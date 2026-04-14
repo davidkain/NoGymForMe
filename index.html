@@ -88,23 +88,51 @@
     /* ── HERO ── */
     .hero {
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 140px 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: stretch;
+      padding-top: 72px;
       position: relative;
       overflow: hidden;
     }
 
-    /* diagonal gold accent */
-    .hero::after {
+    .hero-image-col {
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    .hero-image-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
+    /* gradient fade from image into dark bg on the right edge */
+    .hero-image-col::after {
       content: '';
       position: absolute;
-      top: -200px; left: -200px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(200,150,46,0.12) 0%, transparent 70%);
+      inset: 0;
+      background: linear-gradient(to left, var(--black) 0%, transparent 40%);
+    }
+
+    .hero-content-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 56px 80px 40px;
+      position: relative;
+    }
+
+    /* gold glow behind text */
+    .hero-content-col::before {
+      content: '';
+      position: absolute;
+      top: 10%; right: -100px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(200,150,46,0.10) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -120,11 +148,10 @@
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: clamp(52px, 8vw, 100px);
+      font-size: clamp(44px, 5vw, 80px);
       font-weight: 900;
       line-height: 1.0;
       color: var(--white);
-      max-width: 900px;
       margin-bottom: 24px;
       opacity: 0;
       animation: fadeUp .7s ease forwards .35s;
@@ -136,12 +163,12 @@
     }
 
     .hero-subtitle {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 300;
       color: var(--grey);
-      max-width: 560px;
+      max-width: 440px;
       line-height: 1.7;
-      margin-bottom: 48px;
+      margin-bottom: 40px;
       opacity: 0;
       animation: fadeUp .7s ease forwards .5s;
     }
@@ -149,10 +176,11 @@
     .hero-price-box {
       background: var(--card);
       border: 1px solid var(--gold);
-      padding: 24px 48px;
-      margin-bottom: 32px;
+      padding: 20px 32px;
+      margin-bottom: 28px;
       opacity: 0;
       animation: fadeUp .7s ease forwards .65s;
+      display: inline-block;
     }
 
     .price-main {
@@ -214,8 +242,8 @@
     .hero-trust {
       margin-top: 32px;
       display: flex;
-      gap: 32px;
-      justify-content: center;
+      gap: 20px;
+      justify-content: flex-start;
       flex-wrap: wrap;
       opacity: 0;
       animation: fadeUp .7s ease forwards .95s;
@@ -765,44 +793,19 @@
       align-items: center;
     }
 
-    .doctor-video-placeholder {
-      aspect-ratio: 9/16;
-      background: var(--card);
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      max-height: 480px;
-      max-width: 270px;
+    .doctor-video-wrap {
       position: relative;
+      max-width: 300px;
+      border: 1px solid var(--border);
       overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
     }
 
-    .doctor-video-placeholder::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(200,150,46,0.05) 0%, transparent 60%);
-    }
-
-    .play-btn {
-      width: 72px; height: 72px;
-      border: 2px solid var(--gold);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .play-btn:hover { background: var(--gold-muted); }
-    .play-btn svg { margin-right: -4px; }
-
-    .doctor-label {
-      font-size: 14px;
-      color: var(--grey);
+    .doctor-video-wrap video {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: var(--black);
     }
 
     .doctor-content .section-label { text-align: right; }
@@ -862,8 +865,18 @@
       .dosage-box { flex-direction: column; gap: 16px; }
       .dosage-number { font-size: 80px; }
 
-      .hero-title { font-size: 48px; }
-      .hero-price-box { padding: 20px 24px; }
+      .hero {
+        grid-template-columns: 1fr;
+        grid-template-rows: 50vh auto;
+      }
+      .hero-image-col { min-height: 50vh; }
+      .hero-image-col::after {
+        background: linear-gradient(to top, var(--black) 0%, transparent 50%);
+      }
+      .hero-content-col { padding: 40px 24px 60px; }
+      .hero-title { font-size: 44px; }
+      .hero-price-box { padding: 16px 20px; }
+      .hero-trust { justify-content: flex-start; }
     }
   </style>
 </head>
@@ -877,29 +890,37 @@
 
   <!-- HERO -->
   <section class="hero">
-    <p class="hero-eyebrow">תוסף תזונה לגברים · ייצוא ישראלי</p>
-    <h1 class="hero-title">
-      עייפת מהחדר כושר?<br><em>גם אנחנו.</em>
-    </h1>
-    <p class="hero-subtitle">
-      הפתרון הטבעי הראשון בישראל שמיועד במיוחד לגברים — שתומך בחילוף חומרים ותורם לתחושת שובע, בלי אחרי כן לגימנסיה.
-    </p>
-
-    <div class="hero-price-box">
-      <div class="price-main">₪198</div>
-      <div class="price-or">לחודש | או</div>
-      <div class="price-installment">₪22/חודש <small>ב-18 תשלומים ללא ריבית</small></div>
+    <!-- Left: Dr. Kain image -->
+    <div class="hero-image-col">
+      <img src="1000545484.jpg" alt="ד&quot;ר דוד קיין עם מוצר NoGymForMe">
     </div>
 
-    <div class="hero-cta">
-      <a href="#pricing" class="btn-primary">להזמנה עכשיו ← </a>
-    </div>
+    <!-- Right: Text content -->
+    <div class="hero-content-col">
+      <p class="hero-eyebrow">תוסף תזונה לגברים · ייצוא ישראלי</p>
+      <h1 class="hero-title">
+        עייפת מהחדר כושר?<br><em>גם אנחנו.</em>
+      </h1>
+      <p class="hero-subtitle">
+        הפתרון הטבעי הראשון בישראל שמיועד במיוחד לגברים — שתומך בחילוף חומרים ותורם לתחושת שובע, בלי הגימנסיה.
+      </p>
 
-    <div class="hero-trust">
-      <div class="trust-badge"><span class="icon">✓</span> GMP Certified</div>
-      <div class="trust-badge"><span class="icon">✓</span> כשר</div>
-      <div class="trust-badge"><span class="icon">✓</span> 100% החזר כספי</div>
-      <div class="trust-badge"><span class="icon">✓</span> משלוח חינם</div>
+      <div class="hero-price-box">
+        <div class="price-main">₪198</div>
+        <div class="price-or">לחודש | או</div>
+        <div class="price-installment">₪22/חודש <small>ב-18 תשלומים ללא ריבית</small></div>
+      </div>
+
+      <div class="hero-cta">
+        <a href="#pricing" class="btn-primary">להזמנה עכשיו ← </a>
+      </div>
+
+      <div class="hero-trust">
+        <div class="trust-badge"><span class="icon">✓</span> GMP Certified</div>
+        <div class="trust-badge"><span class="icon">✓</span> כשר</div>
+        <div class="trust-badge"><span class="icon">✓</span> 100% החזר כספי</div>
+        <div class="trust-badge"><span class="icon">✓</span> משלוח חינם</div>
+      </div>
     </div>
   </section>
 
@@ -959,13 +980,14 @@
   <div class="doctor-section">
     <div class="section reveal">
       <div class="doctor-inner">
-        <div class="doctor-video-placeholder">
-          <div class="play-btn">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <path d="M8 5v14l11-7L8 5z" fill="#c8962e"/>
-            </svg>
-          </div>
-          <p class="doctor-label">ד"ר דוד קיין מסביר</p>
+        <div class="doctor-video-wrap">
+          <video
+            src="1000545483.mp4"
+            controls
+            playsinline
+            preload="metadata"
+            poster="1000545484.jpg"
+          ></video>
         </div>
 
         <div class="doctor-content">
