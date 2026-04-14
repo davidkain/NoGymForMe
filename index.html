@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NoGymForMe | תוסף הרזיה לגברים</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;700;900&family=Heebo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --deep: #111111;
+      --card: #161616;
+      --border: #1e1e1e;
+      --gold: #c8962e;
+      --gold-light: #e8b84b;
+      --gold-muted: rgba(200,150,46,0.15);
+      --white: #f0ece4;
+      --grey: #8a8680;
+      --red: #b83232;
+      --font-display: 'Frank Ruhl Libre', serif;
+      --font-body: 'Heebo', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-body);
+      direction: rtl;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .6;
+    }
+
+    /* ── STICKY HEADER ── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+    .logo span { color: var(--white); }
+
+    .header-cta {
+      background: var(--gold);
+      color: var(--black);
+      padding: 10px 24px;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background .2s, transform .1s;
+    }
+    .header-cta:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 140px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* diagonal gold accent */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -200px; left: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(200,150,46,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp .6s ease forwards .2s;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(52px, 8vw, 100px);
+      font-weight: 900;
+      line-height: 1.0;
+      color: var(--white);
+      max-width: 900px;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp .7s ease forwards .35s;
+    }
+
+    .hero-title em {
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .hero-subtitle {
+      font-size: 20px;
+      font-weight: 300;
+      color: var(--grey);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+      opacity: 0;
+      animation: fadeUp .7s ease forwards .5s;
+    }
+
+    .hero-price-box {
+      background: var(--card);
+      border: 1px solid var(--gold);
+      padding: 24px 48px;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp .7s ease forwards .65s;
+    }
+
+    .price-main {
+      font-family: var(--font-display);
+      font-size: 54px;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .price-or { font-size: 16px; color: var(--grey); margin: 8px 0; }
+    .price-installment {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .price-installment small {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--grey);
+    }
+
+    .hero-cta {
+      opacity: 0;
+      animation: fadeUp .7s ease forwards .8s;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--black);
+      font-family: var(--font-body);
+      font-weight: 900;
+      font-size: 20px;
+      padding: 20px 56px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.15);
+      transition: left .3s ease;
+    }
+    .btn-primary:hover::before { left: 100%; }
+    .btn-primary:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(200,150,46,0.4);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .hero-trust {
+      margin-top: 32px;
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp .7s ease forwards .95s;
+    }
+
+    .trust-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--grey);
+    }
+    .trust-badge .icon { color: var(--gold); font-size: 18px; }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 40px;
+    }
+
+    /* ── SECTION WRAPPER ── */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 96px 24px;
+      position: relative;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 60px);
+      font-weight: 900;
+      line-height: 1.1;
+      color: var(--white);
+      margin-bottom: 24px;
+    }
+
+    .section-title em {
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .section-body {
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 1.8;
+      color: #aaa;
+      max-width: 700px;
+    }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .stat-item {
+      padding: 48px 32px;
+      text-align: center;
+      border-left: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-left: none; }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 64px;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 15px;
+      color: var(--grey);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* ── PROBLEM SECTION ── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin-top: 60px;
+    }
+
+    .problem-card {
+      background: var(--card);
+      padding: 40px;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: border-color .3s;
+    }
+    .problem-card:hover { border-color: var(--gold); }
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 3px; height: 0;
+      background: var(--gold);
+      transition: height .4s ease;
+    }
+    .problem-card:hover::before { height: 100%; }
+
+    .problem-number {
+      font-family: var(--font-display);
+      font-size: 80px;
+      font-weight: 900;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .problem-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 12px;
+    }
+    .problem-text {
+      font-size: 16px;
+      color: var(--grey);
+      line-height: 1.7;
+    }
+
+    /* ── SOLUTION SECTION ── */
+    .solution-section {
+      background: var(--deep);
+    }
+
+    .ingredients-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 60px;
+    }
+
+    .ingredient-card {
+      border: 1px solid var(--border);
+      padding: 32px;
+      position: relative;
+      transition: border-color .3s, transform .3s;
+    }
+    .ingredient-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-4px);
+    }
+
+    .ingredient-icon {
+      font-size: 40px;
+      margin-bottom: 20px;
+    }
+
+    .ingredient-name {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .ingredient-claim {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .ingredient-desc {
+      font-size: 14px;
+      color: var(--grey);
+      line-height: 1.6;
+    }
+
+    /* ── DOSAGE ── */
+    .dosage-box {
+      margin-top: 60px;
+      background: var(--gold-muted);
+      border: 1px solid var(--gold);
+      padding: 40px;
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .dosage-number {
+      font-family: var(--font-display);
+      font-size: 120px;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .dosage-text h3 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 12px;
+    }
+    .dosage-text p {
+      font-size: 16px;
+      color: var(--grey);
+      line-height: 1.7;
+    }
+
+    /* ── SOCIAL PROOF ── */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 60px;
+    }
+
+    .testimonial-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 32px;
+      position: relative;
+    }
+
+    .testimonial-card::before {
+      content: '"';
+      font-family: var(--font-display);
+      font-size: 120px;
+      color: var(--gold);
+      opacity: .1;
+      position: absolute;
+      top: -20px;
+      right: 20px;
+      line-height: 1;
+    }
+
+    .stars {
+      color: var(--gold);
+      font-size: 18px;
+      margin-bottom: 16px;
+      letter-spacing: 2px;
+    }
+
+    .testimonial-text {
+      font-size: 16px;
+      color: var(--grey);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .testimonial-author {
+      font-weight: 700;
+      color: var(--white);
+      font-size: 15px;
+    }
+    .testimonial-meta {
+      font-size: 13px;
+      color: var(--gold);
+    }
+
+    /* ── PRICING ── */
+    .pricing-section { background: var(--black); }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 60px;
+    }
+
+    .pricing-card {
+      border: 1px solid var(--border);
+      padding: 48px 40px;
+      position: relative;
+      transition: border-color .3s;
+    }
+    .pricing-card:hover { border-color: var(--gold); }
+
+    .pricing-card.featured {
+      border-color: var(--gold);
+      background: var(--card);
+    }
+
+    .badge {
+      position: absolute;
+      top: -14px;
+      right: 32px;
+      background: var(--gold);
+      color: var(--black);
+      font-size: 12px;
+      font-weight: 900;
+      padding: 4px 16px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .pack-name {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .pack-desc {
+      font-size: 14px;
+      color: var(--grey);
+      margin-bottom: 32px;
+    }
+    .pack-price {
+      font-family: var(--font-display);
+      font-size: 56px;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .pack-installment {
+      font-size: 18px;
+      color: var(--white);
+      margin-bottom: 32px;
+    }
+    .pack-installment span { color: var(--grey); font-size: 14px; }
+
+    .pack-features {
+      list-style: none;
+      margin-bottom: 40px;
+    }
+    .pack-features li {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      color: var(--grey);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pack-features li::before {
+      content: '✓';
+      color: var(--gold);
+      font-weight: 900;
+    }
+
+    .btn-order {
+      display: block;
+      text-align: center;
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 16px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+    }
+    .btn-order:hover {
+      background: var(--gold);
+      color: var(--black);
+    }
+
+    .pricing-card.featured .btn-order {
+      background: var(--gold);
+      color: var(--black);
+    }
+    .pricing-card.featured .btn-order:hover {
+      background: var(--gold-light);
+    }
+
+    /* ── TRUST ── */
+    .trust-section { background: var(--card); }
+
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      margin-top: 60px;
+    }
+
+    .trust-item {
+      background: var(--card);
+      padding: 40px 32px;
+      text-align: center;
+    }
+
+    .trust-icon-lg {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .trust-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .trust-desc {
+      font-size: 14px;
+      color: var(--grey);
+      line-height: 1.6;
+    }
+
+    /* ── FAQ ── */
+    .faq-list {
+      margin-top: 60px;
+      border-top: 1px solid var(--border);
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 18px;
+      font-weight: 600;
+      padding: 28px 0;
+      cursor: pointer;
+      text-align: right;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .faq-question .faq-toggle {
+      color: var(--gold);
+      font-size: 24px;
+      line-height: 1;
+      transition: transform .3s;
+      flex-shrink: 0;
+    }
+
+    .faq-item.open .faq-toggle { transform: rotate(45deg); }
+
+    .faq-answer {
+      font-size: 16px;
+      color: var(--grey);
+      line-height: 1.8;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .4s ease, padding .4s ease;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+      padding-bottom: 28px;
+    }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      background: var(--card);
+      padding: 96px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-cta::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(200,150,46,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .final-cta .section-title { margin-bottom: 16px; }
+
+    .whatsapp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #25d366;
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 18px;
+      padding: 18px 40px;
+      text-decoration: none;
+      margin-top: 24px;
+      margin-right: 16px;
+      transition: background .2s, transform .15s;
+    }
+    .whatsapp-btn:hover {
+      background: #1ebe5b;
+      transform: translateY(-2px);
+    }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      background: var(--black);
+      padding: 32px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.8;
+      border-top: 1px solid var(--border);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--grey);
+    }
+    footer .logo { margin-bottom: 16px; display: block; }
+
+    /* ── DOCTOR SECTION ── */
+    .doctor-section {
+      background: var(--deep);
+    }
+
+    .doctor-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .doctor-video-placeholder {
+      aspect-ratio: 9/16;
+      background: var(--card);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      max-height: 480px;
+      max-width: 270px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .doctor-video-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(200,150,46,0.05) 0%, transparent 60%);
+    }
+
+    .play-btn {
+      width: 72px; height: 72px;
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .play-btn:hover { background: var(--gold-muted); }
+    .play-btn svg { margin-right: -4px; }
+
+    .doctor-label {
+      font-size: 14px;
+      color: var(--grey);
+    }
+
+    .doctor-content .section-label { text-align: right; }
+    .doctor-content .section-title { text-align: right; }
+    .doctor-content .section-body { text-align: right; }
+
+    .doctor-credential {
+      margin-top: 40px;
+      padding: 24px;
+      background: var(--gold-muted);
+      border-right: 4px solid var(--gold);
+    }
+    .doctor-credential h4 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .doctor-credential p {
+      font-size: 14px;
+      color: var(--gold);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      header { padding: 16px 20px; }
+
+      .stats-grid,
+      .problem-grid,
+      .ingredients-grid,
+      .pricing-grid,
+      .trust-grid,
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-item { border-left: none; border-bottom: 1px solid var(--border); }
+      .trust-grid { gap: 0; }
+      .doctor-inner { grid-template-columns: 1fr; gap: 40px; }
+      .dosage-box { flex-direction: column; gap: 16px; }
+      .dosage-number { font-size: 80px; }
+
+      .hero-title { font-size: 48px; }
+      .hero-price-box { padding: 20px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">NoGym<span>ForMe</span></div>
+    <a href="#pricing" class="header-cta">להזמנה עכשיו →</a>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow">תוסף תזונה לגברים · ייצוא ישראלי</p>
+    <h1 class="hero-title">
+      עייפת מהחדר כושר?<br><em>גם אנחנו.</em>
+    </h1>
+    <p class="hero-subtitle">
+      הפתרון הטבעי הראשון בישראל שמיועד במיוחד לגברים — שתומך בחילוף חומרים ותורם לתחושת שובע, בלי אחרי כן לגימנסיה.
+    </p>
+
+    <div class="hero-price-box">
+      <div class="price-main">₪198</div>
+      <div class="price-or">לחודש | או</div>
+      <div class="price-installment">₪22/חודש <small>ב-18 תשלומים ללא ריבית</small></div>
+    </div>
+
+    <div class="hero-cta">
+      <a href="#pricing" class="btn-primary">להזמנה עכשיו ← </a>
+    </div>
+
+    <div class="hero-trust">
+      <div class="trust-badge"><span class="icon">✓</span> GMP Certified</div>
+      <div class="trust-badge"><span class="icon">✓</span> כשר</div>
+      <div class="trust-badge"><span class="icon">✓</span> 100% החזר כספי</div>
+      <div class="trust-badge"><span class="icon">✓</span> משלוח חינם</div>
+    </div>
+  </section>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-number">55%</span>
+        <div class="stat-label">מהגברים בישראל<br>סובלים מעודף משקל</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">35+</span>
+        <div class="stat-label">מגיל זה חילוף החומרים<br>מתחיל להאט בצורה משמעותית</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">0</span>
+        <div class="stat-label">מוצרים בשוק הישראלי<br>המיועדים ספציפית לגברים</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- PROBLEM SECTION -->
+  <div class="section reveal">
+    <p class="section-label">הבעיה שאיש לא מדבר עליה</p>
+    <h2 class="section-title">אחי, אתה לא לבד<br>בזה.</h2>
+    <p class="section-body">גברים מעל 35 מתמודדים עם שינויים הורמונליים שמקשים על ירידה במשקל — גם בלי להודות בזה לאף אחד.</p>
+
+    <div class="problem-grid">
+      <div class="problem-card reveal">
+        <div class="problem-number">01</div>
+        <h3 class="problem-title">חילוף חומרים איטי</h3>
+        <p class="problem-text">אחרי גיל 35 הגוף שורף פחות קלוריות בזמן מנוחה. מה שעבד בגיל 25 — פשוט לא עובד יותר.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-number">02</div>
+        <h3 class="problem-title">הכרס שלא הולכת</h3>
+        <p class="problem-text">שומן בטני אצל גברים קשה במיוחד לאיבוד — גם עם ספורט וגם עם דיאטות. הגוף פשוט נאחז בו.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-number">03</div>
+        <h3 class="problem-title">עייפות וחוסר מוטיבציה</h3>
+        <p class="problem-text">אחרי יום עבודה ומשפחה — מי בכלל רוצה לרוץ לחדר כושר? הרצון קיים, האנרגיה — פחות.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-number">04</div>
+        <h3 class="problem-title">אין פתרון בשבילנו</h3>
+        <p class="problem-text">כל המוצרים בשוק מיועדים לנשים. הצבעים, הטעמים, השיווק — הכל. פשוט לא נוגע לגבר.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- DOCTOR SECTION -->
+  <div class="doctor-section">
+    <div class="section reveal">
+      <div class="doctor-inner">
+        <div class="doctor-video-placeholder">
+          <div class="play-btn">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M8 5v14l11-7L8 5z" fill="#c8962e"/>
+            </svg>
+          </div>
+          <p class="doctor-label">ד"ר דוד קיין מסביר</p>
+        </div>
+
+        <div class="doctor-content">
+          <p class="section-label">המדע מאחורי NoGymForMe</p>
+          <h2 class="section-title">שלושה מנגנונים.<br><em>תוצאה אחת.</em></h2>
+          <p class="section-body">
+            ד"ר דוד קיין מסביר כיצד שלושת המרכיבים הפעילים פועלים יחד כדי לתמוך בתהליך הדיאטה — כחלק מאורח חיים בריא.
+          </p>
+          <div class="doctor-credential">
+            <h4>ד"ר דוד קיין</h4>
+            <p>מומחה לתזונה ובריאות גברים</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOLUTION / INGREDIENTS -->
+  <div class="solution-section">
+    <div class="section reveal">
+      <p class="section-label">הפתרון</p>
+      <h2 class="section-title">המרכיבים שעובדים<br><em>בשבילך.</em></h2>
+      <p class="section-body">שלושה מנגנונים, מבוסס מחקר, ניסוח ייחודי לגברים.</p>
+
+      <div class="ingredients-grid">
+        <div class="ingredient-card reveal">
+          <div class="ingredient-icon">🔥</div>
+          <div class="ingredient-name">תמיכה בחילוף חומרים</div>
+          <div class="ingredient-claim">תומך בחילוף חומרים תקין</div>
+          <div class="ingredient-desc">תורם לתפקוד נורמלי של חילוף חומרים, במיוחד אחרי גיל 35 כשהגוף מאט.</div>
+        </div>
+        <div class="ingredient-card reveal">
+          <div class="ingredient-icon">⚡</div>
+          <div class="ingredient-name">תחושת שובע</div>
+          <div class="ingredient-claim">תורם לתחושת שובע</div>
+          <div class="ingredient-desc">מסייע לשמור על תחושת מלאות לאורך זמן — פחות תשוקה לנשנושים בין הארוחות.</div>
+        </div>
+        <div class="ingredient-card reveal">
+          <div class="ingredient-icon">🎯</div>
+          <div class="ingredient-name">איזון רמת סוכר</div>
+          <div class="ingredient-claim">תומך ברמות סוכר תקינות</div>
+          <div class="ingredient-desc">עוזר לשמור על רמות סוכר מאוזנות בדם — המפתח לאנרגיה יציבה לאורך היום.</div>
+        </div>
+      </div>
+
+      <div class="dosage-box reveal">
+        <div class="dosage-number">3</div>
+        <div class="dosage-text">
+          <h3>כמוסות ביום. פשוט כך.</h3>
+          <p>
+            30 דקות לפני הארוחות. לא דיאטות מורכבות, לא שעות בחדר כושר.<br>
+            פשוט שלוש כמוסות שמסייעות לגוף שלך לעשות את מה שהוא אמור לעשות.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- TESTIMONIALS -->
+  <div class="section reveal">
+    <p class="section-label">מה גברים אומרים</p>
+    <h2 class="section-title">תוצאות אמיתיות.<br><em>גברים אמיתיים.</em></h2>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card reveal">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">
+          "ניסיתי כל מיני מוצרים לאורך השנים ושום דבר לא עבד. NoGymForMe שינה את הגישה שלי — מרגיש פחות רעב ויש לי יותר אנרגיה בשעות הצהריים."
+        </p>
+        <div class="testimonial-author">רוני מ., 42</div>
+        <div class="testimonial-meta">תל אביב · לקוח 3 חודשים</div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">
+          "סוף סוף מוצר שמיועד לגברים ומדבר אלינו ישר. 18 תשלומים בלי ריבית — פשוט לקחתי ולא חשבתי פעמיים. שווה כל שקל."
+        </p>
+        <div class="testimonial-author">מיכאל ק., 48</div>
+        <div class="testimonial-meta">חיפה · לקוח 5 חודשים</div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">
+          "הכרס שלי הייתה הבעיה הגדולה שלי. אחרי חודשיים עם NoGymForMe — אני מרגיש את ההבדל בבגדים. ממליץ לכל גבר מעל 40."
+        </p>
+        <div class="testimonial-author">אבי ש., 51</div>
+        <div class="testimonial-meta">ירושלים · לקוח 2 חודשים</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- PRICING -->
+  <div class="pricing-section" id="pricing">
+    <div class="section reveal">
+      <p class="section-label">המחירים</p>
+      <h2 class="section-title">בחר את החבילה<br><em>שמתאימה לך.</em></h2>
+      <p class="section-body">ללא ריבית. ללא התחייבות. 100% החזר כספי תוך 14 יום לפי חוק.</p>
+
+      <div class="pricing-grid">
+        <div class="pricing-card reveal">
+          <div class="pack-name">חבילת התנסות</div>
+          <div class="pack-desc">2 בקבוקים · 2 חודשי אספקה</div>
+          <div class="pack-price">₪396</div>
+          <div class="pack-installment">₪22/חודש <span>ב-18 תשלומים ללא ריבית</span></div>
+          <ul class="pack-features">
+            <li>2 בקבוקי NoGymForMe</li>
+            <li>משלוח חינם ל-7 ימי עסקים</li>
+            <li>גישה לקהילת הגברים שלנו</li>
+            <li>14 יום החזר כספי מלא</li>
+          </ul>
+          <a href="#" class="btn-order">להזמין ← </a>
+        </div>
+
+        <div class="pricing-card featured reveal">
+          <div class="badge">הכי נמכר</div>
+          <div class="pack-name">חבילת הערך</div>
+          <div class="pack-desc">3 בקבוקים · 3 חודשי אספקה</div>
+          <div class="pack-price">₪496</div>
+          <div class="pack-installment">₪28/חודש <span>ב-18 תשלומים ללא ריבית</span></div>
+          <ul class="pack-features">
+            <li>3 בקבוקי NoGymForMe</li>
+            <li>חיסכון של ₪92 לעומת בקבוק בודד</li>
+            <li>משלוח חינם ל-7 ימי עסקים</li>
+            <li>גישה לקהילת הגברים שלנו</li>
+            <li>14 יום החזר כספי מלא</li>
+          </ul>
+          <a href="#" class="btn-order">להזמין עכשיו ← </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRUST SIGNALS -->
+  <div class="trust-section">
+    <div class="section reveal">
+      <p class="section-label">למה לסמוך עלינו</p>
+      <h2 class="section-title">שקיפות.<br><em>ללא פשרות.</em></h2>
+
+      <div class="trust-grid">
+        <div class="trust-item reveal">
+          <div class="trust-icon-lg">🏭</div>
+          <div class="trust-title">GMP Certified</div>
+          <div class="trust-desc">מיוצר במפעל מאושר בתקנים בינלאומיים מחמירים</div>
+        </div>
+        <div class="trust-item reveal">
+          <div class="trust-icon-lg">✡️</div>
+          <div class="trust-title">כשר</div>
+          <div class="trust-desc">בעל תעודת כשרות מוכרת לכל שומרי קשרות</div>
+        </div>
+        <div class="trust-item reveal">
+          <div class="trust-icon-lg">🔒</div>
+          <div class="trust-title">תשלום מאובטח</div>
+          <div class="trust-desc">הצפנת SSL מלאה. תשלום מאובטח דרך טרנזילה</div>
+        </div>
+        <div class="trust-item reveal">
+          <div class="trust-icon-lg">↩️</div>
+          <div class="trust-title">100% החזר כספי</div>
+          <div class="trust-desc">14 יום לביטול לפי חוק הצרכנות הישראלי — ללא שאלות</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 40px; padding: 24px; background: var(--black); border: 1px solid var(--border); text-align: center;">
+        <p style="font-size: 13px; color: var(--grey); line-height: 1.8;">
+          📍 <strong style="color: var(--white);">כתובת ישראלית:</strong> [כתובת החברה] &nbsp;|&nbsp;
+          📞 <strong style="color: var(--white);">טלפון:</strong> +972-XX-XXXXXXX &nbsp;|&nbsp;
+          💬 <strong style="color: var(--white);">WhatsApp זמין</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section reveal">
+    <p class="section-label">שאלות נפוצות</p>
+    <h2 class="section-title">יש לך שאלות.<br><em>יש לנו תשובות.</em></h2>
+
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>מתי יגיע ההזמנה שלי?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          ההזמנות נשלחות תוך 1-2 ימי עסקים ומגיעות לכל רחבי הארץ תוך 7 ימי עסקים. המשלוח חינם ללא תנאים.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>מה מדיניות ביטול ההזמנה?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          לפי חוק הגנת הצרכן הישראלי, יש לך 14 יום מרגע קבלת המוצר לביטול ההזמנה וקבלת החזר כספי מלא — ללא שאלות ועם החזר מלא.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>האם המוצר מתאים לאנשים עם אלרגיות?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          NoGymForMe מיוצר במפעל GMP מוסמך. לפני השימוש, מומלץ לקרוא את רשימת המרכיבים המלאה. במקרה של מחלה כרונית או נטילת תרופות — יש להתייעץ עם רופא.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>מתי אראה תוצאות?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          ציפיות ריאליות: רוב הלקוחות מדווחים על שינוי בתחושת השובע ובאנרגיה תוך 2-4 שבועות. תהליך הדיאטה הוא מרתון ולא ספרינט — NoGymForMe מסייע כחלק מאורח חיים בריא. צפי לתוצאות משמעותיות אחרי כ-2 חודשים.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>האם זה כשר?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          כן. NoGymForMe מחזיק בתעודת כשרות מוכרת. פרטי הכשרות מופיעים על האריזה.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>מה ההבדל בין NoGymForMe לזריקות הרזיה?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          NoGymForMe הוא תוסף תזונה טבעי המסייע בתהליך הדיאטה כחלק מאורח חיים בריא. זריקות כמו Wegovy הן תרופות מרשם עם תופעות לוואי ידועות ועלות גבוהה. אנחנו מציעים גישה טבעית ונגישה — לא השוואה רפואית.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FINAL CTA -->
+  <div class="final-cta">
+    <div style="position: relative; z-index: 1;">
+      <p class="section-label" style="text-align: center;">הצעד הראשון הכי קשה</p>
+      <h2 class="section-title" style="text-align: center; font-size: clamp(40px, 6vw, 72px);">
+        הגיע הזמן לעשות<br><em>משהו בשבילך.</em>
+      </h2>
+      <p style="font-size: 18px; color: var(--grey); text-align: center; margin-bottom: 40px; max-width: 500px; margin-left: auto; margin-right: auto;">
+        ₪22 לחודש. ב-18 תשלומים. 100% החזר כספי. מה יש להפסיד?
+      </p>
+      <div style="text-align: center;">
+        <a href="#pricing" class="btn-primary" style="margin-left: 8px;">להזמנה עכשיו ← </a>
+        <a href="https://wa.me/972XXXXXXXXX" class="whatsapp-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          דברו איתנו בווטסאפ
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div style="background: var(--black); border-top: 1px solid var(--border); padding: 32px 24px;">
+    <p class="disclaimer">
+      * <strong>משרד הבריאות לא אישר את טענות המוצר.</strong><br>
+      NoGymForMe הוא תוסף תזונה המסייע בתהליך הדיאטה כחלק מאורח חיים בריא ומאוזן. אינו תחליף לייעוץ רפואי, אבחנה או טיפול. תוצאות עשויות להשתנות בין אנשים שונים. בעלי מצבים רפואיים, נשים בהריון או מניקות ואנשים הנוטלים תרופות מרשם — יש להתייעץ עם רופא לפני השימוש.
+    </p>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="logo">NoGym<span style="color: var(--white)">ForMe</span></span>
+    <p>© 2025 NoGymForMe. כל הזכויות שמורות.</p>
+    <p style="margin-top: 8px;"><a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">מדיניות פרטיות</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">תנאי שימוש</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">יצירת קשר</a></p>
+  </footer>
+
+  <script>
+    // FAQ toggle
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    }
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Stagger children in grids
+    document.querySelectorAll('.problem-grid, .ingredients-grid, .trust-grid, .testimonials-grid').forEach(grid => {
+      const children = grid.querySelectorAll('.reveal');
+      children.forEach((child, i) => {
+        child.style.transitionDelay = `${i * 0.1}s`;
+      });
+    });
+  </script>
+
+</body>
+</html>
