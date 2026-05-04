@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>השלמת הזמנה | NoGymForMe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --black:       #0a0a0a;
+      --deep:        #111111;
+      --card:        #161616;
+      --border:      #1e1e1e;
+      --border-mid:  #2a2a2a;
+      --gold:        #c8962e;
+      --gold-light:  #e8b84b;
+      --gold-muted:  rgba(200,150,46,0.15);
+      --white:       #f0ece4;
+      --grey:        #8a8680;
+      --grey-light:  #b0aba4;
+      --red:         #b83232;
+      --green:       #2e7d32;
+      --font:        'Assistant', sans-serif;
+      --radius-pill: 100px;
+      --radius-md:   12px;
+      --radius-sm:   8px;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font);
+      direction: rtl;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── noise texture ── */
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none; z-index:0; opacity:.6;
+    }
+
+    /* ══════════════════════════════════
+       HEADER
+    ══════════════════════════════════ */
+    .co-header {
+      border-bottom: 1px solid var(--border);
+      background: var(--deep);
+      position: sticky; top:0; z-index:50;
+    }
+    .co-header-inner {
+      max-width: 1100px; margin:0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex; align-items:center; justify-content:space-between;
+    }
+    .co-logo {
+      font-size: 20px; font-weight:900; letter-spacing:-.5px;
+      color: var(--white); text-decoration:none;
+    }
+    .co-logo span { color: var(--gold); }
+    .co-back {
+      font-size: 13px; color: var(--grey);
+      text-decoration:none; display:flex; align-items:center; gap:6px;
+      transition: color .2s;
+    }
+    .co-back:hover { color: var(--white); }
+    .co-secure {
+      font-size:12px; color:var(--grey);
+      display:flex; align-items:center; gap:5px;
+    }
+    .co-secure svg { flex-shrink:0; }
+
+    /* ══════════════════════════════════
+       LAYOUT
+    ══════════════════════════════════ */
+    .co-layout {
+      max-width: 1100px; margin:0 auto;
+      padding: 40px 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 48px;
+      align-items: start;
+    }
+
+    /* ══════════════════════════════════
+       FORM COLUMN
+    ══════════════════════════════════ */
+    .form-col { min-width: 0; }
+
+    /* section block */
+    .co-section {
+      margin-bottom: 28px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .co-section-head {
+      padding: 18px 24px;
+      background: var(--deep);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items:center; justify-content:space-between;
+    }
+    .co-section-title {
+      font-size: 16px; font-weight:700; color:var(--white);
+    }
+    .co-section-body { padding: 20px 24px; }
+
+    /* sign-in link */
+    .sign-in-link {
+      font-size:13px; color:var(--gold); text-decoration:none;
+      border-bottom:1px solid transparent; transition:border-color .2s;
+    }
+    .sign-in-link:hover { border-color:var(--gold); }
+
+    /* form rows */
+    .field-row { display:grid; gap:12px; margin-bottom:12px; }
+    .field-row.cols-2 { grid-template-columns:1fr 1fr; }
+    .field-row.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+    .field-row:last-child { margin-bottom:0; }
+
+    .field-group { display:flex; flex-direction:column; gap:6px; }
+    .field-label { font-size:12px; color:var(--grey-light); font-weight:600; }
+
+    .field-input {
+      background: var(--card);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
+      padding: 13px 14px;
+      font-family: var(--font);
+      font-size: 15px;
+      color: var(--white);
+      width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      direction: rtl;
+    }
+    .field-input::placeholder { color: var(--grey); }
+    .field-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-muted);
+    }
+    .field-input.error {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(184,50,50,0.15);
+    }
+    .field-error {
+      font-size:12px; color:var(--red); display:none;
+    }
+    .field-error.visible { display:block; }
+
+    select.field-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a8680' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 14px center;
+      padding-left: 36px;
+      cursor: pointer;
+    }
+
+    /* card number field wrapper */
+    .card-field-wrap {
+      position:relative;
+    }
+    .card-type-icon {
+      position:absolute; left:14px; top:50%; transform:translateY(-50%);
+      font-size:18px; pointer-events:none; opacity:0; transition:opacity .2s;
+    }
+    .card-type-icon.visible { opacity:1; }
+    .field-input.has-card-icon { padding-left:44px; }
+
+    /* checkbox row */
+    .checkbox-row {
+      display:flex; align-items:center; gap:10px;
+      padding: 14px 0 0;
+      cursor:pointer;
+    }
+    .checkbox-row input[type=checkbox] {
+      width:18px; height:18px; cursor:pointer; accent-color:var(--gold);
+      flex-shrink:0;
+    }
+    .checkbox-label { font-size:14px; color:var(--grey-light); }
+
+    /* shipping option */
+    .shipping-option {
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 16px;
+      background: var(--card);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
+    }
+    .shipping-left { display:flex; align-items:center; gap:12px; }
+    .shipping-radio {
+      width:20px; height:20px;
+      border:2px solid var(--gold);
+      border-radius:50%;
+      position:relative; flex-shrink:0;
+    }
+    .shipping-radio::after {
+      content:''; width:10px; height:10px;
+      background:var(--gold); border-radius:50%;
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+    }
+    .shipping-name { font-size:15px; font-weight:600; }
+    .shipping-sub { font-size:13px; color:var(--grey); }
+    .shipping-price { font-size:15px; font-weight:700; color:var(--gold); }
+
+    /* payment icons row */
+    .payment-icons {
+      display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+    }
+    .payment-icon {
+      background: var(--deep);
+      border: 1px solid var(--border-mid);
+      border-radius: 4px;
+      padding: 3px 7px;
+      font-size:11px; color:var(--grey-light);
+      font-weight:700; letter-spacing:.3px;
+    }
+    .payment-secure-note {
+      font-size:12px; color:var(--grey); display:flex; align-items:center; gap:6px;
+      margin-bottom:16px;
+    }
+
+    /* complete button */
+    .co-submit-btn {
+      width:100%;
+      background: var(--gold);
+      color: var(--black);
+      font-family: var(--font);
+      font-size: 17px;
+      font-weight: 800;
+      padding: 18px 32px;
+      border: none;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      margin-top: 4px;
+      letter-spacing: -.2px;
+    }
+    .co-submit-btn:hover { background: var(--gold-light); }
+    .co-submit-btn:active { transform:scale(.98); }
+    .co-submit-btn:disabled {
+      opacity:.5; cursor:not-allowed; transform:none;
+    }
+
+    .co-fine-print {
+      text-align:center; font-size:12px; color:var(--grey);
+      margin-top:12px; line-height:1.6;
+    }
+
+    /* ══════════════════════════════════
+       ORDER SUMMARY COLUMN
+    ══════════════════════════════════ */
+    .summary-col {
+      position: sticky; top: 88px;
+    }
+
+    .summary-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    /* mobile toggle bar */
+    .summary-toggle {
+      display:none;
+      width:100%;
+      background:none; border:none; cursor:pointer;
+      padding: 16px 20px;
+      background: var(--deep);
+      border-bottom: 1px solid var(--border);
+      color:var(--white);
+      font-family:var(--font); font-size:14px; font-weight:600;
+      text-align:right; direction:rtl;
+      align-items:center; justify-content:space-between;
+    }
+    .summary-toggle-left { display:flex; align-items:center; gap:8px; }
+    .summary-toggle-icon { transition:transform .3s; }
+    .summary-toggle.open .summary-toggle-icon { transform:rotate(180deg); }
+    .summary-toggle-total { color:var(--gold); font-weight:800; }
+
+    .summary-inner { padding: 20px; }
+    .summary-inner.collapsed { display:none; }
+
+    /* product line */
+    .product-line {
+      display:flex; align-items:center; gap:14px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .product-thumb {
+      width:64px; height:64px;
+      background: var(--card);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
+      display:flex; align-items:center; justify-content:center;
+      font-size:26px; flex-shrink:0; position:relative;
+    }
+    .product-qty-badge {
+      position:absolute; top:-8px; left:-8px;
+      background: var(--grey);
+      color: var(--black);
+      font-size:11px; font-weight:800;
+      width:20px; height:20px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .product-info { flex:1; min-width:0; }
+    .product-name { font-size:14px; font-weight:700; line-height:1.3; }
+    .product-variant { font-size:12px; color:var(--grey); margin-top:2px; }
+    .product-price-right { font-size:15px; font-weight:800; white-space:nowrap; }
+
+    /* coupon */
+    .coupon-row {
+      display:flex; gap:8px; margin-bottom:18px;
+    }
+    .coupon-input {
+      flex:1;
+      background: var(--card);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      font-family: var(--font); font-size:14px;
+      color: var(--white); outline:none;
+      transition:border-color .2s;
+      direction:rtl;
+    }
+    .coupon-input::placeholder { color:var(--grey); }
+    .coupon-input:focus { border-color:var(--gold); }
+    .coupon-apply-btn {
+      background: var(--card);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
+      padding: 11px 18px;
+      font-family: var(--font); font-size:14px; font-weight:700;
+      color:var(--white); cursor:pointer; white-space:nowrap;
+      transition:border-color .2s, color .2s;
+    }
+    .coupon-apply-btn:hover { border-color:var(--gold); color:var(--gold); }
+    .coupon-success {
+      font-size:13px; color:#4caf50; margin-top:-10px; margin-bottom:6px;
+      display:none;
+    }
+    .coupon-success.visible { display:block; }
+
+    /* totals */
+    .totals-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding: 7px 0;
+    }
+    .totals-label { font-size:14px; color:var(--grey-light); }
+    .totals-value { font-size:14px; font-weight:600; }
+    .totals-value.free { color:#4caf50; font-weight:700; }
+    .totals-value.discount { color:#4caf50; font-weight:700; }
+    .totals-divider { border:none; border-top:1px solid var(--border); margin:12px 0; }
+    .totals-row.grand .totals-label {
+      font-size:16px; font-weight:700; color:var(--white);
+    }
+    .totals-row.grand .totals-value {
+      font-size:20px; font-weight:900; color:var(--gold);
+    }
+    .totals-installment {
+      font-size:12px; color:var(--grey); text-align:center;
+      margin-top:10px; padding-top:10px;
+      border-top:1px solid var(--border);
+    }
+
+    /* trust badges */
+    .summary-trust {
+      display:flex; justify-content:center; gap:16px;
+      margin-top:16px; flex-wrap:wrap;
+    }
+    .trust-badge {
+      font-size:11px; color:var(--grey);
+      display:flex; align-items:center; gap:4px;
+    }
+
+    /* ══════════════════════════════════
+       SUCCESS STATE
+    ══════════════════════════════════ */
+    .success-overlay {
+      display:none;
+      position:fixed; inset:0; z-index:200;
+      background: var(--black);
+      align-items:center; justify-content:center;
+      padding:24px;
+    }
+    .success-overlay.visible { display:flex; }
+
+    .success-card {
+      max-width:480px; width:100%;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 52px 44px 44px;
+      text-align:center;
+    }
+    .success-check {
+      width:72px; height:72px;
+      background: rgba(76,175,80,0.15);
+      border:2px solid #4caf50;
+      border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:32px; margin:0 auto 24px;
+      animation: popIn .5s cubic-bezier(0.34,1.3,0.64,1) forwards;
+    }
+    @keyframes popIn {
+      from { transform:scale(0); opacity:0; }
+      to   { transform:scale(1); opacity:1; }
+    }
+    .success-title {
+      font-size:26px; font-weight:900; margin-bottom:10px;
+    }
+    .success-sub {
+      font-size:15px; color:var(--grey-light); margin-bottom:6px;
+    }
+    .success-order-num {
+      display:inline-block;
+      background:var(--deep); border:1px solid var(--border-mid);
+      border-radius:var(--radius-sm);
+      padding:8px 20px; font-size:14px; font-weight:700;
+      color:var(--grey-light); margin:14px 0 22px; letter-spacing:.5px;
+    }
+    .success-note {
+      font-size:13px; color:var(--grey); margin-bottom:28px;
+    }
+    .success-back-btn {
+      display:inline-block;
+      background:var(--gold); color:var(--black);
+      font-family:var(--font); font-size:15px; font-weight:800;
+      padding:14px 36px; border-radius:var(--radius-pill);
+      text-decoration:none; transition:background .2s;
+    }
+    .success-back-btn:hover { background:var(--gold-light); }
+
+    /* ══════════════════════════════════
+       FOOTER
+    ══════════════════════════════════ */
+    .co-footer {
+      border-top:1px solid var(--border);
+      padding:20px 24px;
+      text-align:center;
+    }
+    .co-footer-links {
+      display:flex; justify-content:center; gap:20px; flex-wrap:wrap;
+      list-style:none; margin-bottom:10px;
+    }
+    .co-footer-links a {
+      font-size:12px; color:var(--grey); text-decoration:none;
+      transition:color .2s;
+    }
+    .co-footer-links a:hover { color:var(--white); }
+    .co-footer-copy { font-size:11px; color:var(--grey); }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 780px) {
+      .co-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding-top: 0;
+      }
+
+      /* summary goes first on mobile */
+      .summary-col {
+        position: static;
+        order: -1;
+        border-radius: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .summary-box {
+        border: none;
+        border-radius: 0;
+      }
+      .summary-toggle { display:flex; }
+      .summary-inner { display:none; }
+      .summary-inner.mobile-open { display:block; }
+
+      .form-col { padding-top: 24px; }
+
+      .field-row.cols-2,
+      .field-row.cols-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .co-header-inner { padding:0 16px; }
+      .co-layout { padding-inline: 16px; }
+      .co-section-head { padding:14px 16px; }
+      .co-section-body { padding:16px; }
+      .success-card { padding:36px 24px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     HEADER
+══════════════════════════════ -->
+<header class="co-header">
+  <div class="co-header-inner">
+    <a href="index.html" class="co-back">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 12l-4-4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      חזרה לחנות
+    </a>
+
+    <a href="index.html" class="co-logo">NoGym<span>ForMe</span></a>
+
+    <div class="co-secure">
+      <svg width="14" height="16" viewBox="0 0 14 16" fill="none">
+        <path d="M7 1L1.5 3.5v4C1.5 11 4 13.5 7 15c3-1.5 5.5-4 5.5-7.5v-4L7 1z" stroke="#8a8680" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+      תשלום מאובטח
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════
+     LAYOUT
+══════════════════════════════ -->
+<div class="co-layout">
+
+  <!-- ── FORM COLUMN ── -->
+  <div class="form-col">
+
+    <!-- 1. CONTACT -->
+    <div class="co-section">
+      <div class="co-section-head">
+        <span class="co-section-title">פרטי קשר</span>
+        <a href="#" class="sign-in-link">כבר רשום? התחבר</a>
+      </div>
+      <div class="co-section-body">
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="email">כתובת מייל</label>
+            <input class="field-input" type="email" id="email" placeholder="you@example.com" autocomplete="email" dir="ltr">
+            <span class="field-error" id="emailErr">נא להזין כתובת מייל תקינה</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="phone">טלפון</label>
+            <input class="field-input" type="tel" id="phone" placeholder="050-0000000" autocomplete="tel" dir="ltr">
+            <span class="field-error" id="phoneErr">נא להזין מספר טלפון תקין</span>
+          </div>
+        </div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="newsCheck">
+          <span class="checkbox-label">שלח לי עדכונים ומבצעים למייל</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 2. DELIVERY -->
+    <div class="co-section">
+      <div class="co-section-head">
+        <span class="co-section-title">פרטי משלוח</span>
+      </div>
+      <div class="co-section-body">
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="country">מדינה / אזור</label>
+            <select class="field-input" id="country">
+              <option value="IL" selected>ישראל</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row cols-2">
+          <div class="field-group">
+            <label class="field-label" for="firstName">שם פרטי</label>
+            <input class="field-input" type="text" id="firstName" placeholder="ישראל" autocomplete="given-name">
+            <span class="field-error" id="firstNameErr">נא להזין שם פרטי</span>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="lastName">שם משפחה</label>
+            <input class="field-input" type="text" id="lastName" placeholder="ישראלי" autocomplete="family-name">
+            <span class="field-error" id="lastNameErr">נא להזין שם משפחה</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="address">כתובת</label>
+            <input class="field-input" type="text" id="address" placeholder="רחוב, מספר בית" autocomplete="address-line1">
+            <span class="field-error" id="addressErr">נא להזין כתובת</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="apt">דירה / כניסה (אופציונלי)</label>
+            <input class="field-input" type="text" id="apt" placeholder="דירה 5, קומה 2" autocomplete="address-line2">
+          </div>
+        </div>
+        <div class="field-row cols-2">
+          <div class="field-group">
+            <label class="field-label" for="city">עיר</label>
+            <input class="field-input" type="text" id="city" placeholder="תל אביב" autocomplete="address-level2">
+            <span class="field-error" id="cityErr">נא להזין עיר</span>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="postal">מיקוד (אופציונלי)</label>
+            <input class="field-input" type="text" id="postal" placeholder="6100000" autocomplete="postal-code" dir="ltr">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. SHIPPING METHOD -->
+    <div class="co-section">
+      <div class="co-section-head">
+        <span class="co-section-title">שיטת משלוח</span>
+      </div>
+      <div class="co-section-body">
+        <div class="shipping-option">
+          <div class="shipping-left">
+            <div class="shipping-radio"></div>
+            <div>
+              <div class="shipping-name">משלוח חינם</div>
+              <div class="shipping-sub">7–10 ימי עסקים</div>
+            </div>
+          </div>
+          <div class="shipping-price">חינם</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. PAYMENT -->
+    <div class="co-section">
+      <div class="co-section-head">
+        <span class="co-section-title">פרטי תשלום</span>
+        <div class="payment-icons">
+          <span class="payment-icon">VISA</span>
+          <span class="payment-icon">MC</span>
+          <span class="payment-icon">AMEX</span>
+        </div>
+      </div>
+      <div class="co-section-body">
+        <div class="payment-secure-note">
+          <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
+            <path d="M6 1L1 3v3.5C1 9.5 3.2 11.8 6 13c2.8-1.2 5-3.5 5-6.5V3L6 1z" stroke="#8a8680" stroke-width="1.2" stroke-linejoin="round"/>
+          </svg>
+          כל העסקאות מוצפנות ומאובטחות
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="cardNum">מספר כרטיס אשראי</label>
+            <div class="card-field-wrap">
+              <input class="field-input" type="text" id="cardNum"
+                     placeholder="0000 0000 0000 0000"
+                     maxlength="19" autocomplete="cc-number" dir="ltr">
+              <span class="card-type-icon" id="cardTypeIcon"></span>
+            </div>
+            <span class="field-error" id="cardNumErr">נא להזין מספר כרטיס תקין</span>
+          </div>
+        </div>
+
+        <div class="field-row cols-2">
+          <div class="field-group">
+            <label class="field-label" for="cardExp">תוקף</label>
+            <input class="field-input" type="text" id="cardExp"
+                   placeholder="MM / YY" maxlength="7"
+                   autocomplete="cc-exp" dir="ltr">
+            <span class="field-error" id="cardExpErr">תאריך לא תקין</span>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="cardCvv">CVV</label>
+            <input class="field-input" type="text" id="cardCvv"
+                   placeholder="123" maxlength="4"
+                   autocomplete="cc-csc" dir="ltr">
+            <span class="field-error" id="cardCvvErr">CVV לא תקין</span>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="cardName">שם בעל הכרטיס</label>
+            <input class="field-input" type="text" id="cardName"
+                   placeholder="Israel Israelov" autocomplete="cc-name" dir="ltr">
+            <span class="field-error" id="cardNameErr">נא להזין שם</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. SUBMIT -->
+    <button class="co-submit-btn" id="submitBtn" onclick="handleSubmit()">
+      השלם הזמנה ←
+    </button>
+    <p class="co-fine-print">
+      על ידי השלמת ההזמנה, אתה מסכים ל<a href="#" style="color:var(--gold)">תנאי השימוש</a> ולמדיניות ה<a href="#" style="color:var(--gold)">פרטיות</a> שלנו.<br>
+      ניתן לבטל ב-14 יום ולקבל החזר כספי מלא.
+    </p>
+
+  </div><!-- /form-col -->
+
+  <!-- ── SUMMARY COLUMN ── -->
+  <aside class="summary-col">
+    <div class="summary-box">
+
+      <!-- mobile toggle -->
+      <button class="summary-toggle" id="summaryToggle" onclick="toggleSummary()">
+        <div class="summary-toggle-left">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 3h12M2 8h12M2 13h12" stroke="#c8962e" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          הצג סיכום הזמנה
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="summary-toggle-total" id="toggleTotal">₪0</span>
+          <svg class="summary-toggle-icon" width="12" height="8" viewBox="0 0 12 8" fill="none">
+            <path d="M1 1l5 5 5-5" stroke="#8a8680" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </button>
+
+      <div class="summary-inner" id="summaryInner">
+
+        <!-- product line -->
+        <div class="product-line">
+          <div class="product-thumb">
+            💪
+            <span class="product-qty-badge" id="productQty">2</span>
+          </div>
+          <div class="product-info">
+            <div class="product-name" id="productName">חבילת התנסות</div>
+            <div class="product-variant" id="productVariant">2 בקבוקים · 2 חודשי אספקה</div>
+          </div>
+          <div class="product-price-right" id="productPriceRight">₪396</div>
+        </div>
+
+        <!-- coupon -->
+        <div class="coupon-row">
+          <input class="coupon-input" type="text" id="couponInput" placeholder="קוד קופון" dir="ltr">
+          <button class="coupon-apply-btn" onclick="applyCoupon()">החל</button>
+        </div>
+        <div class="coupon-success" id="couponSuccess">✓ קוד קופון הוחל — 10% הנחה</div>
+
+        <hr class="totals-divider">
+
+        <!-- rows -->
+        <div class="totals-row">
+          <span class="totals-label">סיכום ביניים</span>
+          <span class="totals-value" id="subtotalVal">₪396</span>
+        </div>
+        <div class="totals-row" id="discountRow" style="display:none;">
+          <span class="totals-label">הנחה (10%)</span>
+          <span class="totals-value discount" id="discountVal">-₪40</span>
+        </div>
+        <div class="totals-row">
+          <span class="totals-label">משלוח</span>
+          <span class="totals-value free">חינם</span>
+        </div>
+
+        <hr class="totals-divider">
+
+        <div class="totals-row grand">
+          <span class="totals-label">סה"כ</span>
+          <span class="totals-value" id="grandTotal">₪396</span>
+        </div>
+
+        <div class="totals-installment" id="installmentNote">
+          או ₪22 x ב-18 תשלומים ללא ריבית
+        </div>
+
+        <!-- trust -->
+        <div class="summary-trust">
+          <span class="trust-badge">✓ משלוח חינם</span>
+          <span class="trust-badge">✓ 14 יום החזר כספי</span>
+          <span class="trust-badge">🔒 תשלום מאובטח</span>
+        </div>
+
+      </div><!-- /summary-inner -->
+    </div>
+  </aside>
+
+</div><!-- /co-layout -->
+
+<!-- ══════════════════════════════
+     FOOTER
+══════════════════════════════ -->
+<footer class="co-footer">
+  <ul class="co-footer-links">
+    <li><a href="#">מדיניות החזרות</a></li>
+    <li><a href="#">פרטיות</a></li>
+    <li><a href="#">תנאי שימוש</a></li>
+    <li><a href="#">צור קשר</a></li>
+  </ul>
+  <p class="co-footer-copy">© 2025 NoGymForMe · כל הזכויות שמורות</p>
+</footer>
+
+<!-- ══════════════════════════════
+     SUCCESS OVERLAY
+══════════════════════════════ -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-check">✓</div>
+    <h2 class="success-title">הזמנתך התקבלה! 🎉</h2>
+    <p class="success-sub">תודה שבחרת ב-NoGymForMe.</p>
+    <div class="success-order-num" id="successOrderNum">מספר הזמנה: #NGFM-00000</div>
+    <p class="success-note">אישור ישלח לכתובת המייל שלך תוך מספר דקות.<br>המשלוח יגיע תוך 7–10 ימי עסקים.</p>
+    <a href="index.html" class="success-back-btn">חזרה לדף הבית</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     JAVASCRIPT
+══════════════════════════════ -->
+<script>
+  /* ── Plan data ── */
+  var PLANS = {
+    starter: {
+      name:        'חבילת התנסות',
+      variant:     '2 בקבוקים · 2 חודשי אספקה',
+      price:       396,
+      installment: 22,
+      qty:         2
+    },
+    results: {
+      name:        'חבילת תוצאות ל-90 יום',
+      variant:     '3 בקבוקים · 3 חודשי אספקה',
+      price:       496,
+      installment: 28,
+      qty:         3
+    }
+  };
+
+  /* ── Read plan from URL param ── */
+  var params  = new URLSearchParams(window.location.search);
+  var planKey = params.get('plan') || 'results';
+  var plan    = PLANS[planKey] || PLANS.results;
+
+  var couponApplied = false;
+  var currentTotal  = plan.price;
+
+  function renderSummary() {
+    document.getElementById('productName').textContent        = plan.name;
+    document.getElementById('productVariant').textContent     = plan.variant;
+    document.getElementById('productPriceRight').textContent  = formatPrice(plan.price);
+    document.getElementById('productQty').textContent         = plan.qty;
+    document.getElementById('subtotalVal').textContent        = formatPrice(plan.price);
+    document.getElementById('installmentNote').textContent    =
+      'או ₪' + plan.installment + ' x ב-18 תשלומים ללא ריבית';
+    updateTotal();
+  }
+
+  function updateTotal() {
+    var base     = plan.price;
+    var discount = couponApplied ? Math.round(base * 0.1) : 0;
+    currentTotal = base - discount;
+
+    document.getElementById('grandTotal').textContent   = formatPrice(currentTotal);
+    document.getElementById('toggleTotal').textContent  = formatPrice(currentTotal);
+
+    var discRow = document.getElementById('discountRow');
+    if (couponApplied) {
+      discRow.style.display = 'flex';
+      document.getElementById('discountVal').textContent = '-' + formatPrice(discount);
+    } else {
+      discRow.style.display = 'none';
+    }
+  }
+
+  function formatPrice(n) { return '₪' + n.toLocaleString('he-IL'); }
+
+  /* ── Mobile summary toggle ── */
+  function toggleSummary() {
+    var inner  = document.getElementById('summaryInner');
+    var toggle = document.getElementById('summaryToggle');
+    var open   = inner.classList.toggle('mobile-open');
+    toggle.classList.toggle('open', open);
+    var txt = toggle.querySelector('.summary-toggle-left');
+    txt.lastChild.textContent = open ? 'הסתר סיכום הזמנה' : 'הצג סיכום הזמנה';
+  }
+
+  /* ── Coupon ── */
+  function applyCoupon() {
+    var code = document.getElementById('couponInput').value.trim().toUpperCase();
+    if (code === 'NOGYM10' || code === 'MADGLOW10') {
+      couponApplied = true;
+      updateTotal();
+      document.getElementById('couponSuccess').classList.add('visible');
+      document.getElementById('couponInput').disabled = true;
+    } else {
+      document.getElementById('couponInput').style.borderColor = 'var(--red)';
+      setTimeout(function() {
+        document.getElementById('couponInput').style.borderColor = '';
+      }, 1200);
+    }
+  }
+
+  /* ── Card number formatting ── */
+  document.getElementById('cardNum').addEventListener('input', function(e) {
+    var v   = e.target.value.replace(/\D/g, '').slice(0, 16);
+    var fmt = v.match(/.{1,4}/g);
+    e.target.value = fmt ? fmt.join(' ') : v;
+
+    var icon = document.getElementById('cardTypeIcon');
+    e.target.classList.toggle('has-card-icon', v.length > 0);
+    if      (v[0] === '4')               { icon.textContent = '💳'; icon.classList.add('visible'); }
+    else if (v[0] === '5' || v[0] === '2') { icon.textContent = '💳'; icon.classList.add('visible'); }
+    else if (v[0] === '3')               { icon.textContent = '💳'; icon.classList.add('visible'); }
+    else                                  { icon.textContent = '';   icon.classList.remove('visible'); }
+  });
+
+  /* ── Expiry formatting ── */
+  document.getElementById('cardExp').addEventListener('input', function(e) {
+    var v = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (v.length >= 3) { v = v.slice(0,2) + ' / ' + v.slice(2); }
+    e.target.value = v;
+  });
+
+  /* ── CVV: digits only ── */
+  document.getElementById('cardCvv').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+  });
+
+  /* ── Validation ── */
+  function getVal(id)  { return document.getElementById(id).value.trim(); }
+  function setErr(id, show) {
+    var inp = document.getElementById(id);
+    var err = document.getElementById(id + 'Err');
+    inp.classList.toggle('error', show);
+    if (err) err.classList.toggle('visible', show);
+    return show;
+  }
+
+  function validate() {
+    var hasError = false;
+
+    /* email */
+    var email = getVal('email');
+    if (!email || email.indexOf('@') < 1 || email.indexOf('.') < 2) {
+      hasError = setErr('email', true) || hasError;
+    } else { setErr('email', false); }
+
+    /* phone */
+    var phone = getVal('phone').replace(/\D/g,'');
+    if (phone.length < 9) {
+      hasError = setErr('phone', true) || hasError;
+    } else { setErr('phone', false); }
+
+    /* first / last name */
+    if (!getVal('firstName')) { hasError = setErr('firstName', true) || hasError; }
+    else { setErr('firstName', false); }
+    if (!getVal('lastName'))  { hasError = setErr('lastName', true)  || hasError; }
+    else { setErr('lastName', false); }
+
+    /* address + city */
+    if (!getVal('address')) { hasError = setErr('address', true) || hasError; }
+    else { setErr('address', false); }
+    if (!getVal('city'))    { hasError = setErr('city', true)    || hasError; }
+    else { setErr('city', false); }
+
+    /* card number */
+    var cardNum = getVal('cardNum').replace(/\s/g,'');
+    if (cardNum.length < 13 || !/^\d+$/.test(cardNum)) {
+      hasError = setErr('cardNum', true) || hasError;
+    } else { setErr('cardNum', false); }
+
+    /* expiry */
+    var exp = getVal('cardExp').replace(/\s/g,'');
+    if (!/^\d{2}\/\d{2}$/.test(exp)) {
+      hasError = setErr('cardExp', true) || hasError;
+    } else { setErr('cardExp', false); }
+
+    /* cvv */
+    var cvv = getVal('cardCvv');
+    if (cvv.length < 3 || !/^\d+$/.test(cvv)) {
+      hasError = setErr('cardCvv', true) || hasError;
+    } else { setErr('cardCvv', false); }
+
+    /* card name */
+    if (!getVal('cardName')) { hasError = setErr('cardName', true) || hasError; }
+    else { setErr('cardName', false); }
+
+    return !hasError;
+  }
+
+  /* ── Submit ── */
+  function handleSubmit() {
+    if (!validate()) {
+      /* scroll to first error */
+      var firstErr = document.querySelector('.field-input.error');
+      if (firstErr) firstErr.scrollIntoView({ behavior:'smooth', block:'center' });
+      return;
+    }
+
+    var btn = document.getElementById('submitBtn');
+    btn.disabled    = true;
+    btn.textContent = 'מעבד הזמנה...';
+
+    /* generate fake order number */
+    var orderNum = 'NGFM-' + Math.floor(10000 + Math.random() * 90000);
+    document.getElementById('successOrderNum').textContent = 'מספר הזמנה: #' + orderNum;
+
+    /* simulate processing */
+    setTimeout(function() {
+      document.getElementById('successOverlay').classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }, 1200);
+  }
+
+  /* ── Clear error on type ── */
+  document.querySelectorAll('.field-input').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      inp.classList.remove('error');
+      var errEl = document.getElementById(inp.id + 'Err');
+      if (errEl) errEl.classList.remove('visible');
+    });
+  });
+
+  /* ── Init ── */
+  renderSummary();
+</script>
+</body>
+</html>
