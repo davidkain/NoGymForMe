@@ -22,6 +22,8 @@
       --red: #b83232;
       --font-display: 'Assistant', sans-serif;
       --font-body: 'Assistant', sans-serif;
+      --radius-pill: 100px;
+      --radius-md: 12px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -47,16 +49,35 @@
       opacity: .6;
     }
 
+    /* ── ANNOUNCEMENT BAR ── */
+    .announcement-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 101;
+      background: #1a1a1a;
+      padding: 10px 24px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.5px;
+      /* brushstroke edge via clip-path */
+      clip-path: polygon(0 0, 100% 0, 100% 78%, 99.5% 100%, 98% 88%, 95% 100%, 90% 85%, 85% 100%, 80% 88%, 75% 100%, 70% 85%, 65% 98%, 60% 85%, 55% 100%, 50% 86%, 45% 100%, 40% 88%, 35% 100%, 30% 85%, 25% 98%, 20% 85%, 15% 100%, 10% 88%, 5% 100%, 2% 88%, 0.5% 100%, 0 78%);
+      padding-bottom: 18px;
+    }
+    .announcement-bar strong { color: var(--gold); }
+    .announcement-bar a { color: var(--gold); text-decoration: underline; }
+
     /* ── STICKY HEADER ── */
     header {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 40px; left: 0; right: 0;
       z-index: 100;
       padding: 16px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(10,10,10,0.92);
+      background: rgba(10,10,10,0.95);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
     }
@@ -81,6 +102,7 @@
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
+      border-radius: var(--radius-pill);
       transition: background .2s, transform .1s;
     }
     .header-cta:hover { background: var(--gold-light); transform: translateY(-1px); }
@@ -91,7 +113,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       align-items: stretch;
-      padding-top: 72px;
+      padding-top: 112px; /* header (72) + announcement bar (40) */
       position: relative;
       overflow: hidden;
     }
@@ -148,18 +170,24 @@
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: clamp(44px, 5vw, 80px);
-      font-weight: 900;
-      line-height: 1.0;
+      font-size: clamp(32px, 3.8vw, 58px);
+      font-weight: 700;
+      line-height: 1.05;
       color: var(--white);
       margin-bottom: 24px;
       opacity: 0;
       animation: fadeUp .7s ease forwards .35s;
     }
 
+    /* MadGlow-style oversized accent word */
     .hero-title em {
       font-style: normal;
       color: var(--gold);
+      display: block;
+      font-size: clamp(80px, 11vw, 148px);
+      font-weight: 900;
+      line-height: 0.88;
+      letter-spacing: -2px;
     }
 
     .hero-subtitle {
@@ -218,6 +246,7 @@
       text-decoration: none;
       cursor: pointer;
       border: none;
+      border-radius: var(--radius-pill);
       transition: background .2s, transform .15s, box-shadow .2s;
       position: relative;
       overflow: hidden;
@@ -556,6 +585,7 @@
       padding: 4px 16px;
       letter-spacing: 2px;
       text-transform: uppercase;
+      border-radius: var(--radius-pill);
     }
 
     .pack-name {
@@ -616,6 +646,7 @@
       font-size: 16px;
       padding: 16px;
       cursor: pointer;
+      border-radius: var(--radius-pill);
       transition: all .2s;
       text-decoration: none;
     }
@@ -751,6 +782,7 @@
       font-size: 18px;
       padding: 18px 40px;
       text-decoration: none;
+      border-radius: var(--radius-pill);
       transition: background .2s, transform .15s;
     }
     .whatsapp-btn:hover {
@@ -888,8 +920,23 @@
     }
 
     /* ── RESPONSIVE ── */
+    /* ── ROUNDED CARDS ── */
+    .problem-card,
+    .ingredient-card,
+    .testimonial-card,
+    .pricing-card,
+    .trust-item,
+    .mechanism-item,
+    .dosage-box,
+    .hero-price-box,
+    .doctor-credential {
+      border-radius: var(--radius-md);
+    }
+
     @media (max-width: 768px) {
-      header { padding: 16px 20px; }
+      header { padding: 16px 20px; top: 36px; }
+      .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
+      .hero { padding-top: 108px; }
 
       .stats-grid,
       .problem-grid,
@@ -915,7 +962,8 @@
         background: linear-gradient(to top, var(--black) 0%, transparent 50%);
       }
       .hero-content-col { padding: 40px 24px 60px; }
-      .hero-title { font-size: 44px; }
+      .hero-title { font-size: 28px; }
+      .hero-title em { font-size: clamp(64px, 18vw, 96px); letter-spacing: -1px; }
       .hero-price-box { padding: 16px 20px; }
       .hero-trust { justify-content: flex-start; }
 
@@ -938,6 +986,11 @@
   </style>
 </head>
 <body>
+
+  <!-- ANNOUNCEMENT BAR -->
+  <div class="announcement-bar">
+    🔥 <strong>משלוח חינם</strong> על כל הזמנה &nbsp;·&nbsp; 18 תשלומים ללא ריבית &nbsp;·&nbsp; <strong>100% החזר כספי</strong> תוך 14 יום
+  </div>
 
   <!-- HEADER -->
   <header>
