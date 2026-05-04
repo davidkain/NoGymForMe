@@ -920,6 +920,208 @@
     }
 
     /* ── RESPONSIVE ── */
+    /* ── BRAND STORY SECTION ── */
+    .story-section { background: var(--deep); }
+
+    .story-card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-right: 4px solid var(--gold);
+      padding: 48px 56px;
+      margin-top: 48px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .story-quote-mark {
+      font-family: var(--font-display);
+      font-size: 220px;
+      color: var(--gold);
+      opacity: 0.07;
+      position: absolute;
+      top: -40px;
+      left: 20px;
+      line-height: 1;
+      pointer-events: none;
+      font-style: italic;
+    }
+
+    .story-text {
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    .story-text strong {
+      color: var(--gold);
+      font-weight: 800;
+    }
+
+    .story-sig {
+      margin-top: 28px;
+      font-size: 14px;
+      color: var(--grey);
+      font-style: italic;
+      letter-spacing: 1px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .story-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      margin-top: 48px;
+      padding: 40px 48px;
+      background: var(--gold-muted);
+      border: 1px solid var(--gold);
+      border-radius: var(--radius-md);
+    }
+
+    .story-footer-hl {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .story-footer-sub {
+      font-size: 16px;
+      color: var(--grey);
+    }
+
+    /* ── DISCOUNT POPUP (slide-up bar) ── */
+    .discount-popup {
+      position: fixed;
+      bottom: -160px;
+      left: 0; right: 0;
+      z-index: 200;
+      background: var(--card);
+      border-top: 2px solid var(--gold);
+      box-shadow: 0 -12px 48px rgba(0,0,0,0.7);
+      transition: bottom 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    .discount-popup.popup-visible { bottom: 0; }
+
+    .popup-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .popup-emoji { font-size: 36px; flex-shrink: 0; }
+
+    .popup-text { flex: 1; }
+
+    .popup-headline {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .popup-headline span { color: var(--gold); }
+
+    .popup-sub {
+      font-size: 14px;
+      color: var(--grey);
+    }
+
+    .popup-form {
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .popup-email {
+      background: var(--black);
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 15px;
+      padding: 12px 20px;
+      border-radius: var(--radius-pill);
+      width: 240px;
+      outline: none;
+      transition: border-color .2s;
+      direction: rtl;
+    }
+    .popup-email:focus { border-color: var(--gold); }
+    .popup-email::placeholder { color: var(--grey); }
+
+    .popup-btn {
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+      font-family: var(--font-body);
+      font-weight: 900;
+      font-size: 15px;
+      padding: 12px 28px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s, transform .1s;
+    }
+    .popup-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    .popup-close {
+      background: none;
+      border: none;
+      color: var(--grey);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 8px;
+      flex-shrink: 0;
+      transition: color .2s;
+    }
+    .popup-close:hover { color: var(--white); }
+
+    .popup-success {
+      text-align: center;
+      padding: 4px 0;
+    }
+    .popup-success-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .popup-coupon {
+      display: inline-block;
+      margin-top: 8px;
+      background: var(--gold-muted);
+      border: 1px dashed var(--gold);
+      color: var(--gold);
+      font-family: monospace;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      padding: 8px 24px;
+      border-radius: var(--radius-md);
+    }
+
+    @media (max-width: 768px) {
+      .popup-inner { flex-direction: column; padding: 20px 20px; gap: 16px; }
+      .popup-form { flex-direction: column; width: 100%; }
+      .popup-email { width: 100%; }
+      .popup-btn { width: 100%; text-align: center; }
+      .story-card { padding: 32px 24px; }
+      .story-text { font-size: 18px; }
+      .story-footer { flex-direction: column; text-align: center; padding: 28px 24px; }
+      .story-footer-hl { font-size: 22px; }
+      .story-quote-mark { font-size: 140px; }
+    }
+
     /* ── ROUNDED CARDS ── */
     .problem-card,
     .ingredient-card,
@@ -1009,7 +1211,7 @@
     <div class="hero-content-col">
       <p class="hero-eyebrow">תוסף תזונה לגברים · נוסחה ייחודית</p>
       <h1 class="hero-title">
-        עייפת מהחדר כושר?<br><em>גם אנחנו.</em>
+        עזוב אותך אחי, אתה לא באמת טיפוס של חדר כושר!<br><em>נסה את זה.</em>
       </h1>
       <p class="hero-subtitle">
         הפתרון הטבעי הראשון בישראל שמיועד במיוחד לגברים — שתומך בחילוף חומרים ותורם לתחושת שובע, גם בלי ללכת לחדר כושר.
@@ -1048,6 +1250,39 @@
       <div class="stat-item">
         <span class="stat-number">0</span>
         <div class="stat-label">מוצרים בשוק הישראלי<br>המיועדים ספציפית לגברים</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- BRAND STORY SECTION -->
+  <div class="story-section">
+    <div class="section reveal">
+      <p class="section-label">הסיפור שהתחיל הכל</p>
+      <h2 class="section-title">הייתה לנו שיחה<br><em>עם המאמן.</em></h2>
+
+      <div class="story-card reveal">
+        <div class="story-quote-mark">"</div>
+        <p class="story-text">
+          רון המאמן — שמע, <strong>אני חמור</strong>, אבל אתה? אתה מנייאק.<br>
+          חלאס. לא בא יותר לג'ים.<br><br>
+          שנתיים יא אפס — ריסקת לי ת'ברכיים, עשית אותי רעב.
+          <strong>איפה התוצאות אחי? ואיפה הכסף?</strong><br>
+          שנתיים! "רון המאמן אמר ככה, רון המאמן אמר ככה"...<br><br>
+          חמור. חמור זה מה אני. אבל תקשיב טוב טוב —<br>
+          <strong>דבר ראשון: אני איתך גמרתי. אין יותר חדר כושר.</strong><br>
+          דבר שני: תחליף את הטייץ יא מגעיל, מה זה?? מה זה???
+        </p>
+        <div class="story-sig">— כל גבר ישראלי שניסה את הג'ים ויצא מאוכזב</div>
+      </div>
+
+      <div class="story-footer reveal">
+        <div>
+          <strong class="story-footer-hl">עזוב, אתה לא באמת טיפוס של חדר כושר.</strong>
+          <span class="story-footer-sub">רוצה לרדת במשקל? נסה את זה.</span>
+        </div>
+        <a href="#pricing" class="btn-primary">להזמנה עכשיו ←</a>
       </div>
     </div>
   </div>
@@ -1396,6 +1631,22 @@
     <p style="margin-top: 8px;"><a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">מדיניות פרטיות</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">תנאי שימוש</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">יצירת קשר</a></p>
   </footer>
 
+  <!-- DISCOUNT POPUP -->
+  <div class="discount-popup" id="discountPopup">
+    <div class="popup-inner">
+      <div class="popup-emoji">🔥</div>
+      <div class="popup-text">
+        <div class="popup-headline">רגע לפני שתפספס — <span>10% הנחה</span> על ההזמנה הראשונה</div>
+        <div class="popup-sub">השאר מייל וקוד הקופון שלך מגיע מיידית. ללא ספאם, מבטיחים.</div>
+      </div>
+      <div class="popup-form" id="popupForm">
+        <input type="email" class="popup-email" id="popupEmail" placeholder="המייל שלך..." />
+        <button class="popup-btn" onclick="submitPopup()">תן לי את ההנחה ←</button>
+      </div>
+      <button class="popup-close" onclick="closePopup()" aria-label="סגור">✕</button>
+    </div>
+  </div>
+
   <script>
     // FAQ toggle
     function toggleFaq(btn) {
@@ -1424,6 +1675,58 @@
         child.style.transitionDelay = `${i * 0.1}s`;
       });
     });
+
+    // ── DISCOUNT POPUP ──
+    // Show once per session: after 3.5 s, or on exit-intent
+    (function initPopup() {
+      if (sessionStorage.getItem('ngfm_popup_seen')) return;
+      var shown = false;
+      function showPopup() {
+        if (shown) return;
+        shown = true;
+        document.getElementById('discountPopup').classList.add('popup-visible');
+      }
+      setTimeout(showPopup, 3500);
+      document.addEventListener('mouseleave', function(e) {
+        if (e.clientY <= 0) showPopup();
+      });
+    })();
+
+    function closePopup() {
+      document.getElementById('discountPopup').classList.remove('popup-visible');
+      sessionStorage.setItem('ngfm_popup_seen', '1');
+    }
+
+    function submitPopup() {
+      var emailInput = document.getElementById('popupEmail');
+      var email = emailInput.value.trim();
+      if (!email || email.indexOf('@') === -1) {
+        emailInput.style.borderColor = '#b83232';
+        emailInput.placeholder = 'כתובת מייל תקינה בבקשה...';
+        return;
+      }
+      // Replace form content using safe DOM methods — no innerHTML
+      var form = document.getElementById('popupForm');
+      while (form.firstChild) form.removeChild(form.firstChild);
+
+      var successDiv = document.createElement('div');
+      successDiv.className = 'popup-success';
+
+      var successText = document.createElement('div');
+      successText.className = 'popup-success-text';
+      successText.textContent = '✓ הקוד שלך מוכן!'; // ✓ הקוד שלך מוכן!
+
+      var couponDiv = document.createElement('div');
+      couponDiv.className = 'popup-coupon';
+      couponDiv.textContent = 'NOGYM10';
+
+      successDiv.appendChild(successText);
+      successDiv.appendChild(couponDiv);
+      form.appendChild(successDiv);
+
+      sessionStorage.setItem('ngfm_popup_seen', '1');
+      setTimeout(closePopup, 5000);
+    }
   </script>
 
 </body>
