@@ -829,12 +829,15 @@
 
     .doctor-video-wrap {
       position: relative;
-      max-width: 300px;
+      width: 100%;
+      border-radius: var(--radius-md);
       border: 1px solid var(--border);
       overflow: hidden;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      box-shadow: 0 32px 100px rgba(0,0,0,0.7);
+      margin-left: -24px;
     }
 
+    .doctor-video-wrap img,
     .doctor-video-wrap video {
       display: block;
       width: 100%;
@@ -1325,7 +1328,7 @@
           playsinline
           preload="metadata"
           poster="hero.png"
-          style="width:100%; max-width:420px; border:1px solid var(--border); box-shadow:0 24px 80px rgba(0,0,0,0.6); background:var(--black);"
+          style="width:100%; max-width:640px; border-radius:var(--radius-md); border:1px solid var(--border); box-shadow:0 32px 100px rgba(0,0,0,0.7); background:var(--black);"
         ></video>
       </div>
     </div>
