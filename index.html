@@ -6,7 +6,7 @@
   <title>NOGYMFORME | תוסף הרזיה לגברים</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800;900&family=Rubik:wght@700;800;900&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -20,7 +20,7 @@
       --white: #f0ece4;
       --grey: #8a8680;
       --red: #b83232;
-      --font-display: 'Assistant', sans-serif;
+      --font-display: 'Rubik', 'Assistant', sans-serif;
       --font-body: 'Assistant', sans-serif;
       --radius-pill: 100px;
       --radius-md: 12px;
@@ -127,10 +127,9 @@
     .hero-image-col img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      object-position: center center;
+      object-fit: cover;
+      object-position: 30% center;
       display: block;
-      background: var(--black);
     }
 
     /* gradient fade from image into dark bg on the right edge */
@@ -185,7 +184,7 @@
       font-style: normal;
       color: var(--gold);
       display: block;
-      font-size: clamp(28px, 4vw, 52px);
+      font-size: clamp(38px, 5.5vw, 72px);
       font-weight: 900;
       line-height: 0.88;
       letter-spacing: -2px;
@@ -540,6 +539,23 @@
       margin-bottom: 24px;
     }
 
+    .testimonial-footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .testimonial-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--black);
+      flex-shrink: 0;
+    }
     .testimonial-author {
       font-weight: 700;
       color: var(--white);
@@ -549,6 +565,30 @@
       font-size: 13px;
       color: var(--gold);
     }
+
+    /* Aggregate rating bar */
+    .rating-summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin: 32px 0 8px;
+      flex-wrap: wrap;
+    }
+    .rating-score {
+      font-family: var(--font-display);
+      font-size: 52px;
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1;
+    }
+    .rating-right {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .rating-stars-big { font-size: 22px; color: var(--gold); letter-spacing: 3px; }
+    .rating-count { font-size: 13px; color: var(--grey); }
 
     /* ── PRICING ── */
     .pricing-section { background: var(--black); }
@@ -1121,7 +1161,7 @@
       }
       .hero-content-col { padding: 40px 24px 60px; }
       .hero-title { font-size: 28px; }
-      .hero-title em { font-size: clamp(24px, 7vw, 40px); letter-spacing: -1px; }
+      .hero-title em { font-size: clamp(32px, 9vw, 56px); letter-spacing: -1px; }
       .hero-price-box { padding: 16px 20px; }
       .hero-trust { justify-content: flex-start; }
 
@@ -1140,6 +1180,79 @@
 
       /* Section padding tighter on mobile */
       .section { padding: 64px 20px; }
+    }
+
+    /* ── STICKY MOBILE CTA BAR ── */
+    .sticky-cta-bar {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .sticky-cta-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        z-index: 300;
+        background: var(--black);
+        border-top: 1px solid var(--gold);
+        padding: 12px 20px 20px;
+        gap: 12px;
+      }
+      .sticky-cta-price {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+      }
+      .sticky-cta-price strong {
+        font-family: var(--font-display);
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--white);
+      }
+      .sticky-cta-price span {
+        font-size: 12px;
+        color: var(--grey);
+      }
+      .sticky-cta-btn {
+        background: var(--gold);
+        color: var(--black);
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 15px;
+        padding: 14px 24px;
+        border-radius: var(--radius-pill);
+        text-decoration: none;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      /* give the page bottom breathing room so the bar doesn't overlap content */
+      body { padding-bottom: 80px; }
+    }
+
+    /* ── VIDEO PLAY OVERLAY ── */
+    .video-wrap {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      cursor: pointer;
+    }
+    .video-wrap .play-btn {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .video-wrap.playing .play-btn { opacity: 0; }
+    .video-wrap .play-btn svg {
+      width: 72px;
+      height: 72px;
+      filter: drop-shadow(0 4px 24px rgba(0,0,0,0.7));
     }
   </style>
 </head>
@@ -1322,14 +1435,23 @@
       </div>
 
       <div class="reveal" style="display:flex; justify-content:center; margin-top:48px;">
-        <video
-          src="1000545483.mp4"
-          controls
-          playsinline
-          preload="metadata"
-          poster="hero.png"
-          style="width:100%; max-width:640px; border-radius:var(--radius-md); border:1px solid var(--border); box-shadow:0 32px 100px rgba(0,0,0,0.7); background:var(--black);"
-        ></video>
+        <div class="video-wrap" style="max-width:640px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); box-shadow:0 32px 100px rgba(0,0,0,0.7);" onclick="this.classList.add('playing'); this.querySelector('video').play();">
+          <video
+            src="1000545483.mp4"
+            playsinline
+            preload="metadata"
+            poster="hero.png"
+            controls
+            style="width:100%; display:block; background:var(--black);"
+          ></video>
+          <div class="play-btn">
+            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="36" cy="36" r="36" fill="rgba(0,0,0,0.55)"/>
+              <circle cx="36" cy="36" r="34" stroke="#E8D900" stroke-width="2"/>
+              <polygon points="29,22 55,36 29,50" fill="#E8D900"/>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1341,30 +1463,54 @@
     <p class="section-label">מה גברים אומרים</p>
     <h2 class="section-title">תוצאות אמיתיות.<br><em>גברים אמיתיים.</em></h2>
 
+    <!-- Aggregate rating -->
+    <div class="rating-summary">
+      <div class="rating-score">4.9</div>
+      <div class="rating-right">
+        <div class="rating-stars-big">★★★★★</div>
+        <div class="rating-count">מתוך 127 לקוחות מרוצים</div>
+      </div>
+    </div>
+
     <div class="testimonials-grid">
       <div class="testimonial-card reveal">
         <div class="stars">★★★★★</div>
         <p class="testimonial-text">
           "ניסיתי כל מיני מוצרים לאורך השנים ושום דבר לא עבד. NOGYMFORME שינה את הגישה שלי — מרגיש פחות רעב ויש לי יותר אנרגיה בשעות הצהריים."
         </p>
-        <div class="testimonial-author">רוני מ., 42</div>
-        <div class="testimonial-meta">תל אביב · לקוח 3 חודשים</div>
+        <div class="testimonial-footer">
+          <div class="testimonial-avatar" style="background:#4A90D9;">ר</div>
+          <div>
+            <div class="testimonial-author">רוני מ., 42</div>
+            <div class="testimonial-meta">תל אביב · לקוח 3 חודשים</div>
+          </div>
+        </div>
       </div>
       <div class="testimonial-card reveal">
         <div class="stars">★★★★★</div>
         <p class="testimonial-text">
           "סוף סוף מוצר שמיועד לגברים ומדבר אלינו ישר. 18 תשלומים בלי ריבית — פשוט לקחתי ולא חשבתי פעמיים. שווה כל שקל."
         </p>
-        <div class="testimonial-author">מיכאל ק., 48</div>
-        <div class="testimonial-meta">חיפה · לקוח 5 חודשים</div>
+        <div class="testimonial-footer">
+          <div class="testimonial-avatar" style="background:#E8D900;">מ</div>
+          <div>
+            <div class="testimonial-author">מיכאל ק., 48</div>
+            <div class="testimonial-meta">חיפה · לקוח 5 חודשים</div>
+          </div>
+        </div>
       </div>
       <div class="testimonial-card reveal">
         <div class="stars">★★★★★</div>
         <p class="testimonial-text">
           "הכרס שלי הייתה הבעיה הגדולה שלי. אחרי חודשיים עם NOGYMFORME — אני מרגיש את ההבדל בבגדים. ממליץ לכל גבר מעל 40."
         </p>
-        <div class="testimonial-author">אבי ש., 51</div>
-        <div class="testimonial-meta">ירושלים · לקוח 2 חודשים</div>
+        <div class="testimonial-footer">
+          <div class="testimonial-avatar" style="background:#27AE60;">א</div>
+          <div>
+            <div class="testimonial-author">אבי ש., 51</div>
+            <div class="testimonial-meta">ירושלים · לקוח 2 חודשים</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1655,6 +1801,15 @@
       setTimeout(closePopup, 5000);
     }
   </script>
+
+  <!-- STICKY MOBILE CTA BAR -->
+  <div class="sticky-cta-bar">
+    <div class="sticky-cta-price">
+      <strong>₪198 <small style="font-size:13px;font-weight:400;">/ חודש</small></strong>
+      <span>6.5 ₪ ליום בלבד</span>
+    </div>
+    <a href="order.html?plan=results" class="sticky-cta-btn">להזמנה עכשיו ←</a>
+  </div>
 
 </body>
 </html>
