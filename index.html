@@ -726,8 +726,18 @@
     }
 
     .trust-icon-lg {
-      font-size: 48px;
       margin-bottom: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .trust-icon-lg svg {
+      width: 48px;
+      height: 48px;
+      stroke: var(--gold);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .trust-title {
@@ -1572,22 +1582,34 @@
 
       <div class="trust-grid">
         <div class="trust-item reveal">
-          <div class="trust-icon-lg">🏭</div>
+          <div class="trust-icon-lg">
+            <!-- GMP / certified badge -->
+            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m-5 9H6a2 2 0 01-2-2V7a2 2 0 012-2h3.5M15 3h3a2 2 0 012 2v10a2 2 0 01-2 2h-3"/><circle cx="12" cy="12" r="9"/></svg>
+          </div>
           <div class="trust-title">GMP Certified</div>
           <div class="trust-desc">עומד בתקני הייצור המחמירים של משרד הבריאות</div>
         </div>
         <div class="trust-item reveal">
-          <div class="trust-icon-lg">✡️</div>
+          <div class="trust-icon-lg">
+            <!-- Kosher / leaf -->
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+          </div>
           <div class="trust-title">כשר</div>
           <div class="trust-desc">כשרות בד"ץ העדה החרדית ירושלים</div>
         </div>
         <div class="trust-item reveal">
-          <div class="trust-icon-lg">🔒</div>
+          <div class="trust-icon-lg">
+            <!-- Lock / secure -->
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
           <div class="trust-title">תשלום מאובטח</div>
           <div class="trust-desc">הצפנת SSL מלאה. תשלום מאובטח דרך טרנזילה</div>
         </div>
         <div class="trust-item reveal">
-          <div class="trust-icon-lg">↩️</div>
+          <div class="trust-icon-lg">
+            <!-- Return / refund -->
+            <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          </div>
           <div class="trust-title">100% החזר כספי</div>
           <div class="trust-desc">14 יום לביטול לפי חוק הצרכנות הישראלי — ללא שאלות</div>
         </div>
