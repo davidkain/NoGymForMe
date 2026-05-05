@@ -1189,8 +1189,8 @@
       .pack-name { font-size: 20px; }
 
       /* Mechanism items: keep number on left, text on right (RTL-friendly) */
-      .mechanism-item { flex-direction: row-reverse; }
-      .mechanism-num { min-width: 28px; font-size: 28px; }
+      .mechanism-item { flex-direction: row; align-items: flex-start; }
+      .mechanism-num { min-width: 28px; font-size: 28px; padding-top: 2px; }
 
       /* Doctor video full width */
       .doctor-video-wrap { max-width: 100%; }
@@ -1455,7 +1455,7 @@
       </div>
 
       <div class="reveal" style="display:flex; justify-content:center; margin-top:48px;">
-        <div class="video-wrap" style="max-width:640px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); box-shadow:0 32px 100px rgba(0,0,0,0.7);" onclick="this.classList.add('playing'); this.querySelector('video').play();">
+        <div class="video-wrap" id="videoWrap" style="max-width:640px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); box-shadow:0 32px 100px rgba(0,0,0,0.7);">
           <video
             src="1000545483.mp4"
             playsinline
@@ -1832,6 +1832,17 @@
       sessionStorage.setItem('ngfm_popup_seen', '1');
       setTimeout(closePopup, 5000);
     }
+
+    // Video play button
+    (function() {
+      var wrap = document.getElementById('videoWrap');
+      if (!wrap) return;
+      var video = wrap.querySelector('video');
+      wrap.addEventListener('click', function() { video.play(); });
+      video.addEventListener('play',  function() { wrap.classList.add('playing'); });
+      video.addEventListener('pause', function() { wrap.classList.remove('playing'); });
+      video.addEventListener('ended', function() { wrap.classList.remove('playing'); });
+    })();
   </script>
 
   <!-- STICKY MOBILE CTA BAR -->
