@@ -87,7 +87,7 @@
       font-size: 32px;
       font-weight: 900;
       color: var(--gold);
-      letter-spacing: 1px;
+      letter-spacing: -1px;
     }
     .logo span { color: var(--white); }
 
@@ -127,8 +127,8 @@
     .hero-image-col img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      object-position: 30% center;
+      object-fit: contain;
+      object-position: center center;
       display: block;
     }
 
@@ -1150,7 +1150,7 @@
     }
 
     @media (max-width: 768px) {
-      header { padding: 12px 20px; top: 36px; }
+      header { padding: 12px 20px; top: 60px; }
       .header-cta { display: none; }
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
@@ -1173,11 +1173,17 @@
 
       .hero {
         grid-template-columns: 1fr;
-        grid-template-rows: 50vh auto;
+        grid-template-rows: auto auto;
       }
-      .hero-image-col { min-height: 50vh; }
+      .hero-image-col {
+        min-height: unset;
+        height: auto;
+      }
+      .hero-image-col img {
+        height: auto !important;
+      }
       .hero-image-col::after {
-        background: linear-gradient(to top, var(--black) 0%, transparent 50%);
+        display: none;
       }
       .hero-content-col { padding: 40px 24px 60px; }
       .hero-title { font-size: 28px; }
