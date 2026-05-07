@@ -1280,6 +1280,80 @@
       height: 72px;
       filter: drop-shadow(0 4px 24px rgba(0,0,0,0.7));
     }
+    /* ── Science Section ── */
+    .science-section {
+      padding: 100px 0;
+      background: var(--black);
+    }
+
+    .science-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 48px;
+    }
+
+    .sci-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .sci-card:hover {
+      border-color: rgba(232,217,0,0.35);
+      transform: translateY(-3px);
+    }
+
+    .sci-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.3;
+    }
+    .sci-latin {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--grey);
+      display: block;
+      margin-top: 2px;
+      direction: ltr;
+      text-align: right;
+    }
+
+    .sci-card-benefit {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1.45;
+    }
+
+    .sci-card-body {
+      font-size: 0.9rem;
+      color: var(--grey);
+      line-height: 1.75;
+      flex: 1;
+    }
+
+    .sci-card-bottom {
+      font-size: 0.88rem;
+      color: var(--white);
+      line-height: 1.65;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .sci-q {
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    @media (max-width: 768px) {
+      .science-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -1382,41 +1456,43 @@
 
   <div class="section-divider"></div>
 
-  <!-- DOCTOR SECTION -->
-  <div class="doctor-section">
+  <!-- SCIENCE SECTION -->
+  <div class="science-section">
     <div class="section reveal">
-      <div class="doctor-inner">
-        <div class="doctor-video-wrap">
-          <img src="new_me.png" alt="NOGYMFORME" style="display:block;width:100%;height:auto;">
+      <p class="section-label">המדע מאחורי NOGYMFORME</p>
+      <h2 class="section-title">לא קסם. <em>פשוט פורמולה שעושה שכל.</em></h2>
+      <p class="section-body">במקום עוד הבטחות ריקות, NOGYMFORME מבוסס על שילוב של סיבים תזונתיים ורכיבים תומכי מטבוליזם. המטרה פשוטה: לעזור לך להרגיש יותר בשליטה בין הארוחות, להפחית נשנושים מיותרים, ולתמוך בתהליך ירידה במשקל כחלק משגרה מאוזנת.</p>
+
+      <div class="science-grid">
+
+        <div class="sci-card reveal">
+          <div class="sci-card-title">קונג׳אק <span class="sci-latin">Glucomannan</span></div>
+          <div class="sci-card-benefit">הסיב שנותן לקיבה להבין שהגיע הזמן להירגע.</div>
+          <div class="sci-card-body">קונג׳אק הוא סיב תזונתי מסיס שסופח מים ויוצר מרקם ג׳לי במערכת העיכול. בפועל, הוא עוזר לתחושת מלאות נוחה יותר לפני הארוחה ואחריה.</div>
+          <div class="sci-card-bottom"><span class="sci-q">מה זה נותן לך?</span> יותר שליטה על הכמות שאתה אוכל, ופחות צורך לסגור פינה עם עוד נשנוש.</div>
         </div>
 
-        <div class="doctor-content">
-          <p class="section-label">המדע מאחורי NOGYMFORME</p>
-          <h2 class="section-title">שלושה מנגנונים.<br><em>תוצאה אחת.</em></h2>
-          <div class="mechanism-list">
-            <div class="mechanism-item">
-              <span class="mechanism-num">1</span>
-              <div>
-                <div class="mechanism-title">שובע לאורך זמן</div>
-                <div class="mechanism-sub">מרגישים מלאים, אוכלים פחות</div>
-              </div>
-            </div>
-            <div class="mechanism-item">
-              <span class="mechanism-num">2</span>
-              <div>
-                <div class="mechanism-title">איזון סוכר</div>
-                <div class="mechanism-sub">פחות חשקים במהלך היום</div>
-              </div>
-            </div>
-            <div class="mechanism-item">
-              <span class="mechanism-num">3</span>
-              <div>
-                <div class="mechanism-title">תמיכה במטבוליזם</div>
-                <div class="mechanism-sub">עוזר לניצול אנרגיה</div>
-              </div>
-            </div>
-          </div>
-</div>
+        <div class="sci-card reveal">
+          <div class="sci-card-title">פסיליום <span class="sci-latin">Psyllium</span></div>
+          <div class="sci-card-benefit">הסיב שעוזר להוריד הילוך בין הארוחות.</div>
+          <div class="sci-card-body">פסיליום הוא סיב מסיס שיוצר ג׳ל עדין במערכת העיכול. הוא מסייע לתחושת מלאות ולשליטה טובה יותר בין ארוחות.</div>
+          <div class="sci-card-bottom"><span class="sci-q">מה זה נותן לך?</span> פחות נפילות רעב באמצע היום, ופחות חיפוש אוטומטי אחרי משהו מתוק או מלוח.</div>
+        </div>
+
+        <div class="sci-card reveal">
+          <div class="sci-card-title">תמצית תה ירוק <span class="sci-latin">Green Tea Extract</span></div>
+          <div class="sci-card-benefit">תמיכה עדינה בחילוף חומרים, בלי סיפורי קסם.</div>
+          <div class="sci-card-body">תה ירוק מכיל רכיבים טבעיים שנחקרו בהקשר של חילוף חומרים וניצול אנרגיה. הוא לא מחליף תזונה נכונה ולא עושה את העבודה לבד, אבל הוא חלק חכם מהפורמולה.</div>
+          <div class="sci-card-bottom"><span class="sci-q">מה זה נותן לך?</span> תמיכה יומיומית במטבוליזם ובניצול אנרגיה.</div>
+        </div>
+
+        <div class="sci-card reveal">
+          <div class="sci-card-title">כרומיום פיקולינט</div>
+          <div class="sci-card-benefit">מינרל קטן עם תפקיד חשוב באיזון.</div>
+          <div class="sci-card-body">כרומיום הוא מינרל קורט שתורם לחילוף חומרים תקין של פחמימות, שומנים וחלבונים, ולשמירה על רמות סוכר תקינות בדם.</div>
+          <div class="sci-card-bottom"><span class="sci-q">מה זה נותן לך?</span> תמיכה באיזון יומיומי, במיוחד סביב ארוחות ופחמימות.</div>
+        </div>
+
       </div>
     </div>
   </div>
