@@ -1920,15 +1920,22 @@
       setTimeout(closePopup, 5000);
     }
 
-    // Video play button
+    // Video: autoplay on scroll into view, pause when out
     (function() {
       var wrap = document.getElementById('videoWrap');
       if (!wrap) return;
       var video = wrap.querySelector('video');
-      wrap.addEventListener('click', function() { video.play(); });
-      video.addEventListener('play',  function() { wrap.classList.add('playing'); });
-      video.addEventListener('pause', function() { wrap.classList.remove('playing'); });
-      video.addEventListener('ended', function() { wrap.classList.remove('playing'); });
+      video.muted = true;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            video.play();
+          } else {
+            video.pause();
+          }
+        });
+      }, { threshold: 0.5 });
+      observer.observe(video);
     })();
 
     // Shared 1-minute countdown for announcement bar + popup
