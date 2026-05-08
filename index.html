@@ -159,46 +159,27 @@
     }
 
     .hero-eyebrow {
-      font-size: 17px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
+      font-family: var(--font-display);
+      font-size: clamp(18px, 2vw, 28px);
+      font-weight: 700;
+      letter-spacing: 0px;
       color: var(--gold);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       opacity: 0;
       animation: fadeUp .6s ease forwards .2s;
-    }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: clamp(32px, 3.8vw, 58px);
-      font-weight: 700;
-      line-height: 1.05;
-      color: var(--white);
-      margin-bottom: 24px;
-      opacity: 0;
-      animation: fadeUp .7s ease forwards .35s;
-    }
-
-    /* MadGlow-style oversized accent word */
-    .hero-title em {
-      font-style: normal;
-      color: var(--gold);
-      display: block;
-      font-size: clamp(38px, 5.5vw, 72px);
-      font-weight: 900;
-      line-height: 0.88;
-      letter-spacing: -2px;
+      line-height: 1.2;
     }
 
     .hero-subtitle {
-      font-size: 18px;
-      font-weight: 300;
-      color: var(--grey);
-      max-width: 440px;
-      line-height: 1.7;
+      font-family: var(--font-display);
+      font-size: clamp(22px, 2.8vw, 42px);
+      font-weight: 700;
+      color: var(--white);
+      max-width: 480px;
+      line-height: 1.25;
       margin-bottom: 40px;
       opacity: 0;
-      animation: fadeUp .7s ease forwards .5s;
+      animation: fadeUp .7s ease forwards .35s;
     }
 
     .hero-price-box {
@@ -241,8 +222,8 @@
       color: var(--black);
       font-family: var(--font-body);
       font-weight: 900;
-      font-size: 20px;
-      padding: 20px 56px;
+      font-size: 23px;
+      padding: 24px 64px;
       text-decoration: none;
       cursor: pointer;
       border: none;
@@ -603,7 +584,7 @@
 
     .pricing-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 24px;
       margin-top: 60px;
     }
@@ -1150,7 +1131,7 @@
     }
 
     @media (max-width: 768px) {
-      header { padding: 12px 20px; top: 60px; }
+      header { display: none; }
       .header-cta { display: none; }
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
@@ -1187,9 +1168,8 @@
         display: none;
       }
       .hero-content-col { padding: 40px 24px 60px; }
-      .hero-title { font-size: 28px; }
-      .hero-title em { font-size: clamp(32px, 9vw, 56px); letter-spacing: -1px; }
-      .hero-price-box { padding: 16px 20px; }
+      .hero-eyebrow { font-size: clamp(20px, 6vw, 28px); }
+      .hero-subtitle { font-size: clamp(18px, 5vw, 24px); }
       .hero-trust { justify-content: flex-start; }
 
       /* Pricing pack name smaller on mobile */
@@ -1369,21 +1349,12 @@
     <!-- Right: Text content -->
     <div class="hero-content-col">
       <p class="hero-eyebrow">תוסף תזונה לגברים · נוסחה ייחודית</p>
-      <h1 class="hero-title">
-        עזוב אותך אחי, אתה לא באמת טיפוס של חדר כושר!<br><em>נסה את זה.</em>
-      </h1>
       <p class="hero-subtitle">
-        הפתרון הטבעי הראשון בישראל שמיועד במיוחד לגברים - שתומך בחילוף חומרים ותורם לתחושת שובע, גם בלי ללכת לחדר כושר.
+        הפתרון הטבעי הראשון בישראל שמיועד <span style="color:var(--gold)">לגברים</span> - תומך בחילוף חומרים ותורם לתחושת שובע, גם בלי ללכת לחדר כושר.
       </p>
 
-      <div class="hero-price-box">
-        <div class="price-main">₪198</div>
-        <div class="price-or">לחודש | או</div>
-        <div class="price-installment">6.5 ₪ ליום , מה לא תשלם?</div>
-      </div>
-
       <div class="hero-cta">
-        <a href="order.html?plan=results" class="btn-primary">להזמנה עכשיו ← </a>
+        <a href="order.html?plan=results" class="btn-primary">רוצה שינוי? הזמן עכשיו</a>
       </div>
 
       <div class="hero-trust">
@@ -1620,6 +1591,20 @@
       <p class="section-body">ללא ריבית. ללא התחייבות. 100% החזר כספי תוך 14 יום לפי חוק.</p>
 
       <div class="pricing-grid">
+        <div class="pricing-card reveal">
+          <div class="pack-name">בקבוק אחד</div>
+          <div class="pack-desc">בקבוק אחד · אספקה לחודש</div>
+          <div class="pack-price">₪198</div>
+          <div class="pack-installment">₪11 x <span>ב-18 תשלומים ללא ריבית</span></div>
+          <ul class="pack-features">
+            <li>בקבוק NOGYMFORME אחד</li>
+            <li>משלוח חינם ל-7 ימי עסקים</li>
+            <li>גישה לקהילת הגברים שלנו</li>
+            <li>14 יום החזר כספי מלא</li>
+          </ul>
+          <a href="order.html?plan=single" class="btn-order">להזמין ← </a>
+        </div>
+
         <div class="pricing-card reveal">
           <div class="pack-name">חבילת התנסות</div>
           <div class="pack-desc">2 בקבוקים · 2 חודשי אספקה</div>
@@ -1870,7 +1855,7 @@
         shown = true;
         document.getElementById('discountPopup').classList.add('popup-visible');
       }
-      setTimeout(showPopup, 3500);
+      setTimeout(showPopup, 12000);
       document.addEventListener('mouseleave', function(e) {
         if (e.clientY <= 0) showPopup();
       });
