@@ -13,7 +13,7 @@
   // (See TRACKING-SETUP.md for how to get this URL.)
   // ─────────────────────────────────────────────────────────────────────────
   var CONFIG = {
-    URL: '' // e.g. 'https://script.google.com/macros/s/AKfy.../exec'
+    URL: 'https://script.google.com/macros/s/AKfycbwBmCaPLs3cFn2zvJw4vuMoFypgigvDIJbPuLxnLTebWOISz5o892F_H0gLtBtFvfn5/exec'
   };
 
   // Fields the tracker will EVER forward. Anything else is dropped.
