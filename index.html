@@ -1360,7 +1360,7 @@
 
   <!-- ANNOUNCEMENT BAR -->
   <div class="announcement-bar">
-    🔥 <strong>משלוח חינם</strong> על כל הזמנה &nbsp;·&nbsp; 18 תשלומים ללא ריבית &nbsp;·&nbsp; <strong>100% החזר כספי</strong> תוך 14 יום
+    <span id="barCountdown" style="font-variant-numeric:tabular-nums;min-width:3.2ch;display:inline-block;text-align:center">1:00</span> <strong>משלוח חינם</strong> על כל הזמנה &nbsp;·&nbsp; 18 תשלומים ללא ריבית &nbsp;·&nbsp; <strong>100% החזר כספי</strong> תוך 14 יום
   </div>
 
   <!-- HEADER -->
@@ -1833,7 +1833,7 @@
   <div class="discount-popup" id="discountPopup">
     <div class="popup-card">
       <button class="popup-close" onclick="closePopup()" aria-label="סגור">✕</button>
-      <div class="popup-emoji">🔥</div>
+      <div class="popup-emoji" id="popupCountdown" style="font-size:42px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:2px">1:00</div>
       <div class="popup-headline">רגע לפני שתפספס —</div>
       <div class="popup-discount-badge">10% הנחה</div>
       <div class="popup-sub">על ההזמנה הראשונה שלך.<br>השאר מייל וקוד הקופון מגיע מיידית.</div>
@@ -1935,6 +1935,22 @@
       video.addEventListener('play',  function() { wrap.classList.add('playing'); });
       video.addEventListener('pause', function() { wrap.classList.remove('playing'); });
       video.addEventListener('ended', function() { wrap.classList.remove('playing'); });
+    })();
+
+    // Shared 1-minute countdown for announcement bar + popup
+    (function() {
+      var secs = 60;
+      function fmt(s) { return '0:' + (s < 10 ? '0' : '') + s; }
+      function tick() {
+        var bar = document.getElementById('barCountdown');
+        var pop = document.getElementById('popupCountdown');
+        var label = fmt(secs);
+        if (bar) bar.textContent = label;
+        if (pop) pop.textContent = label;
+        secs = secs > 0 ? secs - 1 : 60;
+      }
+      tick();
+      setInterval(tick, 1000);
     })();
   </script>
 
