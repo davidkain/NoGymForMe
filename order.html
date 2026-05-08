@@ -818,6 +818,7 @@
 <!-- ══════════════════════════════
      JAVASCRIPT
 ══════════════════════════════ -->
+<script src="tracking.js"></script>
 <script>
   /* ── Plan data ── */
   var PLANS = {
@@ -990,6 +991,25 @@
   }
 
   /* ── Submit ── */
+  /* ── Tracking: build a snapshot of non-payment fields ── */
+  var orderCompleted = false;
+  function snapshotForTracking() {
+    function v(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+    var first = v('firstName'), last = v('lastName');
+    return {
+      name: (first + ' ' + last).trim(),
+      email: v('email'),
+      phone: v('phone'),
+      plan: plan ? plan.name : '',
+      address: v('address'),
+      city: v('city'),
+      total: currentTotal
+    };
+  }
+  if (window.NGFMTrack) {
+    NGFMTrack.watchAbandon(snapshotForTracking, function () { return orderCompleted; });
+  }
+
   function handleSubmit() {
     if (!validate()) {
       /* scroll to first error */
@@ -1005,6 +1025,14 @@
     /* generate fake order number */
     var orderNum = 'NGFM-' + Math.floor(10000 + Math.random() * 90000);
     document.getElementById('successOrderNum').textContent = 'מספר הזמנה: #' + orderNum;
+
+    /* fire completed-order event (no card data ever included) */
+    orderCompleted = true;
+    if (window.NGFMTrack) {
+      var snap = snapshotForTracking();
+      snap.orderNum = orderNum;
+      NGFMTrack.completed(snap);
+    }
 
     /* simulate processing */
     setTimeout(function() {

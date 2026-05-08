@@ -1830,6 +1830,7 @@
     </div>
   </div>
 
+  <script src="tracking.js"></script>
   <script>
     // FAQ toggle
     function toggleFaq(btn) {
@@ -1888,6 +1889,7 @@
         emailInput.placeholder = 'כתובת מייל תקינה בבקשה...';
         return;
       }
+      if (window.NGFMTrack) NGFMTrack.discount(email);
       // Replace form content using safe DOM methods - no innerHTML
       var form = document.getElementById('popupForm');
       while (form.firstChild) form.removeChild(form.firstChild);
