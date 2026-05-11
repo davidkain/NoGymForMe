@@ -279,7 +279,7 @@
     .section {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 96px 24px;
+      padding: 56px 24px;
       position: relative;
     }
 
@@ -1135,9 +1135,8 @@
       .header-cta { display: none; }
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
-      .hero { padding-top: 108px; }
+      .hero { padding-top: 52px; }
 
-      .stats-grid,
       .problem-grid,
       .ingredients-grid,
       .pricing-grid,
@@ -1146,7 +1145,15 @@
         grid-template-columns: 1fr;
       }
 
-      .stat-item { border-left: none; border-bottom: 1px solid var(--border); }
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+      }
+      .stat-item { border-left: none; border-right: 1px solid var(--border); padding: 24px 12px; }
+      .stat-item:first-child { border-right: 1px solid var(--border); }
+      .stat-item:last-child { border-right: none; }
+      .stat-number { font-size: 36px; }
+      .stat-label { font-size: 11px; }
       .trust-grid { gap: 0; }
       .doctor-inner { grid-template-columns: 1fr; gap: 40px; }
       .dosage-box { flex-direction: column; gap: 16px; }
@@ -1160,14 +1167,17 @@
       .hero-image-col {
         min-height: unset;
         height: auto;
+        margin-top: 0;
       }
       .hero-image-col img {
         height: auto !important;
+        display: block;
+        margin-top: 0;
       }
       .hero-image-col::after {
         display: none;
       }
-      .hero-content-col { padding: 40px 24px 60px; }
+      .hero-content-col { padding: 24px 24px 40px; }
       .hero-eyebrow { font-size: clamp(20px, 6vw, 28px); }
       .hero-subtitle { font-size: clamp(18px, 5vw, 24px); }
       .hero-trust { justify-content: flex-start; }
@@ -1186,7 +1196,7 @@
       .dosage-text { text-align: center; }
 
       /* Section padding tighter on mobile */
-      .section { padding: 64px 20px; }
+      .section { padding: 36px 20px; }
     }
 
     /* ── STICKY MOBILE CTA BAR ── */
@@ -1351,8 +1361,8 @@
 
           <a href="order.html?plan=single" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
             <div>
-              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">בקבוק אחד</div>
-              <div style="font-size:13px;color:var(--grey);margin-top:4px;">בקבוק אחד · אספקה לחודש</div>
+              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת הביישן</div>
+              <div style="font-size:13px;color:var(--grey);margin-top:4px;">בקבוק אחד - 90 קפסולות</div>
             </div>
             <div style="text-align:left;">
               <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--gold);">₪198</div>
@@ -1362,8 +1372,8 @@
 
           <a href="order.html?plan=starter" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
             <div>
-              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת התנסות</div>
-              <div style="font-size:13px;color:var(--grey);margin-top:4px;">2 בקבוקים · 2 חודשי אספקה</div>
+              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת יאללה, בוא ננסה</div>
+              <div style="font-size:13px;color:var(--grey);margin-top:4px;">שני בקבוקים - 180 קפסולות</div>
             </div>
             <div style="text-align:left;">
               <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--gold);">₪396</div>
@@ -1374,8 +1384,8 @@
           <a href="order.html?plan=results" style="display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--gold);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;position:relative;">
             <div style="position:absolute;top:-12px;right:20px;background:var(--gold);color:var(--black);font-size:11px;font-weight:900;padding:3px 14px;border-radius:var(--radius-pill);letter-spacing:1px;">הכי נמכר</div>
             <div>
-              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">רוצים שינוי? זאת החבילה בשבילכם</div>
-              <div style="font-size:13px;color:var(--grey);margin-top:4px;">3 בקבוקים · 3 חודשי אספקה</div>
+              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת אול-אין (כי הקיץ כבר פה...)</div>
+              <div style="font-size:13px;color:var(--grey);margin-top:4px;">שלושה בקבוקים - 270 קפסולות</div>
             </div>
             <div style="text-align:left;">
               <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--gold);">₪496</div>
@@ -1643,8 +1653,8 @@
 
       <div class="pricing-grid">
         <div class="pricing-card reveal">
-          <div class="pack-name">בקבוק אחד</div>
-          <div class="pack-desc">בקבוק אחד · אספקה לחודש</div>
+          <div class="pack-name">חבילת הביישן</div>
+          <div class="pack-desc">בקבוק אחד - 90 קפסולות</div>
           <div class="pack-price">₪198</div>
           <div class="pack-installment">₪11 x <span>ב-18 תשלומים ללא ריבית</span></div>
           <ul class="pack-features">
@@ -1657,8 +1667,8 @@
         </div>
 
         <div class="pricing-card reveal">
-          <div class="pack-name">חבילת התנסות</div>
-          <div class="pack-desc">2 בקבוקים · 2 חודשי אספקה</div>
+          <div class="pack-name">חבילת יאללה, בוא ננסה</div>
+          <div class="pack-desc">שני בקבוקים - 180 קפסולות</div>
           <div class="pack-price">₪396</div>
           <div class="pack-installment">₪22 x <span>ב-18 תשלומים ללא ריבית</span></div>
           <ul class="pack-features">
@@ -1673,8 +1683,8 @@
 
         <div class="pricing-card featured reveal">
           <div class="badge">הכי נמכר</div>
-          <div class="pack-name">חבילת תוצאות ל־90 יום</div>
-          <div class="pack-desc">3 בקבוקים · 3 חודשי אספקה</div>
+          <div class="pack-name">חבילת אול-אין (כי הקיץ כבר פה...)</div>
+          <div class="pack-desc">שלושה בקבוקים - 270 קפסולות</div>
           <div class="pack-price">₪496</div>
           <div class="pack-installment">₪28 x <span>ב-18 תשלומים ללא ריבית</span></div>
           <ul class="pack-features">
