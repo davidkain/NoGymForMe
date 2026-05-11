@@ -8,6 +8,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800;900&family=Rubik:wght@700;800;900&display=swap" rel="stylesheet">
 
+  <!-- ═══════════════════════════════════════════════════════════════
+       GOOGLE TAG MANAGER
+       Replace GTM-XXXXXXX with your container ID from tagmanager.google.com
+       ════════════════════════════════════════════════════════════════ -->
+  <!-- <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-XXXXXXX');</script> -->
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       META (FACEBOOK) PIXEL
+       Replace XXXXXXXXXXXXXXXXXX with your Pixel ID from business.facebook.com
+       ════════════════════════════════════════════════════════════════ -->
+  <!-- <script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','XXXXXXXXXXXXXXXXXX');fbq('track','PageView');</script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=XXXXXXXXXXXXXXXXXX&ev=PageView&noscript=1"/></noscript> -->
+
   <style>
     :root {
       --black: #111111;
@@ -1664,7 +1687,7 @@
             <li>גישה לקהילת הגברים שלנו</li>
             <li>14 יום החזר כספי מלא</li>
           </ul>
-          <a href="order.html?plan=single" class="btn-order">להזמין ← </a>
+          <a href="order.html?plan=single" class="btn-order" onclick="handlePurchase('single',event)">להזמין ← </a>
         </div>
 
         <div class="pricing-card reveal">
@@ -1679,7 +1702,7 @@
             <li>14 יום החזר כספי מלא</li>
             <li>אפליקצייה ייעודית ל-NOGYMFORME</li>
           </ul>
-          <a href="order.html?plan=starter" class="btn-order">להזמין ← </a>
+          <a href="order.html?plan=starter" class="btn-order" onclick="handlePurchase('starter',event)">להזמין ← </a>
         </div>
 
         <div class="pricing-card featured reveal">
@@ -1697,7 +1720,7 @@
             <li>אפליקצייה ייעודית ל-NOGYMFORME</li>
             <li><strong>תפריט תזונה מותאם אישית</strong></li>
           </ul>
-          <a href="order.html?plan=results" class="btn-order">להזמין עכשיו ← </a>
+          <a href="order.html?plan=results" class="btn-order" onclick="handlePurchase('results',event)">להזמין עכשיו ← </a>
         </div>
       </div>
     </div>
@@ -1878,6 +1901,70 @@
   </div>
 
   <script src="tracking.js"></script>
+  <script>
+    // ─────────────────────────────────────────────────────────────────────────
+    // PURCHASE ORCHESTRATION
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // Package catalogue — single source of truth for prices and labels.
+    var PLANS = {
+      single:  { name: 'חבילת הביישן',               price: 198,  currency: 'ILS', quantity: 1 },
+      starter: { name: 'חבילת יאללה, בוא ננסה',       price: 396,  currency: 'ILS', quantity: 2 },
+      results: { name: 'חבילת אול-אין',               price: 496,  currency: 'ILS', quantity: 3 }
+    };
+
+    /**
+     * handlePurchase(planId)
+     *
+     * Fires tracking events (FB Pixel + GTM dataLayer + NGFMTrack),
+     * then redirects to the order page.
+     *
+     * To connect a payment API later:
+     *   1. Replace (or augment) the window.location redirect below with
+     *      your gateway initialisation call (e.g. Stripe.redirectToCheckout,
+     *      or a local Israeli gateway like Cardcom / Tranzila / Grow).
+     *   2. Pass `plan.price` and `plan.currency` to the gateway.
+     *   3. On success callback, call NGFMTrack.completed({ ... }).
+     */
+    function handlePurchase(planId, event) {
+      if (event) event.preventDefault();
+
+      var plan = PLANS[planId];
+      if (!plan) { console.warn('handlePurchase: unknown plan', planId); return; }
+
+      // ── Facebook Pixel ──────────────────────────────────────────────────
+      if (typeof fbq === 'function') {
+        fbq('track', 'InitiateCheckout', {
+          content_name:     plan.name,
+          content_ids:      [planId],
+          content_type:     'product',
+          value:            plan.price,
+          currency:         plan.currency,
+          num_items:        plan.quantity
+        });
+      }
+
+      // ── Google Tag Manager dataLayer ────────────────────────────────────
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event:          'InitiateCheckout',
+        plan_id:        planId,
+        plan_name:      plan.name,
+        value:          plan.price,
+        currency:       plan.currency,
+        quantity:       plan.quantity
+      });
+
+      // ── Internal tracker (Google Sheet) ─────────────────────────────────
+      if (window.NGFMTrack) {
+        NGFMTrack.started({ plan: planId });
+      }
+
+      // ── Redirect to order page ───────────────────────────────────────────
+      // TODO: replace with payment gateway call when ready
+      window.location.href = 'order.html?plan=' + encodeURIComponent(planId);
+    }
+  </script>
   <script>
     // FAQ toggle
     function toggleFaq(btn) {
