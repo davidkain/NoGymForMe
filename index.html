@@ -1080,6 +1080,13 @@
       .whatsapp-float { animation: none; }
     }
 
+    /* Plan-modal pricing cards: keep desktop hover affordance for the two
+       non-highlighted cards, but only on devices that ACTUALLY have a hover
+       pointer — prevents the gold border from sticking on mobile tap. */
+    @media (hover: hover) {
+      .plan-card-hover:hover { border-color: var(--gold) !important; }
+    }
+
     /* ── DISCLAIMER ── */
     .disclaimer {
       background: var(--black);
@@ -1394,6 +1401,8 @@
       .testimonials-grid {
         grid-template-columns: 1fr;
       }
+      /* Breathing room between numbered problem cards on mobile */
+      .problem-grid { gap: 20px; }
 
       .stats-grid {
         grid-template-columns: repeat(3, 1fr);
@@ -1403,7 +1412,8 @@
       .stat-item:first-child { border-right: 1px solid var(--border); }
       .stat-item:last-child { border-right: none; }
       .stat-number { font-size: 36px; }
-      .stat-label { font-size: 11px; }
+      /* Descriptive text under stat numbers — larger for readability on mobile */
+      .stat-label { font-size: 14px; line-height: 1.45; margin-top: 10px; }
       .trust-grid { gap: 0; }
       .doctor-inner { grid-template-columns: 1fr; gap: 40px; }
       .dosage-box { flex-direction: column; gap: 16px; }
@@ -1475,7 +1485,8 @@
         z-index: 300;
         background: var(--black);
         border-top: 1px solid var(--gold);
-        padding: 12px 20px 20px;
+        /* extra right padding reserves space for the floating WhatsApp icon */
+        padding: 12px 78px 20px 20px;
         gap: 12px;
       }
       .sticky-cta-price {
@@ -1631,7 +1642,7 @@
             </div>
           </a>
 
-          <a href="order.html?plan=single" onclick="handlePurchase('single',event)" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+          <a href="order.html?plan=single" onclick="handlePurchase('single',event)" class="plan-card-hover" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;">
             <div>
               <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת הביישן</div>
               <div style="font-size:13px;color:var(--grey);margin-top:4px;">בקבוק אחד - 90 קפסולות</div>
@@ -1642,7 +1653,7 @@
             </div>
           </a>
 
-          <a href="order.html?plan=starter" onclick="handlePurchase('starter',event)" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+          <a href="order.html?plan=starter" onclick="handlePurchase('starter',event)" class="plan-card-hover" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;">
             <div>
               <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת<br>יאללה, בוא ננסה</div>
               <div style="font-size:13px;color:var(--grey);margin-top:4px;">שני בקבוקים - 180 קפסולות</div>
