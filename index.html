@@ -1038,6 +1038,48 @@
       transform: translateY(-2px);
     }
 
+    /* ── FLOATING WHATSAPP BUTTON (all viewports) ── */
+    .whatsapp-float {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .2s ease, box-shadow .2s ease;
+      animation: whatsapp-pulse 2.4s ease-in-out infinite;
+    }
+    .whatsapp-float:hover {
+      transform: scale(1.08);
+      box-shadow: 0 10px 28px rgba(37, 211, 102, 0.45);
+      animation: none;
+    }
+    .whatsapp-icon {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    @keyframes whatsapp-pulse {
+      0%, 100% { box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 0 0 rgba(37,211,102,0.6); }
+      50%      { box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 0 14px rgba(37,211,102,0); }
+    }
+    @media (max-width: 640px) {
+      .whatsapp-float {
+        bottom: 16px;
+        right: 16px;
+        width: 54px;
+        height: 54px;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .whatsapp-float { animation: none; }
+    }
+
     /* ── DISCLAIMER ── */
     .disclaimer {
       background: var(--black);
@@ -2456,6 +2498,15 @@
       if (e.key === 'Escape') closePlanModal();
     });
   </script>
+
+  <!-- FLOATING WHATSAPP CTA -->
+  <a href="https://wa.me/972559190077?text=%D7%90%D7%97%D7%99%2C%D7%90%D7%A0%D7%97%D7%A0%D7%95%20%D7%A4%D7%94%20%D7%91%D7%A9%D7%91%D7%99%D7%9C%D7%9A%20%D7%9C%D7%9B%D7%9C%20%D7%A9%D7%90%D7%9C%D7%94%20NOGYMFORME"
+     class="whatsapp-float"
+     target="_blank"
+     rel="noopener noreferrer"
+     aria-label="דברו איתנו בווטסאפ">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
+  </a>
 
 </body>
 </html>
