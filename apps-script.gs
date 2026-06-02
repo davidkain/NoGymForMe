@@ -5,18 +5,29 @@
  * configured Google Sheet, highlights the new row yellow, and emails
  * davidkain1@gmail.com a notification with the full sheet attached as XLSX.
  *
- * Setup:
+ * Initial setup:
  *   1) Create a new Google Sheet you own. Note its ID (the long string in
  *      the URL between /d/ and /edit).
  *   2) script.google.com → New project → paste THIS file's contents.
- *   3) Set SHEET_ID below.
+ *   3) EITHER paste the Sheet ID into SHEET_ID below ONCE (it will be
+ *      auto-migrated to Script Properties on the first request and survive
+ *      any future file replacement),
+ *      OR set it directly via Project Settings → Script properties →
+ *      add property "SHEET_ID" with your sheet ID as the value.
  *   4) Deploy → New deployment → type "Web app" → execute as "Me",
  *      access "Anyone". Copy the deployment URL.
  *   5) Paste that URL into tracking.js → CONFIG.URL.
+ *
+ * Future updates: when you replace this file with a newer version that has
+ * `SHEET_ID = ''`, the script reads the persisted value from Script
+ * Properties — your SHEET_ID is no longer destroyed by pasting over the file.
  */
 
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
-const SHEET_ID = '';                          // ← paste your Sheet ID here
+// Empty by default — committed source must not contain secrets. The script
+// reads the real value from Script Properties at runtime (see getSheetId()).
+// You ONLY need to fill this in once during initial setup; it auto-migrates.
+const SHEET_ID = '';
 const NOTIFY_EMAIL = 'davidkain1@gmail.com';
 const TIMEZONE = 'Asia/Jerusalem';
 
@@ -37,7 +48,8 @@ const HIGHLIGHT_BG = '#FFF59D'; // soft yellow for newly added rows
 
 // ─── ENTRY POINTS ────────────────────────────────────────────────────────────
 function doGet() {
-  return jsonOut({ ok: true, ping: 'NoGymForMe tracker alive' });
+  var id = getSheetId();
+  return jsonOut({ ok: !!id, ping: 'NoGymForMe tracker alive', configured: !!id });
 }
 
 function doPost(e) {
@@ -46,7 +58,23 @@ function doPost(e) {
     const type = data.type;
     if (!TABS[type]) return jsonOut({ ok: false, error: 'unknown type' });
 
-    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheetId = getSheetId();
+    if (!sheetId) {
+      // Fail with a clear message instead of "ארגומנט לא חוקי: id".
+      // Also email the operator so a silent config breakage is loud.
+      const msg = 'SHEET_ID is not configured. Set it via Project Settings → ' +
+                  'Script properties (key: SHEET_ID), or paste it into the ' +
+                  'SHEET_ID const at the top of this file ONCE — the value ' +
+                  'will auto-migrate to Script Properties and survive future ' +
+                  'file replacements.';
+      try {
+        MailApp.sendEmail(NOTIFY_EMAIL, '🚨 NGFM tracker — SHEET_ID missing',
+          msg + '\n\nIncoming payload was:\n' + (e && e.postData && e.postData.contents || ''));
+      } catch (_) {}
+      return jsonOut({ ok: false, error: msg });
+    }
+
+    const ss = SpreadsheetApp.openById(sheetId);
     const sheet = ensureSheet(ss, type);
 
     // Per-email dedup for discount popup signups:
@@ -100,6 +128,26 @@ function discountEmailExists(sheet, email) {
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
+
+/**
+ * Resolves the active Sheet ID. Source of truth is Script Properties so a
+ * future file paste-over with empty `SHEET_ID` doesn't destroy the config.
+ *
+ * Migration path: if the file-local SHEET_ID const is set but Script
+ * Properties is empty, copy const→Properties on first call. After that one
+ * call the file's const can be safely emptied again.
+ */
+function getSheetId() {
+  var props = PropertiesService.getScriptProperties();
+  var stored = props.getProperty('SHEET_ID');
+  if (stored) return stored;
+  if (SHEET_ID) {
+    props.setProperty('SHEET_ID', SHEET_ID);
+    return SHEET_ID;
+  }
+  return null;
+}
+
 function ensureSheet(ss, type) {
   const name = TABS[type];
   let sheet = ss.getSheetByName(name);
@@ -141,7 +189,7 @@ function promoteAbandonedToCompleted(ss, d) {
 }
 
 function sendNotification(type, d, ss) {
-  const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=xlsx';
+  const url = 'https://docs.google.com/spreadsheets/d/' + getSheetId() + '/export?format=xlsx';
   const blob = UrlFetchApp.fetch(url, {
     headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() }
   }).getBlob().setName('NoGymForMe_Data.xlsx');
@@ -168,7 +216,7 @@ function bodyFor(type, d) {
   const rows = Object.keys(d).filter(function (k) { return k.charAt(0) !== '_' && k !== 'type'; })
     .map(function (k) { return '<tr><td style="padding:4px 12px 4px 0;color:#666">' + k + '</td><td style="padding:4px 0">' + escapeHtml(d[k] || '') + '</td></tr>'; })
     .join('');
-  const sheetUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit';
+  const sheetUrl = 'https://docs.google.com/spreadsheets/d/' + getSheetId() + '/edit';
   const label = (type === 'discount') ? 'Discount signup' :
                 (type === 'started')  ? 'Abandoned checkout' :
                 'Completed order';
