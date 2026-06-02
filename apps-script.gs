@@ -46,6 +46,20 @@ const HEADERS = {
 const HEADER_BG = '#E8D900';   // brand gold
 const HIGHLIGHT_BG = '#FFF59D'; // soft yellow for newly added rows
 
+// Human-readable label for each `source` value the site sends.
+// Used in email subject + body so a glance at the inbox tells you
+// which package the lead was looking at, without opening the email.
+const SOURCE_LABELS = {
+  'popup':                 '🪄 10% popup',
+  'waitlist_single':       '🍶 חבילת הביישן (1 בקבוק)',
+  'waitlist_starter':      '🍶🍶 חבילת יאללה (2 בקבוקים)',
+  'waitlist_results':      '🍶🍶🍶 חבילת אול-אין (3 בקבוקים)',
+  'waitlist_subscription': '♻️ מנוי חודשי'
+};
+function labelForSource(source) {
+  return SOURCE_LABELS[source] || source || '(unknown source)';
+}
+
 // ─── ENTRY POINTS ────────────────────────────────────────────────────────────
 function doGet() {
   var id = getSheetId();
@@ -206,9 +220,19 @@ function sendNotification(type, d, ss) {
 }
 
 function subjectFor(type, d) {
-  if (type === 'discount')  return '🟡 NoGymForMe — discount signup: ' + (d.email || '');
-  if (type === 'started')   return '🟠 NoGymForMe — abandoned checkout: ' + (d.email || d.phone || '');
-  if (type === 'completed') return '🟢 NoGymForMe — NEW ORDER: ' + (d.orderNum || '') + ' (' + (d.name || d.email || '') + ')';
+  // Subject lines surface the most actionable info first so you can
+  // triage the inbox without opening each email. For discount/waitlist
+  // events, that means showing WHICH package the lead was on.
+  if (type === 'discount') {
+    return '🟡 NGFM — ' + labelForSource(d.source) + ' — ' + (d.email || '');
+  }
+  if (type === 'started') {
+    var planLabel = d.plan ? labelForSource('waitlist_' + d.plan) : '(no plan)';
+    return '🟠 NGFM abandoned — ' + planLabel + ' — ' + (d.email || d.phone || '');
+  }
+  if (type === 'completed') {
+    return '🟢 NGFM NEW ORDER — ' + (d.orderNum || '') + ' (' + (d.name || d.email || '') + ')';
+  }
   return 'NoGymForMe — event';
 }
 
@@ -217,11 +241,28 @@ function bodyFor(type, d) {
     .map(function (k) { return '<tr><td style="padding:4px 12px 4px 0;color:#666">' + k + '</td><td style="padding:4px 0">' + escapeHtml(d[k] || '') + '</td></tr>'; })
     .join('');
   const sheetUrl = 'https://docs.google.com/spreadsheets/d/' + getSheetId() + '/edit';
-  const label = (type === 'discount') ? 'Discount signup' :
+  const label = (type === 'discount') ? 'Discount / waitlist signup' :
                 (type === 'started')  ? 'Abandoned checkout' :
                 'Completed order';
+
+  // Big "which package?" callout at the top — replaces the need to scan
+  // the data table to find which plan the lead was on.
+  let packageCallout = '';
+  if (type === 'discount' && d.source) {
+    packageCallout =
+      '<div style="background:#E8D900;color:#000;padding:14px 18px;border-radius:6px;margin:0 0 16px;font-size:18px;font-weight:bold">' +
+      escapeHtml(labelForSource(d.source)) +
+      '</div>';
+  } else if (type === 'started' && d.plan) {
+    packageCallout =
+      '<div style="background:#FFE5B4;color:#000;padding:14px 18px;border-radius:6px;margin:0 0 16px;font-size:18px;font-weight:bold">' +
+      escapeHtml(labelForSource('waitlist_' + d.plan)) +
+      '</div>';
+  }
+
   return '<div style="font-family:Arial,sans-serif">' +
     '<h2 style="margin:0 0 12px">' + label + '</h2>' +
+    packageCallout +
     '<p style="margin:0 0 12px;color:#444">A new event was just recorded. The new row is highlighted <span style="background:#FFF59D;padding:2px 8px">yellow</span> in the attached spreadsheet.</p>' +
     '<table style="border-collapse:collapse">' + rows + '</table>' +
     '<p style="margin-top:24px"><a href="' + sheetUrl + '" style="background:#E8D900;color:#000;padding:10px 18px;text-decoration:none;font-weight:bold">Open live sheet →</a></p>' +
