@@ -519,6 +519,71 @@
       .co-section-body { padding:16px; }
       .success-card { padding:36px 24px 28px; }
     }
+
+    /* ══════════════════════════════════
+       WAITLIST (replaces purchase flow
+       while payment gateway is wired up)
+    ══════════════════════════════════ */
+    .waitlist-section {
+      border: 1px solid var(--gold-muted);
+      background:
+        radial-gradient(120% 100% at 50% 0%, rgba(232,217,0,0.07) 0%, transparent 60%),
+        var(--deep);
+    }
+    .waitlist-body {
+      padding: 40px 32px 36px;
+    }
+    .waitlist-heading {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.45;
+      color: var(--white);
+      letter-spacing: -.3px;
+      margin-bottom: 16px;
+    }
+    .waitlist-sub {
+      font-size: 15.5px;
+      line-height: 1.7;
+      color: var(--grey-light);
+      margin-bottom: 24px;
+    }
+    .brand-inline {
+      display: inline-block;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: -.2px;
+      vertical-align: baseline;
+    }
+    .waitlist-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .waitlist-input {
+      font-size: 16px;
+      padding: 15px 16px;
+      direction: ltr;
+      text-align: right;
+      unicode-bidi: plaintext;
+    }
+    .waitlist-input::placeholder {
+      color: var(--grey);
+    }
+    .waitlist-btn {
+      margin-top: 4px;
+    }
+    .waitlist-thanks {
+      font-size: 12.5px;
+      color: var(--grey);
+      text-align: center;
+      line-height: 1.6;
+      margin-top: 18px;
+    }
+    @media (max-width: 780px) {
+      .waitlist-body { padding: 30px 20px 26px; }
+      .waitlist-heading { font-size: 19px; }
+      .waitlist-sub { font-size: 14.5px; }
+    }
   </style>
 </head>
 <body>
@@ -554,173 +619,35 @@
   <!-- ── FORM COLUMN ── -->
   <div class="form-col">
 
-    <!-- 1. CONTACT -->
-    <div class="co-section">
-      <div class="co-section-head">
-        <span class="co-section-title">פרטי קשר</span>
-        <a href="#" class="sign-in-link">כבר רשום? התחבר</a>
-      </div>
-      <div class="co-section-body">
-        <div class="field-row">
+    <!-- WAITLIST (replaces purchase flow while payment gateway is being connected) -->
+    <div class="co-section waitlist-section">
+      <div class="co-section-body waitlist-body">
+        <h2 class="waitlist-heading">
+          רגע לפני שאתה מוציא כרטיס, אנחנו עדיין מסיימים להכין את הכל כמו שצריך.
+        </h2>
+        <p class="waitlist-sub">
+          רוצה להיות מהראשונים שמנסים את <span dir="ltr" class="brand-inline">NOGYMFORME</span>?<br>
+          השאר מייל, ונעדכן אותך ברגע שהקפסולות מוכנות להזמנה.
+        </p>
+
+        <form id="waitlistForm" class="waitlist-form" novalidate>
           <div class="field-group">
-            <label class="field-label" for="email">כתובת מייל</label>
-            <input class="field-input" type="email" id="email" placeholder="you@example.com" autocomplete="email" dir="ltr">
-            <span class="field-error" id="emailErr">נא להזין כתובת מייל תקינה</span>
+            <input class="field-input waitlist-input"
+                   type="email" id="waitlistEmail"
+                   placeholder="האימייל שלך כאן..."
+                   autocomplete="email" required dir="auto">
+            <span class="field-error" id="waitlistEmailErr">נא להזין כתובת מייל תקינה</span>
           </div>
-        </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label" for="phone">טלפון</label>
-            <input class="field-input" type="tel" id="phone" placeholder="050-0000000" autocomplete="tel" dir="ltr">
-            <span class="field-error" id="phoneErr">נא להזין מספר טלפון תקין</span>
-          </div>
-        </div>
-        <label class="checkbox-row">
-          <input type="checkbox" id="newsCheck">
-          <span class="checkbox-label">שלח לי עדכונים ומבצעים למייל</span>
-        </label>
+          <button class="co-submit-btn waitlist-btn" type="submit" id="waitlistBtn">
+            אני רוצה להיות ראשון!
+          </button>
+        </form>
+
+        <p class="waitlist-thanks">
+          לא נשלח לך ספאם — רק עדכון אחד ברגע שהמוצר זמין להזמנה.
+        </p>
       </div>
     </div>
-
-    <!-- 2. DELIVERY -->
-    <div class="co-section">
-      <div class="co-section-head">
-        <span class="co-section-title">פרטי משלוח</span>
-      </div>
-      <div class="co-section-body">
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label" for="country">מדינה / אזור</label>
-            <select class="field-input" id="country">
-              <option value="IL" selected>ישראל</option>
-            </select>
-          </div>
-        </div>
-        <div class="field-row cols-2">
-          <div class="field-group">
-            <label class="field-label" for="firstName">שם פרטי</label>
-            <input class="field-input" type="text" id="firstName" placeholder="ישראל" autocomplete="given-name">
-            <span class="field-error" id="firstNameErr">נא להזין שם פרטי</span>
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="lastName">שם משפחה</label>
-            <input class="field-input" type="text" id="lastName" placeholder="ישראלי" autocomplete="family-name">
-            <span class="field-error" id="lastNameErr">נא להזין שם משפחה</span>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label" for="address">כתובת</label>
-            <input class="field-input" type="text" id="address" placeholder="רחוב, מספר בית" autocomplete="address-line1">
-            <span class="field-error" id="addressErr">נא להזין כתובת</span>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label" for="apt">דירה / כניסה (אופציונלי)</label>
-            <input class="field-input" type="text" id="apt" placeholder="דירה 5, קומה 2" autocomplete="address-line2">
-          </div>
-        </div>
-        <div class="field-row cols-2">
-          <div class="field-group">
-            <label class="field-label" for="city">עיר</label>
-            <input class="field-input" type="text" id="city" placeholder="תל אביב" autocomplete="address-level2">
-            <span class="field-error" id="cityErr">נא להזין עיר</span>
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="postal">מיקוד (אופציונלי)</label>
-            <input class="field-input" type="text" id="postal" placeholder="6100000" autocomplete="postal-code" dir="ltr">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. SHIPPING METHOD -->
-    <div class="co-section">
-      <div class="co-section-head">
-        <span class="co-section-title">שיטת משלוח</span>
-      </div>
-      <div class="co-section-body">
-        <div class="shipping-option">
-          <div class="shipping-left">
-            <div class="shipping-radio"></div>
-            <div>
-              <div class="shipping-name">משלוח חינם</div>
-              <div class="shipping-sub">7–10 ימי עסקים</div>
-            </div>
-          </div>
-          <div class="shipping-price">חינם</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. PAYMENT -->
-    <div class="co-section">
-      <div class="co-section-head">
-        <span class="co-section-title">פרטי תשלום</span>
-        <div class="payment-icons">
-          <span class="payment-icon">VISA</span>
-          <span class="payment-icon">MC</span>
-          <span class="payment-icon">AMEX</span>
-        </div>
-      </div>
-      <div class="co-section-body">
-        <div class="payment-secure-note">
-          <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
-            <path d="M6 1L1 3v3.5C1 9.5 3.2 11.8 6 13c2.8-1.2 5-3.5 5-6.5V3L6 1z" stroke="#8a8680" stroke-width="1.2" stroke-linejoin="round"/>
-          </svg>
-          כל העסקאות מוצפנות ומאובטחות
-        </div>
-
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label" for="cardNum">מספר כרטיס אשראי</label>
-            <div class="card-field-wrap">
-              <input class="field-input" type="text" id="cardNum"
-                     placeholder="0000 0000 0000 0000"
-                     maxlength="19" autocomplete="cc-number" dir="ltr">
-              <span class="card-type-icon" id="cardTypeIcon"></span>
-            </div>
-            <span class="field-error" id="cardNumErr">נא להזין מספר כרטיס תקין</span>
-          </div>
-        </div>
-
-        <div class="field-row cols-2">
-          <div class="field-group">
-            <label class="field-label" for="cardExp">תוקף</label>
-            <input class="field-input" type="text" id="cardExp"
-                   placeholder="MM / YY" maxlength="7"
-                   autocomplete="cc-exp" dir="ltr">
-            <span class="field-error" id="cardExpErr">תאריך לא תקין</span>
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="cardCvv">CVV</label>
-            <input class="field-input" type="text" id="cardCvv"
-                   placeholder="123" maxlength="4"
-                   autocomplete="cc-csc" dir="ltr">
-            <span class="field-error" id="cardCvvErr">CVV לא תקין</span>
-          </div>
-        </div>
-
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label" for="cardName">שם בעל הכרטיס</label>
-            <input class="field-input" type="text" id="cardName"
-                   placeholder="Israel Israelov" autocomplete="cc-name" dir="ltr">
-            <span class="field-error" id="cardNameErr">נא להזין שם</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 5. SUBMIT -->
-    <button class="co-submit-btn" id="submitBtn" onclick="handleSubmit()">
-      השלם הזמנה ←
-    </button>
-    <p class="co-fine-print">
-      על ידי השלמת ההזמנה, אתה מסכים ל<a href="#" style="color:var(--gold)">תנאי השימוש</a> ולמדיניות ה<a href="#" style="color:var(--gold)">פרטיות</a> שלנו.<br>
-      ניתן לבטל ב-14 יום ולקבל החזר כספי מלא.
-    </p>
 
   </div><!-- /form-col -->
 
@@ -838,32 +765,13 @@
 ══════════════════════════════ -->
 <script src="tracking.js"></script>
 <script>
-  /* ── Plan data ── */
+  /* ── Plan data (still drives the summary column) ── */
   var PLANS = {
-    single: {
-      name:        'חבילת הביישן',
-      variant:     'בקבוק אחד - 90 קפסולות',
-      price:       198,
-      installment: 16.5,
-      qty:         1
-    },
-    starter: {
-      name:        'חבילת יאללה, בוא ננסה',
-      variant:     'שני בקבוקים - 180 קפסולות',
-      price:       396,
-      installment: 33,
-      qty:         2
-    },
-    results: {
-      name:        'חבילת אול-אין (כי הקיץ כבר פה...)',
-      variant:     'שלושה בקבוקים - 270 קפסולות',
-      price:       496,
-      installment: 41.3,
-      qty:         3
-    }
+    single:  { name: 'חבילת הביישן',                       variant: 'בקבוק אחד - 90 קפסולות',      price: 198, installment: 16.5, qty: 1 },
+    starter: { name: 'חבילת יאללה, בוא ננסה',              variant: 'שני בקבוקים - 180 קפסולות',   price: 396, installment: 33,   qty: 2 },
+    results: { name: 'חבילת אול-אין (כי הקיץ כבר פה...)',  variant: 'שלושה בקבוקים - 270 קפסולות', price: 496, installment: 41.3, qty: 3 }
   };
 
-  /* ── Read plan from URL param ── */
   var params  = new URLSearchParams(window.location.search);
   var planKey = params.get('plan') || 'results';
   var plan    = PLANS[planKey] || PLANS.results;
@@ -871,13 +779,15 @@
   var couponApplied = false;
   var currentTotal  = plan.price;
 
+  function formatPrice(n) { return '₪' + n.toLocaleString('he-IL'); }
+
   function renderSummary() {
-    document.getElementById('productName').textContent        = plan.name;
-    document.getElementById('productVariant').textContent     = plan.variant;
-    document.getElementById('productPriceRight').textContent  = formatPrice(plan.price);
-    document.getElementById('productQty').textContent         = plan.qty;
-    document.getElementById('subtotalVal').textContent        = formatPrice(plan.price);
-    document.getElementById('installmentNote').textContent    =
+    document.getElementById('productName').textContent       = plan.name;
+    document.getElementById('productVariant').textContent    = plan.variant;
+    document.getElementById('productPriceRight').textContent = formatPrice(plan.price);
+    document.getElementById('productQty').textContent        = plan.qty;
+    document.getElementById('subtotalVal').textContent       = formatPrice(plan.price);
+    document.getElementById('installmentNote').textContent   =
       'או ₪' + plan.installment + ' x ב-12 תשלומים ללא ריבית';
     updateTotal();
   }
@@ -887,8 +797,8 @@
     var discount = couponApplied ? Math.round(base * 0.1) : 0;
     currentTotal = base - discount;
 
-    document.getElementById('grandTotal').textContent   = formatPrice(currentTotal);
-    document.getElementById('toggleTotal').textContent  = formatPrice(currentTotal);
+    document.getElementById('grandTotal').textContent  = formatPrice(currentTotal);
+    document.getElementById('toggleTotal').textContent = formatPrice(currentTotal);
 
     var discRow = document.getElementById('discountRow');
     if (couponApplied) {
@@ -898,8 +808,6 @@
       discRow.style.display = 'none';
     }
   }
-
-  function formatPrice(n) { return '₪' + n.toLocaleString('he-IL'); }
 
   /* ── Mobile summary toggle ── */
   function toggleSummary() {
@@ -921,154 +829,71 @@
       document.getElementById('couponInput').disabled = true;
     } else {
       document.getElementById('couponInput').style.borderColor = 'var(--red)';
-      setTimeout(function() {
+      setTimeout(function () {
         document.getElementById('couponInput').style.borderColor = '';
       }, 1200);
     }
   }
 
-  /* ── Card number formatting ── */
-  document.getElementById('cardNum').addEventListener('input', function(e) {
-    var v   = e.target.value.replace(/\D/g, '').slice(0, 16);
-    var fmt = v.match(/.{1,4}/g);
-    e.target.value = fmt ? fmt.join(' ') : v;
-
-    var icon = document.getElementById('cardTypeIcon');
-    e.target.classList.toggle('has-card-icon', v.length > 0);
-    if      (v[0] === '4')               { icon.textContent = '💳'; icon.classList.add('visible'); }
-    else if (v[0] === '5' || v[0] === '2') { icon.textContent = '💳'; icon.classList.add('visible'); }
-    else if (v[0] === '3')               { icon.textContent = '💳'; icon.classList.add('visible'); }
-    else                                  { icon.textContent = '';   icon.classList.remove('visible'); }
-  });
-
-  /* ── Expiry formatting ── */
-  document.getElementById('cardExp').addEventListener('input', function(e) {
-    var v = e.target.value.replace(/\D/g, '').slice(0, 4);
-    if (v.length >= 3) { v = v.slice(0,2) + ' / ' + v.slice(2); }
-    e.target.value = v;
-  });
-
-  /* ── CVV: digits only ── */
-  document.getElementById('cardCvv').addEventListener('input', function(e) {
-    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-  });
-
-  /* ── Validation ── */
-  function getVal(id)  { return document.getElementById(id).value.trim(); }
-  function setErr(id, show) {
-    var inp = document.getElementById(id);
-    var err = document.getElementById(id + 'Err');
-    inp.classList.toggle('error', show);
-    if (err) err.classList.toggle('visible', show);
-    return show;
+  /* ── Waitlist submit (replaces purchase flow while payment gateway is being connected) ── */
+  function isValidEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   }
 
-  function validate() {
-    var hasError = false;
+  document.getElementById('waitlistForm').addEventListener('submit', function (e) {
+    e.preventDefault();
 
-    /* email */
-    var email = getVal('email');
-    if (!email || email.indexOf('@') < 1 || email.indexOf('.') < 2) {
-      hasError = setErr('email', true) || hasError;
-    } else { setErr('email', false); }
+    var input = document.getElementById('waitlistEmail');
+    var errEl = document.getElementById('waitlistEmailErr');
+    var email = input.value.trim();
 
-    /* phone */
-    var phone = getVal('phone').replace(/\D/g,'');
-    if (phone.length < 9) {
-      hasError = setErr('phone', true) || hasError;
-    } else { setErr('phone', false); }
-
-    /* first / last name */
-    if (!getVal('firstName')) { hasError = setErr('firstName', true) || hasError; }
-    else { setErr('firstName', false); }
-    if (!getVal('lastName'))  { hasError = setErr('lastName', true)  || hasError; }
-    else { setErr('lastName', false); }
-
-    /* address + city */
-    if (!getVal('address')) { hasError = setErr('address', true) || hasError; }
-    else { setErr('address', false); }
-    if (!getVal('city'))    { hasError = setErr('city', true)    || hasError; }
-    else { setErr('city', false); }
-
-    /* card number */
-    var cardNum = getVal('cardNum').replace(/\s/g,'');
-    if (cardNum.length < 13 || !/^\d+$/.test(cardNum)) {
-      hasError = setErr('cardNum', true) || hasError;
-    } else { setErr('cardNum', false); }
-
-    /* expiry */
-    var exp = getVal('cardExp').replace(/\s/g,'');
-    if (!/^\d{2}\/\d{2}$/.test(exp)) {
-      hasError = setErr('cardExp', true) || hasError;
-    } else { setErr('cardExp', false); }
-
-    /* cvv */
-    var cvv = getVal('cardCvv');
-    if (cvv.length < 3 || !/^\d+$/.test(cvv)) {
-      hasError = setErr('cardCvv', true) || hasError;
-    } else { setErr('cardCvv', false); }
-
-    /* card name */
-    if (!getVal('cardName')) { hasError = setErr('cardName', true) || hasError; }
-    else { setErr('cardName', false); }
-
-    return !hasError;
-  }
-
-  /* ── Submit ── */
-  /* ── Tracking: build a snapshot of non-payment fields ── */
-  var orderCompleted = false;
-  function snapshotForTracking() {
-    function v(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
-    var first = v('firstName'), last = v('lastName');
-    return {
-      name: (first + ' ' + last).trim(),
-      email: v('email'),
-      phone: v('phone'),
-      plan: plan ? plan.name : '',
-      address: v('address'),
-      city: v('city'),
-      total: currentTotal
-    };
-  }
-  if (window.NGFMTrack) {
-    NGFMTrack.watchAbandon(snapshotForTracking, function () { return orderCompleted; });
-  }
-
-  function handleSubmit() {
-    if (!validate()) {
-      /* scroll to first error */
-      var firstErr = document.querySelector('.field-input.error');
-      if (firstErr) firstErr.scrollIntoView({ behavior:'smooth', block:'center' });
+    if (!isValidEmail(email)) {
+      input.classList.add('error');
+      errEl.classList.add('visible');
+      input.focus();
       return;
     }
+    input.classList.remove('error');
+    errEl.classList.remove('visible');
 
-    var btn = document.getElementById('submitBtn');
+    var btn = document.getElementById('waitlistBtn');
     btn.disabled    = true;
-    btn.textContent = 'מעבד הזמנה...';
+    btn.textContent = 'שולח...';
 
-    /* generate fake order number */
-    var orderNum = 'NGFM-' + Math.floor(10000 + Math.random() * 90000);
-    document.getElementById('successOrderNum').textContent = 'מספר הזמנה: #' + orderNum;
-
-    /* fire completed-order event (no card data ever included) */
-    orderCompleted = true;
-    if (window.NGFMTrack) {
-      var snap = snapshotForTracking();
-      snap.orderNum = orderNum;
-      NGFMTrack.completed(snap);
+    /* Persist to Google Sheet via the existing Apps Script endpoint.
+       `source` is tagged with the plan so you can see in your sheet
+       which package each waitlist signup was viewing. */
+    if (window.NGFMTrack && typeof NGFMTrack.discount === 'function') {
+      NGFMTrack.discount(email, 'waitlist_' + planKey);
     }
 
-    /* simulate processing */
-    setTimeout(function() {
-      document.getElementById('successOverlay').classList.add('visible');
-      document.body.style.overflow = 'hidden';
-    }, 1200);
-  }
+    /* Meta Pixel: standard "Lead" event — used by Meta to optimize ad
+       delivery toward people likely to give their email, and lets you
+       build a Custom Audience of waitlist signups for a launch-day blast. */
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead', {
+        content_name:     plan.name,
+        content_category: 'waitlist',
+        value:            plan.price,
+        currency:         'ILS'
+      });
+    }
+
+    /* Repurpose the existing success overlay for the waitlist confirmation. */
+    document.getElementById('successOrderNum').style.display = 'none';
+    document.querySelector('.success-title').textContent     = 'נרשמת בהצלחה! 🎉';
+    document.querySelector('.success-sub').textContent       =
+      'תודה — נעדכן אותך במייל ברגע ש-NOGYMFORME מוכן להזמנה.';
+    document.querySelector('.success-note').innerHTML        =
+      'בינתיים, אתה רשמית בראש התור.<br>צפה לעדכון מאיתנו בשבועות הקרובים.';
+
+    document.getElementById('successOverlay').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  });
 
   /* ── Clear error on type ── */
-  document.querySelectorAll('.field-input').forEach(function(inp) {
-    inp.addEventListener('input', function() {
+  document.querySelectorAll('.field-input').forEach(function (inp) {
+    inp.addEventListener('input', function () {
       inp.classList.remove('error');
       var errEl = document.getElementById(inp.id + 'Err');
       if (errEl) errEl.classList.remove('visible');

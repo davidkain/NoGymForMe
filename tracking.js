@@ -64,8 +64,8 @@
   // Public API
   // ─────────────────────────────────────────────────────────────────────────
   global.NGFMTrack = {
-    discount: function (email) {
-      send('discount', { email: email, source: 'popup' });
+    discount: function (email, source) {
+      send('discount', { email: email, source: source || 'popup' });
     },
 
     /** call when user fills email/phone on order form (non-blocking) */
