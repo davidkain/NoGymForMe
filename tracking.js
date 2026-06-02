@@ -68,6 +68,57 @@
       send('discount', { email: email, source: source || 'popup' });
     },
 
+    /**
+     * Like discount(), but reads the response so callers can branch on
+     * whether the email was already on file. Used by the popup to show
+     * the "אחי, כבר קיבלת" message for returning visitors on a new device
+     * (where the client-side localStorage check would miss them).
+     *
+     * Fails open: any error (network, CORS, Apps Script down, timeout)
+     * resolves with { ok: false, alreadyExists: false } so the caller
+     * can fall through to the regular success flow — better to give a
+     * returning visitor a second coupon code than to block them with
+     * an error message.
+     *
+     * @param {string}   email
+     * @param {string}   [source]    free-form tag stored alongside the email
+     * @param {function({ ok: boolean, alreadyExists: boolean, error?: string }): void} callback
+     * @param {number}   [timeoutMs] default 3500ms
+     */
+    discountCheck: function (email, source, callback, timeoutMs) {
+      if (!CONFIG.URL) { callback({ ok: false, alreadyExists: false, error: 'not configured' }); return; }
+
+      var payload = {
+        type:   'discount',
+        email:  String(email || '').slice(0, 500),
+        source: source || 'popup',
+        _ua:    (navigator.userAgent || '').slice(0, 200),
+        _ts:    Date.now()
+      };
+
+      var done = false;
+      function finish(resp) { if (done) return; done = true; callback(resp); }
+
+      // Hard timeout — Apps Script can be slow under cold-start.
+      // Fail open so a slow server never blocks the popup UX.
+      setTimeout(function () { finish({ ok: false, alreadyExists: false, error: 'timeout' }); }, timeoutMs || 3500);
+
+      try {
+        fetch(CONFIG.URL, {
+          method:  'POST',
+          mode:    'cors', // need to read the response — note send() uses no-cors
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // text/plain avoids CORS preflight
+          body:    JSON.stringify(payload),
+          keepalive: true
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (json) { finish({ ok: !!(json && json.ok), alreadyExists: !!(json && json.alreadyExists) }); })
+          .catch(function (err) { finish({ ok: false, alreadyExists: false, error: String(err) }); });
+      } catch (e) {
+        finish({ ok: false, alreadyExists: false, error: String(e) });
+      }
+    },
+
     /** call when user fills email/phone on order form (non-blocking) */
     started: function (data) {
       send('started', data);

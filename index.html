@@ -2241,7 +2241,8 @@
     });
 
     // ── DISCOUNT POPUP ──
-    // Show once per session: after 3.5 s, or on exit-intent
+    // Show once per session: after 12 s, or on exit-intent.
+    // (Per-email dedup happens at submit time — see submitPopup below.)
     (function initPopup() {
       if (sessionStorage.getItem('ngfm_popup_seen')) return;
       var shown = false;
@@ -2261,16 +2262,77 @@
       sessionStorage.setItem('ngfm_popup_seen', '1');
     }
 
-    function submitPopup() {
-      var emailInput = document.getElementById('popupEmail');
-      var email = emailInput.value.trim();
-      if (!email || email.indexOf('@') === -1) {
-        emailInput.style.borderColor = '#b83232';
-        emailInput.placeholder = 'כתובת מייל תקינה בבקשה...';
-        return;
-      }
-      if (window.NGFMTrack) NGFMTrack.discount(email);
-      // Replace form content using safe DOM methods - no innerHTML
+    // ── Per-email dedup for the discount popup ──
+    // Strategy: localStorage as a fast client-side check, Apps Script
+    // as the source of truth (catches cross-device returns). Storage
+    // is a plain array of lowercase-trimmed emails capped at 50 entries
+    // (the user is unlikely to legitimately discount-signup with that
+    // many addresses; oldest entries fall off as the cap is hit).
+    var DISCOUNT_LS_KEY = 'ngfm_discount_emails';
+
+    function normalizeEmail(e) {
+      return String(e || '').toLowerCase().trim();
+    }
+    function getStoredDiscountEmails() {
+      try {
+        var raw = localStorage.getItem(DISCOUNT_LS_KEY);
+        var arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) { return []; }
+    }
+    function rememberDiscountEmail(email) {
+      var arr = getStoredDiscountEmails();
+      var norm = normalizeEmail(email);
+      if (arr.indexOf(norm) !== -1) return;
+      arr.push(norm);
+      if (arr.length > 50) arr = arr.slice(-50);
+      try { localStorage.setItem(DISCOUNT_LS_KEY, JSON.stringify(arr)); } catch (e) {}
+    }
+    function discountEmailKnownLocally(email) {
+      return getStoredDiscountEmails().indexOf(normalizeEmail(email)) !== -1;
+    }
+
+    /** Replace the popup form with the brand-voice "already got it" message.
+     *  Also hides the popup's original header (countdown / "10% הנחה" /
+     *  sub) because it directly contradicts the new message. The success
+     *  state for a NEW signup keeps the header — "10% הנחה" reads fine
+     *  above "your code is ready". */
+    function showAlreadyReceived() {
+      var card = document.querySelector('.popup-card');
+      ['.popup-emoji', '.popup-headline', '.popup-discount-badge', '.popup-sub'].forEach(function (sel) {
+        var el = card.querySelector(sel);
+        if (el) el.style.display = 'none';
+      });
+
+      var form = document.getElementById('popupForm');
+      while (form.firstChild) form.removeChild(form.firstChild);
+
+      var wrap = document.createElement('div');
+      wrap.className = 'popup-success';
+
+      var head = document.createElement('div');
+      head.className = 'popup-success-text';
+      head.textContent = 'אחי, כבר קיבלת את ההנחה.';
+
+      var sub = document.createElement('div');
+      sub.style.cssText = 'font-size:15px;color:var(--grey-light);margin:12px 0 22px;line-height:1.5;';
+      sub.textContent = 'יאללה בוא תנסה.';
+
+      var cta = document.createElement('a');
+      cta.href = '#pricing';
+      cta.className = 'popup-btn';
+      cta.style.cssText = 'display:inline-block;text-decoration:none;padding:14px 32px;';
+      cta.textContent = 'לתפריט החבילות ←';
+      cta.addEventListener('click', closePopup);
+
+      wrap.appendChild(head);
+      wrap.appendChild(sub);
+      wrap.appendChild(cta);
+      form.appendChild(wrap);
+    }
+
+    /** Replace the popup form with the success state showing the coupon code. */
+    function showCouponSuccess(code) {
       var form = document.getElementById('popupForm');
       while (form.firstChild) form.removeChild(form.firstChild);
 
@@ -2279,18 +2341,58 @@
 
       var successText = document.createElement('div');
       successText.className = 'popup-success-text';
-      successText.textContent = '✓ הקוד שלך מוכן!'; // ✓ הקוד שלך מוכן!
+      successText.textContent = '✓ הקוד שלך מוכן!';
 
       var couponDiv = document.createElement('div');
       couponDiv.className = 'popup-coupon';
-      couponDiv.textContent = 'NOGYM10';
+      couponDiv.textContent = code;
 
       successDiv.appendChild(successText);
       successDiv.appendChild(couponDiv);
       form.appendChild(successDiv);
 
-      sessionStorage.setItem('ngfm_popup_seen', '1');
       setTimeout(closePopup, 5000);
+    }
+
+    function submitPopup() {
+      var emailInput = document.getElementById('popupEmail');
+      var email = emailInput.value.trim();
+      if (!email || email.indexOf('@') === -1) {
+        emailInput.style.borderColor = '#b83232';
+        emailInput.placeholder = 'כתובת מייל תקינה בבקשה...';
+        return;
+      }
+
+      sessionStorage.setItem('ngfm_popup_seen', '1');
+
+      // Fast path: localStorage already has this email → show "אחי" instantly.
+      if (discountEmailKnownLocally(email)) {
+        showAlreadyReceived();
+        return;
+      }
+
+      // Disable submit while the server check runs (cold-start can be slow).
+      var btn = document.querySelector('.popup-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'בודק...'; }
+
+      // Server-side per-email check via Apps Script.
+      // Falls open on timeout/error: returning visitor on a fresh device
+      // gets a second coupon code rather than a hard failure message.
+      if (window.NGFMTrack && typeof NGFMTrack.discountCheck === 'function') {
+        NGFMTrack.discountCheck(email, 'popup', function (resp) {
+          rememberDiscountEmail(email); // remember either way
+          if (resp && resp.alreadyExists) {
+            showAlreadyReceived();
+          } else {
+            showCouponSuccess('NOGYM10');
+          }
+        });
+      } else {
+        // Legacy fallback (older tracking.js without discountCheck)
+        if (window.NGFMTrack) NGFMTrack.discount(email);
+        rememberDiscountEmail(email);
+        showCouponSuccess('NOGYM10');
+      }
     }
 
     // Video: autoplay on scroll into view, pause when out

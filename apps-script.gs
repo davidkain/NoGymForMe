@@ -48,6 +48,20 @@ function doPost(e) {
 
     const ss = SpreadsheetApp.openById(SHEET_ID);
     const sheet = ensureSheet(ss, type);
+
+    // Per-email dedup for discount popup signups:
+    // Returning visitors on a new device (so localStorage check on the
+    // client doesn't catch them) should see the "אחי, כבר קיבלת" message
+    // instead of accumulating duplicate rows + duplicate notification
+    // emails. The popup is also the only event type that doesn't have a
+    // legitimate "submit twice" path — checkouts CAN happen twice for the
+    // same email, so dedup is scoped to `discount` only.
+    if (type === 'discount' && data.email) {
+      if (discountEmailExists(sheet, data.email)) {
+        return jsonOut({ ok: true, alreadyExists: true });
+      }
+    }
+
     const row = buildRow(type, data);
     sheet.appendRow(row);
 
@@ -60,7 +74,7 @@ function doPost(e) {
 
     sendNotification(type, data, ss);
 
-    return jsonOut({ ok: true });
+    return jsonOut({ ok: true, alreadyExists: false });
   } catch (err) {
     // Best-effort error log; never throw to the client.
     try {
@@ -68,6 +82,21 @@ function doPost(e) {
     } catch (_) {}
     return jsonOut({ ok: false, error: String(err) });
   }
+}
+
+/**
+ * Returns true if the email already exists in the discount tab.
+ * Email comparison is case-insensitive and whitespace-trimmed.
+ */
+function discountEmailExists(sheet, email) {
+  const last = sheet.getLastRow();
+  if (last < 2) return false;
+  const norm = String(email).toLowerCase().trim();
+  const emails = sheet.getRange(2, 2, last - 1, 1).getValues();
+  for (let i = 0; i < emails.length; i++) {
+    if (String(emails[i][0]).toLowerCase().trim() === norm) return true;
+  }
+  return false;
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
