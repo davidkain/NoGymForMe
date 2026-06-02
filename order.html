@@ -767,9 +767,10 @@
 <script>
   /* ── Plan data (still drives the summary column) ── */
   var PLANS = {
-    single:  { name: 'חבילת הביישן',                       variant: 'בקבוק אחד - 90 קפסולות',      price: 198, installment: 16.5, qty: 1 },
-    starter: { name: 'חבילת יאללה, בוא ננסה',              variant: 'שני בקבוקים - 180 קפסולות',   price: 396, installment: 33,   qty: 2 },
-    results: { name: 'חבילת אול-אין (כי הקיץ כבר פה...)',  variant: 'שלושה בקבוקים - 270 קפסולות', price: 496, installment: 41.3, qty: 3 }
+    single:       { name: 'חבילת הביישן',                       variant: 'בקבוק אחד - 90 קפסולות',         price: 198, installment: 16.5, qty: 1 },
+    starter:      { name: 'חבילת יאללה, בוא ננסה',              variant: 'שני בקבוקים - 180 קפסולות',      price: 396, installment: 33,   qty: 2 },
+    results:      { name: 'חבילת אול-אין (כי הקיץ כבר פה...)',  variant: 'שלושה בקבוקים - 270 קפסולות',    price: 496, installment: 41.3, qty: 3 },
+    subscription: { name: 'מנוי חודשי',                          variant: 'בקבוק אחד מדי חודש · ביטול בכל עת', price: 168, isSubscription: true, qty: 1 }
   };
 
   var params  = new URLSearchParams(window.location.search);
@@ -780,15 +781,19 @@
   var currentTotal  = plan.price;
 
   function formatPrice(n) { return '₪' + n.toLocaleString('he-IL'); }
+  function formatPlanPrice(p) {
+    return p.isSubscription ? formatPrice(p.price) + '/חודש' : formatPrice(p.price);
+  }
 
   function renderSummary() {
     document.getElementById('productName').textContent       = plan.name;
     document.getElementById('productVariant').textContent    = plan.variant;
-    document.getElementById('productPriceRight').textContent = formatPrice(plan.price);
+    document.getElementById('productPriceRight').textContent = formatPlanPrice(plan);
     document.getElementById('productQty').textContent        = plan.qty;
-    document.getElementById('subtotalVal').textContent       = formatPrice(plan.price);
-    document.getElementById('installmentNote').textContent   =
-      'או ₪' + plan.installment + ' x ב-12 תשלומים ללא ריבית';
+    document.getElementById('subtotalVal').textContent       = formatPlanPrice(plan);
+    document.getElementById('installmentNote').textContent   = plan.isSubscription
+      ? 'מחויב מדי חודש · משלוח חינם תמיד · ביטול בכל עת'
+      : 'או ₪' + plan.installment + ' x ב-12 תשלומים ללא ריבית';
     updateTotal();
   }
 
@@ -797,8 +802,9 @@
     var discount = couponApplied ? Math.round(base * 0.1) : 0;
     currentTotal = base - discount;
 
-    document.getElementById('grandTotal').textContent  = formatPrice(currentTotal);
-    document.getElementById('toggleTotal').textContent = formatPrice(currentTotal);
+    var suffix = plan.isSubscription ? '/חודש' : '';
+    document.getElementById('grandTotal').textContent  = formatPrice(currentTotal) + suffix;
+    document.getElementById('toggleTotal').textContent = formatPrice(currentTotal) + suffix;
 
     var discRow = document.getElementById('discountRow');
     if (couponApplied) {

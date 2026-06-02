@@ -42,11 +42,13 @@
       --deep: #181818;
       --card: #1e1e1e;
       --border: #2a2a2a;
+      --border-mid: #333333;
       --gold: #E8D900;
       --gold-light: #F5EB00;
       --gold-muted: rgba(232,217,0,0.15);
       --white: #f0ece4;
       --grey: #8a8680;
+      --grey-light: #b0aba4;
       --red: #b83232;
       --font-display: 'Rubik', 'Assistant', sans-serif;
       --font-body: 'Assistant', sans-serif;
@@ -726,6 +728,180 @@
       background: var(--gold-light);
     }
 
+    /* ── PRICING: subscription band (sits above the 3-card grid) ── */
+    .sub-band {
+      position: relative;
+      margin-top: 60px;
+      margin-bottom: 28px;
+      padding: 36px 40px 32px;
+      background:
+        radial-gradient(120% 100% at 0% 0%, rgba(232,217,0,0.10) 0%, transparent 55%),
+        linear-gradient(180deg, var(--card) 0%, var(--deep) 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: var(--radius-md);
+      box-shadow:
+        0 0 0 1px rgba(232,217,0,0.05),
+        0 20px 40px -16px rgba(0,0,0,0.55);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .sub-band::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(135deg, transparent 0 18px, rgba(232,217,0,0.025) 18px 19px);
+      pointer-events: none;
+    }
+    .sub-badge-top {
+      position: absolute;
+      top: -14px;
+      right: 32px;
+      background: var(--gold);
+      color: var(--black);
+      font-size: 12px;
+      font-weight: 900;
+      padding: 5px 18px;
+      letter-spacing: 2px;
+      border-radius: var(--radius-pill);
+      z-index: 2;
+    }
+    .sub-left { position: relative; z-index: 1; }
+    .sub-headline {
+      font-family: var(--font-display);
+      font-size: 30px;
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 14px;
+      letter-spacing: -.5px;
+    }
+    .sub-headline em {
+      font-style: normal;
+      color: var(--gold);
+      font-weight: 900;
+    }
+    .sub-tagline {
+      font-size: 17px;
+      color: var(--grey-light);
+      line-height: 1.55;
+      margin-bottom: 22px;
+    }
+    .sub-tagline strong { color: var(--white); font-weight: 700; }
+
+    .sub-benefits {
+      list-style: none;
+      margin-bottom: 26px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 22px;
+    }
+    .sub-benefits li {
+      font-size: 14.5px;
+      color: var(--white);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .sub-benefits li::before {
+      content: '✓';
+      color: var(--gold);
+      font-weight: 900;
+      font-size: 16px;
+    }
+
+    .sub-cta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-sub {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--black);
+      font-family: var(--font-body);
+      font-weight: 800;
+      font-size: 17px;
+      padding: 15px 36px;
+      border-radius: var(--radius-pill);
+      text-decoration: none;
+      transition: background .2s, transform .1s;
+      letter-spacing: -.2px;
+    }
+    .btn-sub:hover { background: var(--gold-light); }
+    .btn-sub:active { transform: scale(.98); }
+    .sub-cancel-note {
+      font-size: 13px;
+      color: var(--grey-light);
+      font-weight: 500;
+    }
+
+    .sub-right {
+      position: relative; z-index: 1;
+      background: var(--black);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-md);
+      padding: 26px 24px;
+      text-align: center;
+    }
+    .sub-compare-line {
+      font-size: 14px;
+      color: var(--grey);
+      margin-bottom: 4px;
+    }
+    .sub-compare-line .strike {
+      text-decoration: line-through;
+      text-decoration-color: var(--grey);
+      text-decoration-thickness: 1.5px;
+      color: var(--grey-light);
+    }
+    .sub-main-price {
+      font-family: var(--font-display);
+      font-size: 56px;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+      margin: 8px 0 4px;
+    }
+    .sub-main-price .unit {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--white);
+      margin-right: 4px;
+    }
+    .sub-savings {
+      font-size: 14px;
+      color: var(--white);
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-mid);
+      line-height: 1.5;
+    }
+    .sub-savings strong { color: var(--gold); font-weight: 800; }
+
+    @media (max-width: 900px) {
+      .sub-band {
+        grid-template-columns: 1fr;
+        padding: 32px 22px 26px;
+        gap: 22px;
+      }
+      .sub-badge-top { right: 16px; }
+      .sub-headline { font-size: 22px; line-height: 1.25; }
+      .sub-tagline { font-size: 15px; }
+      .sub-benefits { gap: 8px 16px; }
+      .sub-benefits li { font-size: 14px; }
+      .sub-right { padding: 22px 18px; }
+      .sub-main-price { font-size: 46px; }
+      .sub-cta-row { flex-direction: column; align-items: stretch; gap: 10px; }
+      .btn-sub { width: 100%; text-align: center; padding: 16px 24px; }
+      .sub-cancel-note { text-align: center; }
+    }
+
     /* ── TRUST ── */
     .trust-section { background: var(--card); }
 
@@ -1402,7 +1578,19 @@
 
         <div style="display:flex;flex-direction:column;gap:16px;">
 
-          <a href="order.html?plan=single" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+          <a href="order.html?plan=subscription" onclick="handlePurchase('subscription',event)" style="display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,var(--card) 0%,var(--deep) 100%);border:1.5px solid var(--gold);border-radius:var(--radius-md);padding:22px 24px;text-decoration:none;position:relative;box-shadow:0 12px 30px -12px rgba(232,217,0,0.18);">
+            <div style="position:absolute;top:-12px;right:20px;background:var(--gold);color:var(--black);font-size:11px;font-weight:900;padding:3px 14px;border-radius:var(--radius-pill);letter-spacing:1px;">המומלץ ביותר</div>
+            <div>
+              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">מנוי חודשי</div>
+              <div style="font-size:13px;color:var(--grey-light);margin-top:4px;">בקבוק כל חודש · משלוח חינם · ביטול בכל עת</div>
+            </div>
+            <div style="text-align:left;">
+              <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--gold);">₪168<span style="font-size:14px;font-weight:600;color:var(--white);">/חודש</span></div>
+              <div style="font-size:12px;color:var(--grey);">חיסכון ₪30/חודש</div>
+            </div>
+          </a>
+
+          <a href="order.html?plan=single" onclick="handlePurchase('single',event)" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
             <div>
               <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת הביישן</div>
               <div style="font-size:13px;color:var(--grey);margin-top:4px;">בקבוק אחד - 90 קפסולות</div>
@@ -1413,7 +1601,7 @@
             </div>
           </a>
 
-          <a href="order.html?plan=starter" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+          <a href="order.html?plan=starter" onclick="handlePurchase('starter',event)" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
             <div>
               <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת<br>יאללה, בוא ננסה</div>
               <div style="font-size:13px;color:var(--grey);margin-top:4px;">שני בקבוקים - 180 קפסולות</div>
@@ -1424,7 +1612,7 @@
             </div>
           </a>
 
-          <a href="order.html?plan=results" style="display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--gold);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;position:relative;">
+          <a href="order.html?plan=results" onclick="handlePurchase('results',event)" style="display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--gold);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;position:relative;">
             <div style="position:absolute;top:-12px;right:20px;background:var(--gold);color:var(--black);font-size:11px;font-weight:900;padding:3px 14px;border-radius:var(--radius-pill);letter-spacing:1px;">הכי נמכר</div>
             <div>
               <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת<br>אול-אין<br>(כי הקיץ כבר פה...)</div>
@@ -1694,6 +1882,45 @@
       <h2 class="section-title">בחר את החבילה<br><em>שמתאימה לך.</em></h2>
       <p class="section-body">ללא ריבית. ללא התחייבות. 100% החזר כספי תוך 14 יום לפי חוק.</p>
 
+      <!-- ── SUBSCRIPTION BAND (positioned above the 3-card one-time grid) ── -->
+      <div class="sub-band reveal">
+        <span class="sub-badge-top">המומלץ ביותר</span>
+
+        <div class="sub-left">
+          <h3 class="sub-headline">
+            המסלול הכי משתלם להוריד את הכרס<br>
+            <em>(הקיץ כבר פה)</em>
+          </h3>
+          <p class="sub-tagline">
+            בלי לעקוב. בלי לשכוח. <strong>פשוט מגיע אליך הביתה כל חודש</strong> — עם הנחה קבועה.
+          </p>
+
+          <ul class="sub-benefits">
+            <li>משלוח חינם</li>
+            <li>הנחה קבועה</li>
+            <li>אספקה חודשית אוטומטית</li>
+            <li>ביטול בכל עת — בלי שאלות</li>
+          </ul>
+
+          <div class="sub-cta-row">
+            <a href="order.html?plan=subscription"
+               class="btn-sub"
+               onclick="handlePurchase('subscription',event)">אני בפנים ←</a>
+            <span class="sub-cancel-note">ביטול בכל רגע. בלי קנסות. בלי הסברים.</span>
+          </div>
+        </div>
+
+        <div class="sub-right">
+          <div class="sub-compare-line">פעם אחת: <span class="strike">₪198</span></div>
+          <div class="sub-main-price">₪168<span class="unit">/חודש</span></div>
+          <div class="sub-compare-line">15% הנחה לכל החיים</div>
+          <div class="sub-savings">
+            חיסכון של <strong>₪30 בחודש</strong><br>
+            = <strong>₪360 בשנה</strong>
+          </div>
+        </div>
+      </div>
+
       <div class="pricing-grid">
         <div class="pricing-card reveal">
           <div class="pack-name">חבילת הביישן</div>
@@ -1927,9 +2154,10 @@
 
     // Package catalogue — single source of truth for prices and labels.
     var PLANS = {
-      single:  { name: 'חבילת הביישן',               price: 198,  currency: 'ILS', quantity: 1 },
-      starter: { name: 'חבילת יאללה, בוא ננסה',       price: 396,  currency: 'ILS', quantity: 2 },
-      results: { name: 'חבילת אול-אין',               price: 496,  currency: 'ILS', quantity: 3 }
+      single:       { name: 'חבילת הביישן',         price: 198, currency: 'ILS', quantity: 1 },
+      starter:      { name: 'חבילת יאללה, בוא ננסה', price: 396, currency: 'ILS', quantity: 2 },
+      results:      { name: 'חבילת אול-אין',         price: 496, currency: 'ILS', quantity: 3 },
+      subscription: { name: 'מנוי חודשי',            price: 168, currency: 'ILS', quantity: 1, recurring: 'monthly' }
     };
 
     /**
