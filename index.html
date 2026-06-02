@@ -632,7 +632,12 @@
       display: flex;
       flex-direction: column;
     }
-    .pricing-card:hover { border-color: var(--gold); }
+    /* Hover-only on devices that actually have a hover pointer.
+       Prevents the gold border from sticking on mobile tap, which made
+       all four cards in the on-page pricing grid look "featured." */
+    @media (hover: hover) {
+      .pricing-card:hover { border-color: var(--gold); }
+    }
 
     .pricing-card.featured {
       border-color: var(--gold);
