@@ -734,7 +734,14 @@
       margin-top: 60px;
       margin-bottom: 28px;
       padding: 36px 40px 32px;
+      /* Background image layers (top→bottom):
+         1. Diagonal hatching for premium tactile feel (auto-clipped to border-radius)
+         2. Warm gold radial wash in the top-corner
+         3. Base dark card→deep gradient
+         Stacked as backgrounds (not a ::before) so overflow:hidden is NOT needed,
+         which lets the .sub-badge-top sticker poke outside the card unclipped. */
       background:
+        repeating-linear-gradient(135deg, transparent 0 18px, rgba(232,217,0,0.025) 18px 19px),
         radial-gradient(120% 100% at 0% 0%, rgba(232,217,0,0.10) 0%, transparent 55%),
         linear-gradient(180deg, var(--card) 0%, var(--deep) 100%);
       border: 1.5px solid var(--gold);
@@ -742,18 +749,10 @@
       box-shadow:
         0 0 0 1px rgba(232,217,0,0.05),
         0 20px 40px -16px rgba(0,0,0,0.55);
-      overflow: hidden;
       display: grid;
       grid-template-columns: 1.4fr 1fr;
       gap: 40px;
       align-items: center;
-    }
-    .sub-band::before {
-      content: '';
-      position: absolute; inset: 0;
-      background-image:
-        repeating-linear-gradient(135deg, transparent 0 18px, rgba(232,217,0,0.025) 18px 19px);
-      pointer-events: none;
     }
     .sub-badge-top {
       position: absolute;

@@ -372,6 +372,22 @@
     }
     .coupon-success.visible { display:block; }
 
+    /* Subscription: gold-tinted note replacing the coupon row */
+    .sub-discount-note {
+      font-size: 13px;
+      color: var(--grey-light);
+      background: rgba(232,217,0,0.06);
+      border: 1px solid var(--gold-muted);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      margin-bottom: 18px;
+      line-height: 1.55;
+    }
+    .sub-discount-note strong {
+      color: var(--gold);
+      font-weight: 800;
+    }
+
     /* totals */
     .totals-row {
       display:flex; justify-content:space-between; align-items:center;
@@ -687,11 +703,16 @@
         </div>
 
         <!-- coupon -->
-        <div class="coupon-row">
+        <div class="coupon-row" id="couponRow">
           <input class="coupon-input" type="text" id="couponInput" placeholder="קוד קופון" dir="ltr">
           <button class="coupon-apply-btn" onclick="applyCoupon()">החל</button>
         </div>
         <div class="coupon-success" id="couponSuccess">✓ קוד קופון הוחל — 10% הנחה</div>
+
+        <!-- Shown only for subscription plans: replaces the coupon row -->
+        <div class="sub-discount-note" id="subDiscountNote" style="display:none;">
+          ✓ המנוי כולל <strong>הנחה קבועה של 15%</strong> — אין צורך בקוד קופון.
+        </div>
 
         <hr class="totals-divider">
 
@@ -794,6 +815,22 @@
     document.getElementById('installmentNote').textContent   = plan.isSubscription
       ? 'מחויב מדי חודש · משלוח חינם תמיד · ביטול בכל עת'
       : 'או ₪' + plan.installment + ' x ב-12 תשלומים ללא ריבית';
+
+    // Subscriptions already include a permanent 15% discount, so stacking a
+    // 10% promo coupon on top breaks the pricing narrative AND the unit
+    // economics. Hide the coupon row and show a friendly explanatory note.
+    var couponRow      = document.getElementById('couponRow');
+    var couponSuccess  = document.getElementById('couponSuccess');
+    var subNote        = document.getElementById('subDiscountNote');
+    if (plan.isSubscription) {
+      if (couponRow)     couponRow.style.display     = 'none';
+      if (couponSuccess) couponSuccess.style.display = 'none';
+      if (subNote)       subNote.style.display       = 'block';
+    } else {
+      if (couponRow)     couponRow.style.display     = '';
+      if (subNote)       subNote.style.display       = 'none';
+    }
+
     updateTotal();
   }
 
