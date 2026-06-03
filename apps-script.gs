@@ -70,6 +70,20 @@ function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const type = data.type;
+
+    // ── READ-ONLY: members-area email verification ─────────────────────────
+    // Special branch BEFORE the TABS check, because `verify` doesn't write
+    // anything — it just answers "is this email in Completed Orders?".
+    if (type === 'verify') {
+      const sheetId = getSheetId();
+      if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
+      const ss = SpreadsheetApp.openById(sheetId);
+      const sheet = ss.getSheetByName(TABS.completed);
+      // No tab yet = no completed orders yet = no one is a verified customer.
+      if (!sheet) return jsonOut({ ok: true, verified: false });
+      return jsonOut({ ok: true, verified: completedEmailExists(sheet, data.email || '') });
+    }
+
     if (!TABS[type]) return jsonOut({ ok: false, error: 'unknown type' });
 
     const sheetId = getSheetId();
@@ -135,6 +149,29 @@ function discountEmailExists(sheet, email) {
   if (last < 2) return false;
   const norm = String(email).toLowerCase().trim();
   const emails = sheet.getRange(2, 2, last - 1, 1).getValues();
+  for (let i = 0; i < emails.length; i++) {
+    if (String(emails[i][0]).toLowerCase().trim() === norm) return true;
+  }
+  return false;
+}
+
+/**
+ * Returns true if the email exists in the Completed Orders tab.
+ * Used by the members-area gate on the website to verify that a visitor is
+ * a paying customer before exposing the download link to app.nogymforme.com.
+ *
+ * Completed Orders headers (see HEADERS.completed):
+ *   ['Timestamp', 'Order #', 'Name', 'Email', 'Phone', 'Address', 'City', 'Plan', 'Total', 'User-Agent']
+ *                                       ↑ column 4 (1-indexed)
+ *
+ * Case-insensitive + whitespace-trimmed, same as discountEmailExists.
+ */
+function completedEmailExists(sheet, email) {
+  const last = sheet.getLastRow();
+  if (last < 2) return false;
+  const norm = String(email).toLowerCase().trim();
+  if (!norm) return false;
+  const emails = sheet.getRange(2, 4, last - 1, 1).getValues();
   for (let i = 0; i < emails.length; i++) {
     if (String(emails[i][0]).toLowerCase().trim() === norm) return true;
   }

@@ -119,6 +119,54 @@
       }
     },
 
+    /**
+     * Members-area gate: check whether the given email exists in the
+     * Completed Orders tab (i.e. the visitor is a paying customer).
+     *
+     * Unlike send()/discount(), this is a read-only call — Apps Script
+     * never appends a row. Same response shape as discountCheck so callers
+     * get a stable contract.
+     *
+     * FAILS CLOSED (verified=false) on network/timeout errors, because for a
+     * security-adjacent gate it's safer to ask the user to retry than to
+     * accidentally grant access when the backend is silent. Contrast with
+     * discountCheck which fails OPEN (a slow server shouldn't block a coupon).
+     *
+     * @param {string}   email
+     * @param {function({ ok: boolean, verified: boolean, error?: string }): void} callback
+     * @param {number}   [timeoutMs] default 4000ms (Apps Script cold-start tolerance)
+     */
+    verifyMember: function (email, callback, timeoutMs) {
+      if (!CONFIG.URL) { callback({ ok: false, verified: false, error: 'not configured' }); return; }
+
+      var payload = {
+        type:  'verify',
+        email: String(email || '').slice(0, 500),
+        _ua:   (navigator.userAgent || '').slice(0, 200),
+        _ts:   Date.now()
+      };
+
+      var done = false;
+      function finish(resp) { if (done) return; done = true; callback(resp); }
+
+      setTimeout(function () { finish({ ok: false, verified: false, error: 'timeout' }); }, timeoutMs || 4000);
+
+      try {
+        fetch(CONFIG.URL, {
+          method:  'POST',
+          mode:    'cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body:    JSON.stringify(payload),
+          keepalive: true
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (json) { finish({ ok: !!(json && json.ok), verified: !!(json && json.verified) }); })
+          .catch(function (err) { finish({ ok: false, verified: false, error: String(err) }); });
+      } catch (e) {
+        finish({ ok: false, verified: false, error: String(e) });
+      }
+    },
+
     /** call when user fills email/phone on order form (non-blocking) */
     started: function (data) {
       send('started', data);
