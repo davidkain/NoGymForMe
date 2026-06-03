@@ -148,18 +148,19 @@
       gap: 20px;
     }
     .header-link {
-      color: var(--white);
+      color: var(--gold);
       font-family: var(--font-body);
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 900;
       text-decoration: none;
       padding: 8px 0;
       border-bottom: 1px solid transparent;
       transition: color .2s, border-color .2s;
       white-space: nowrap;
+      letter-spacing: 0.3px;
     }
     @media (hover: hover) {
-      .header-link:hover { color: var(--gold); border-bottom-color: var(--gold); }
+      .header-link:hover { color: var(--gold-light, var(--gold)); border-bottom-color: var(--gold); }
     }
 
     /* ── HERO ── */

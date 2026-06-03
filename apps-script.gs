@@ -31,6 +31,15 @@ const SHEET_ID = '';
 const NOTIFY_EMAIL = 'davidkain1@gmail.com';
 const TIMEZONE = 'Asia/Jerusalem';
 
+// Owner/admin emails that always pass the members-area gate, regardless of
+// whether they appear in Completed Orders. Useful so the operator can test
+// the gate, do customer support, or access the members area without having
+// to place a real order. Add team members here as needed.
+// All comparisons are case-insensitive + whitespace-trimmed.
+const OWNER_EMAILS = [
+  NOTIFY_EMAIL  // davidkain1@gmail.com
+];
+
 const TABS = {
   discount:  'Discount Signups',
   started:   'Abandoned Checkouts',
@@ -75,13 +84,24 @@ function doPost(e) {
     // Special branch BEFORE the TABS check, because `verify` doesn't write
     // anything — it just answers "is this email in Completed Orders?".
     if (type === 'verify') {
+      const reqEmail = String(data.email || '').toLowerCase().trim();
+
+      // Owner/admin allowlist — operators always pass the gate.
+      // Lets the team access the members area for testing + support
+      // without needing to be in Completed Orders.
+      for (let i = 0; i < OWNER_EMAILS.length; i++) {
+        if (String(OWNER_EMAILS[i]).toLowerCase().trim() === reqEmail) {
+          return jsonOut({ ok: true, verified: true });
+        }
+      }
+
       const sheetId = getSheetId();
       if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
       const ss = SpreadsheetApp.openById(sheetId);
       const sheet = ss.getSheetByName(TABS.completed);
       // No tab yet = no completed orders yet = no one is a verified customer.
       if (!sheet) return jsonOut({ ok: true, verified: false });
-      return jsonOut({ ok: true, verified: completedEmailExists(sheet, data.email || '') });
+      return jsonOut({ ok: true, verified: completedEmailExists(sheet, reqEmail) });
     }
 
     if (!TABS[type]) return jsonOut({ ok: false, error: 'unknown type' });
