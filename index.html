@@ -147,20 +147,27 @@
       align-items: center;
       gap: 20px;
     }
+    /* Members-area link: outlined-gold pill, sibling to the solid-gold .header-cta */
     .header-link {
       color: var(--gold);
       font-family: var(--font-body);
       font-size: 14px;
       font-weight: 900;
       text-decoration: none;
-      padding: 8px 0;
-      border-bottom: 1px solid transparent;
-      transition: color .2s, border-color .2s;
+      padding: 10px 18px;
+      border: 1px solid var(--gold);
+      border-radius: var(--radius-pill);
+      transition: background .2s, color .2s, transform .15s;
       white-space: nowrap;
       letter-spacing: 0.3px;
+      background: transparent;
     }
     @media (hover: hover) {
-      .header-link:hover { color: var(--gold-light, var(--gold)); border-bottom-color: var(--gold); }
+      .header-link:hover {
+        background: var(--gold);
+        color: var(--black);
+        transform: translateY(-1px);
+      }
     }
 
     /* ── HERO ── */
@@ -1114,6 +1121,67 @@
       .plan-card-hover:hover { border-color: var(--gold) !important; }
     }
 
+    /* ── MEMBERS-AREA APP STORE BUTTONS ── */
+    .app-store-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: stretch;
+    }
+    .app-store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--black);
+      border: 1px solid var(--border);
+      color: var(--white);
+      padding: 12px 22px;
+      border-radius: 12px;
+      text-decoration: none;
+      min-width: 180px;
+      transition: border-color .2s, background .2s, transform .15s;
+    }
+    @media (hover: hover) {
+      .app-store-btn:hover {
+        border-color: var(--gold);
+        transform: translateY(-1px);
+      }
+    }
+    .app-store-glyph {
+      width: 28px;
+      height: 28px;
+      color: var(--white);          /* applies to inline SVG via currentColor */
+      flex-shrink: 0;
+    }
+    .app-store-glyph.play {
+      /* Google Play triangle is multicolored — don't tint */
+      color: transparent;
+    }
+    .app-store-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+      text-align: left;             /* English store names read LTR even inside RTL parent */
+      direction: ltr;
+    }
+    .app-store-eyebrow {
+      font-size: 10px;
+      color: var(--grey-light);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .app-store-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--white);
+    }
+    @media (max-width: 480px) {
+      .app-store-buttons { flex-direction: column; align-items: center; }
+      .app-store-btn { width: 100%; max-width: 280px; justify-content: center; }
+    }
+
     /* ── DISCLAIMER ── */
     .disclaimer {
       background: var(--black);
@@ -1645,7 +1713,7 @@
   <header>
     <div class="logo">NOGYM<span>FORME</span></div>
     <div class="header-actions">
-      <a href="#" class="header-link" onclick="openMembersGate(event)">אזור חברי המותג NOGYMFORME</a>
+      <a href="#" class="header-link" onclick="openMembersGate(event)">אזור חברים</a>
       <a href="#" class="header-cta" onclick="openPlanModal(event)">להזמנה עכשיו →</a>
     </div>
   </header>
@@ -1723,7 +1791,7 @@
             <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:rgba(232,217,0,0.12);border:1px solid var(--gold);margin-bottom:16px;">
               <span style="font-size:28px;">🔒</span>
             </div>
-            <h2 style="font-family:var(--font-display);font-size:clamp(22px,3vw,28px);font-weight:900;color:var(--white);margin-bottom:14px;">אזור חברי המותג</h2>
+            <h2 style="font-family:var(--font-display);font-size:clamp(22px,3vw,28px);font-weight:900;color:var(--white);margin-bottom:14px;">אזור חברים</h2>
             <p style="color:var(--grey-light);font-size:15px;line-height:1.6;max-width:420px;margin:0 auto;">
               הכלים האלו זמינים אך ורק ללקוחות המותג. רכשת מוצר? התחבר עם המייל שאיתו ביצעת את ההזמנה
             </p>
@@ -1753,12 +1821,49 @@
             <span style="font-size:28px;">✓</span>
           </div>
           <h2 style="font-family:var(--font-display);font-size:clamp(22px,3vw,28px);font-weight:900;color:var(--white);margin-bottom:10px;">ברוך הבא, אחי</h2>
-          <p style="color:var(--grey-light);font-size:15px;line-height:1.6;margin-bottom:28px;">
-            ההזמנה שלך אומתה. אזור החברים שלך מוכן.
+          <p style="color:var(--grey-light);font-size:15px;line-height:1.6;margin-bottom:24px;">
+            ההזמנה שלך אומתה. הורד את האפליקציה למובייל:
           </p>
-          <a id="membersDownloadCta" href="https://app.nogymforme.com" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:var(--gold);color:var(--black);font-family:var(--font-display);font-weight:900;font-size:16px;padding:16px 36px;border-radius:var(--radius-pill);text-decoration:none;transition:transform .15s;">
-            כניסה לאזור החברים ←
-          </a>
+
+          <!-- ─────────────────────────────────────────────────────────────
+               APP STORE BUTTONS
+               Swap the two href="#" placeholders below with the real
+               Apple App Store and Google Play URLs once the apps are live.
+               ───────────────────────────────────────────────────────────── -->
+          <div class="app-store-buttons">
+            <a class="app-store-btn"
+               id="appStoreLink"
+               href="#"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="הורד מ-App Store">
+              <svg class="app-store-glyph" viewBox="0 0 384 512" aria-hidden="true">
+                <path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM260.1 80.4c25.7-30.5 25.4-58.3 24.3-68.4-21.8 1.3-47.1 14.9-61.5 31.6-15.9 17.9-25.3 40-23.3 64 23.7 1.8 45.3-10.4 60.5-27.2z"/>
+              </svg>
+              <div class="app-store-text">
+                <span class="app-store-eyebrow">Download on the</span>
+                <strong class="app-store-name">App Store</strong>
+              </div>
+            </a>
+
+            <a class="app-store-btn"
+               id="playStoreLink"
+               href="#"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="הורד מ-Google Play">
+              <svg class="app-store-glyph play" viewBox="0 0 512 512" aria-hidden="true">
+                <path fill="#5BC9F4" d="M325.3 234.3 104.6 13l280.8 161.2-60.1 60.1z"/>
+                <path fill="#EA4335" d="M104.6 13l220.7 221.3-220.7 220.7V13z"/>
+                <path fill="#FBBC04" d="M385.4 174.2l60.5 35-60.6 60.6-60.1-60.1 60.2-35.5z"/>
+                <path fill="#34A853" d="M104.6 455l280.8-161.2-60.1-60.1L104.6 455z"/>
+              </svg>
+              <div class="app-store-text">
+                <span class="app-store-eyebrow">GET IT ON</span>
+                <strong class="app-store-name">Google Play</strong>
+              </div>
+            </a>
+          </div>
           <button type="button" onclick="logoutMember()" style="display:block;margin:24px auto 0;background:none;border:none;color:var(--grey);font-size:13px;cursor:pointer;text-decoration:underline;">
             התחבר עם מייל אחר
           </button>
@@ -2263,7 +2368,7 @@
   <footer>
     <span class="logo">NOGYM<span style="color: var(--white)">FORME</span></span>
     <p>© 2025 NOGYMFORME. כל הזכויות שמורות.</p>
-    <p style="margin-top: 8px;"><a href="#" onclick="openMembersGate(event)" style="color: var(--gold); text-decoration: none; margin: 0 12px; font-weight: 700;">אזור חברי המותג</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">מדיניות פרטיות</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">תנאי שימוש</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">יצירת קשר</a></p>
+    <p style="margin-top: 8px;"><a href="#" onclick="openMembersGate(event)" style="color: var(--gold); text-decoration: none; margin: 0 12px; font-weight: 700;">אזור חברים</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">מדיניות פרטיות</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">תנאי שימוש</a> · <a href="#" style="color: var(--grey); text-decoration: none; margin: 0 12px;">יצירת קשר</a></p>
   </footer>
 
   <!-- DISCOUNT POPUP (centred floating modal) -->
