@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  NOGYMFORME app icon — master vector.
+
+  Used as:
+    • Favicon on the marketing site (nogymforme.com)
+    • Source-of-truth for app store icons (Phase B will rasterize this to
+      PNG at all required sizes via the Next.js repo's build pipeline)
+
+  Design:
+    • 1024×1024 square (Apple App Store master size)
+    • Black background with 180px corner radius — Apple/Google will mask
+      to their own platform shapes, but 180/1024 ≈ 17.5% reads correctly
+      across mask styles (iOS squircle, Android adaptive circle, Web square)
+    • "NGFM" 4-letter monogram in brand gold, centered, max weight
+    • Single-tone for silhouette clarity at small sizes (Apple HIG)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Brand-black background tile -->
+  <rect width="1024" height="1024" fill="#0A0A0A" rx="180" ry="180"/>
+
+  <!-- Subtle inner gold edge (1.5%) — gives the tile premium weight without competing with the monogram -->
+  <rect x="14" y="14" width="996" height="996" rx="166" ry="166" fill="none" stroke="#E8D900" stroke-width="2" opacity="0.35"/>
+
+  <!-- NGFM monogram in brand gold.
+       Helvetica Neue / Arial fallback for universal rasterization;
+       letter-spacing tightens the wordmark feel; baseline centered on canvas. -->
+  <text x="512" y="538"
+        font-family="'Helvetica Neue', 'Helvetica', 'Arial Black', sans-serif"
+        font-weight="900"
+        font-size="320"
+        fill="#E8D900"
+        text-anchor="middle"
+        dominant-baseline="central"
+        letter-spacing="-14">NGFM</text>
+</svg>
