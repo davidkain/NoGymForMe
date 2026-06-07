@@ -9,14 +9,43 @@ retina DPR the device renders at).
 
 ```
 store-screenshots/
-└── iphone-6.7/        ← 1290×2796 — required by Apple, also valid for Google
-    ├── dashboard.png   ← landing screen post-login
-    ├── weight.png      ← weight tracking
-    ├── checkin.png     ← daily check-in (showed weight pre-fill + streak calendar)
-    ├── meals.png       ← nutrition + meal plan
-    ├── lounge.png      ← community feed with 3 categories
-    └── profile.png     ← account + subscription
+├── iphone-6.7/                     ← 1290×2796 — required by Apple, also valid for Google
+│   ├── dashboard.png                ← landing screen post-login
+│   ├── weight.png                   ← weight tracking
+│   ├── checkin.png                  ← daily check-in (showed weight pre-fill + streak calendar)
+│   ├── meals.png                    ← nutrition + meal plan
+│   ├── lounge.png                   ← community feed with 3 categories
+│   └── profile.png                  ← account + subscription
+├── feature-graphic-1024x500.png    ← Google Play feature graphic (banner at top of listing)
+└── feature-graphic-source.svg      ← editable SVG source of the feature graphic
 ```
+
+## Feature graphic (Google Play required asset)
+
+`feature-graphic-1024x500.png` is the banner Google Play displays
+at the top of your app's store listing on Android. Required spec:
+
+- **Size:** exactly 1024×500 px
+- **Fully opaque** (no transparency — Google rejects transparent PNGs here)
+- **Safe zone:** keep content in central 924×400 region (Play UI sometimes overlays
+  install buttons / rating chips on the edges)
+
+Design lockup: NGFM monogram badge (mirrors `/app-icon.svg`) on the left + Hebrew
+RTL tagline stack on the right, with a small Latin NOGYMFORME eyebrow + gold divider.
+
+### Editing the feature graphic
+
+To tweak copy / colors / layout, edit `feature-graphic-source.svg` then re-rasterize:
+
+```bash
+rsvg-convert -w 1024 -h 500 feature-graphic-source.svg -o feature-graphic-1024x500.png
+```
+
+**Bidi gotcha** if you change the Hebrew text and it bleeds off-screen:
+`rsvg-convert` correctly applies RTL bidi reordering, but that means
+`text-anchor="end"` anchors the *visual-left* edge of RTL text (the
+reading-order end is on the left in Hebrew). Use `text-anchor="start"`
+with `direction="rtl"` to right-align Hebrew text to a given x coordinate.
 
 ## Used for
 
