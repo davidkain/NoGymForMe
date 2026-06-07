@@ -37,7 +37,9 @@ const TIMEZONE = 'Asia/Jerusalem';
 // to place a real order. Add team members here as needed.
 // All comparisons are case-insensitive + whitespace-trimmed.
 const OWNER_EMAILS = [
-  NOTIFY_EMAIL  // davidkain1@gmail.com
+  NOTIFY_EMAIL,                       // davidkain1@gmail.com — operator
+  'davidkain1+stores@gmail.com'       // App Store + Google Play reviewer credential
+                                      // (Gmail plus-addressing — routes to davidkain1@gmail.com inbox)
 ];
 
 const TABS = {
