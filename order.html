@@ -755,7 +755,7 @@
 
         <!-- Shown only for subscription plans: replaces the coupon row -->
         <div class="sub-discount-note" id="subDiscountNote" style="display:none;">
-          ✓ המנוי כולל <strong>הנחה קבועה של 15%</strong> — אין צורך בקוד קופון.
+          ✓ המנוי כולל <strong>הנחה קבועה של 21%</strong> — אין צורך בקוד קופון.
         </div>
 
         <hr class="totals-divider">
@@ -835,7 +835,7 @@
     single:       { name: 'חבילת הביישן',                       variant: 'בקבוק אחד - 90 קפסולות',         price: 198, installment: 16.5, qty: 1 },
     starter:      { name: 'חבילת יאללה, בוא ננסה',              variant: 'שני בקבוקים - 180 קפסולות',      price: 396, installment: 33,   qty: 2 },
     results:      { name: 'חבילת אול-אין (כי הקיץ כבר פה...)',  variant: 'שלושה בקבוקים - 270 קפסולות',    price: 496, installment: 41.3, qty: 3 },
-    subscription: { name: 'מנוי חודשי',                          variant: 'בקבוק אחד מדי חודש · ביטול בכל עת', price: 168, isSubscription: true, qty: 1 }
+    subscription: { name: 'מנוי חודשי',                          variant: 'בקבוק אחד מדי חודש · ביטול בכל עת', price: 155, isSubscription: true, qty: 1 }
   };
 
   var params  = new URLSearchParams(window.location.search);
@@ -860,7 +860,7 @@
       ? 'מחויב מדי חודש · משלוח חינם תמיד · ביטול בכל עת'
       : 'או ₪' + plan.installment + ' x ב-12 תשלומים ללא ריבית';
 
-    // Subscriptions already include a permanent 15% discount, so stacking a
+    // Subscriptions already include a permanent 21% discount, so stacking a
     // 10% promo coupon on top breaks the pricing narrative AND the unit
     // economics. Hide the coupon row and show a friendly explanatory note.
     var couponRow      = document.getElementById('couponRow');
