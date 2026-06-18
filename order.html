@@ -989,6 +989,26 @@
 
   /* ── Init ── */
   renderSummary();
+
+  /* Meta Pixel: standard "InitiateCheckout" — fires once when the visitor
+     reaches this order page with a plan selected. Lets Meta optimize ad
+     delivery toward people who actually reach checkout, and measures the
+     drop-off between landing and reaching this step.
+
+     NOTE: there is intentionally NO "Purchase" event here — this page is
+     currently a waitlist (no payment gateway connected), so firing Purchase
+     would report fake conversions and mis-train ad optimization. When the
+     real payment flow goes live, fire it at the verified success step:
+       fbq('track', 'Purchase', { value: currentTotal, currency: 'ILS',
+           content_name: plan.name }); */
+  if (typeof fbq === 'function') {
+    fbq('track', 'InitiateCheckout', {
+      content_name:     plan.name,
+      content_category: plan.isSubscription ? 'subscription' : 'one_time',
+      value:            plan.price,
+      currency:         'ILS'
+    });
+  }
 </script>
 
 <!-- FLOATING WHATSAPP CTA -->
