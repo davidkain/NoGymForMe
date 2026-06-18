@@ -1447,7 +1447,8 @@
       header {
         display: flex;
         justify-content: flex-end;
-        top: 42px;                 /* sit just below the announcement bar */
+        top: 58px;                 /* clear the announcement bar (2 lines on phones) */
+        z-index: 102;              /* above the bar (101) so the pill frame is never clipped */
         padding: 6px 16px;
         background: transparent;
         backdrop-filter: none;
@@ -1467,7 +1468,7 @@
       }
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
-      .hero { padding-top: 86px; } /* clear announcement bar + members pill */
+      .hero { padding-top: 100px; } /* clear announcement bar + members pill */
       .hero-headline { white-space: normal; top: 5%; right: 4%; left: auto; max-width: 64%; font-size: clamp(18px, 5.4vw, 30px); letter-spacing: 0; }
 
       .problem-grid,
