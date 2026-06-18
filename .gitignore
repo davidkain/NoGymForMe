@@ -2,3 +2,13 @@
 
 # Playwright MCP transient trace + console logs
 .playwright-mcp/
+
+# Node / Vercel
+node_modules/
+.vercel/
+
+# Secrets — env vars live in the Vercel dashboard, never in the repo.
+# (.env.example IS committed as documentation; real values never are.)
+.env
+.env.local
+.env.*.local
