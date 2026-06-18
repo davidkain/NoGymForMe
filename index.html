@@ -1458,10 +1458,12 @@
       .header-cta { display: none; }
       .header-link {
         pointer-events: auto;
-        background: rgba(10,10,10,0.72);
-        backdrop-filter: blur(6px);
-        padding: 8px 14px;
+        background: var(--black);    /* solid so it reads as one clean button */
+        backdrop-filter: none;       /* blur over the hero caused edge artifacts */
+        padding: 8px 16px;
         font-size: 13px;
+        border-radius: 10px;         /* moderate radius — the 100px pill turned the
+                                        short ends into two prominent half-circles */
       }
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
@@ -1800,8 +1802,8 @@
             <span style="font-size:28px;">✓</span>
           </div>
           <h2 style="font-family:var(--font-display);font-size:clamp(22px,3vw,28px);font-weight:900;color:var(--white);margin-bottom:10px;">ברוך הבא, אחי</h2>
-          <p style="color:var(--grey-light);font-size:16px;line-height:1.7;margin-bottom:8px;">אנחנו מכינים לכם משהו טוב! האפליקציה שלנו מתעדכנת ממש עכשיו ותיהיה זמינה להורדה בקרוב. נעדכן אתכם במייל ברגע שהגרסה החדשה תהיה באוויר.</p>
-          <p style="color:var(--gold);font-weight:800;font-size:15px;margin-top:14px;margin-bottom:0;">צוות NOGYMFORME</p>
+          <p style="color:var(--white);font-size:18px;line-height:1.8;margin-bottom:8px;">אנחנו מכינים לכם משהו טוב! האפליקציה שלנו מתעדכנת ממש עכשיו ותיהיה זמינה להורדה בקרוב. נעדכן אתכם במייל ברגע שהגרסה החדשה תהיה באוויר.</p>
+          <p style="color:var(--gold);font-weight:800;font-size:16px;margin-top:16px;margin-bottom:0;">צוות NOGYMFORME</p>
           <button type="button" onclick="logoutMember()" style="display:block;margin:24px auto 0;background:none;border:none;color:var(--grey);font-size:13px;cursor:pointer;text-decoration:underline;">
             התחבר עם מייל אחר
           </button>
