@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "name": "nogymforme-site",
+  "description": "NOGYMFORME static site + Vercel serverless payment function (SUMIT).",
+  "engines": {
+    "node": "20.x"
+  }
+}

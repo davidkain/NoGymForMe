@@ -679,32 +679,39 @@
   <!-- ── FORM COLUMN ── -->
   <div class="form-col">
 
-    <!-- WAITLIST (replaces purchase flow while payment gateway is being connected) -->
+    <!-- CHECKOUT — collect contact details, then redirect to SUMIT's secure payment page -->
     <div class="co-section waitlist-section">
       <div class="co-section-body waitlist-body">
-        <h2 class="waitlist-heading">
-          רגע לפני שאתה מוציא כרטיס, אנחנו עדיין מסיימים להכין את הכל כמו שצריך.
-        </h2>
+        <h2 class="waitlist-heading">כמעט שם — נשאיר פרטים ועוברים לתשלום מאובטח</h2>
         <p class="waitlist-sub">
-          רוצה להיות מהראשונים שמנסים את <span dir="ltr" class="brand-inline">NOGYMFORME</span>?<br>
-          השאר מייל, ונעדכן אותך ברגע שהקפסולות מוכנות להזמנה.
+          נשלח אישור ופרטי מעקב למייל. התשלום עצמו מתבצע בעמוד המאובטח של חברת הסליקה
+          <span dir="ltr" class="brand-inline">SUMIT</span> — פרטי האשראי לעולם אינם נשמרים אצלנו.
         </p>
 
-        <form id="waitlistForm" class="waitlist-form" novalidate>
+        <form id="checkoutForm" class="waitlist-form" novalidate>
           <div class="field-group">
-            <input class="field-input waitlist-input"
-                   type="email" id="waitlistEmail"
-                   placeholder="האימייל שלך כאן..."
-                   autocomplete="email" required dir="auto">
-            <span class="field-error" id="waitlistEmailErr">נא להזין כתובת מייל תקינה</span>
+            <input class="field-input waitlist-input" type="text" id="custName"
+                   placeholder="שם מלא" autocomplete="name" required dir="auto">
+            <span class="field-error" id="custNameErr">נא להזין שם מלא</span>
           </div>
-          <button class="co-submit-btn waitlist-btn" type="submit" id="waitlistBtn">
-            אני רוצה להיות ראשון!
+          <div class="field-group">
+            <input class="field-input waitlist-input" type="email" id="custEmail"
+                   placeholder="אימייל" autocomplete="email" required dir="auto">
+            <span class="field-error" id="custEmailErr">נא להזין כתובת מייל תקינה</span>
+          </div>
+          <div class="field-group">
+            <input class="field-input waitlist-input" type="tel" id="custPhone"
+                   placeholder="טלפון" autocomplete="tel" required dir="auto">
+            <span class="field-error" id="custPhoneErr">נא להזין מספר טלפון</span>
+          </div>
+          <button class="co-submit-btn waitlist-btn" type="submit" id="payBtn">
+            המשך לתשלום מאובטח
           </button>
+          <span class="field-error" id="payError">אירעה תקלה ביצירת התשלום. נסה שוב או דברו איתנו בוואטסאפ.</span>
         </form>
 
         <p class="waitlist-thanks">
-          לא נשלח לך ספאם — רק עדכון אחד ברגע שהמוצר זמין להזמנה.
+          🔒 התשלום מעובד באופן מאובטח על ידי SUMIT.
         </p>
       </div>
     </div>
@@ -922,60 +929,78 @@
     }
   }
 
-  /* ── Waitlist submit (replaces purchase flow while payment gateway is being connected) ── */
+  /* ── Checkout submit → create a SUMIT payment, then redirect ── */
   function isValidEmail(v) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   }
 
-  document.getElementById('waitlistForm').addEventListener('submit', function (e) {
+  document.getElementById('checkoutForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    var input = document.getElementById('waitlistEmail');
-    var errEl = document.getElementById('waitlistEmailErr');
-    var email = input.value.trim();
+    var nameEl  = document.getElementById('custName');
+    var emailEl = document.getElementById('custEmail');
+    var phoneEl = document.getElementById('custPhone');
+    var payErr  = document.getElementById('payError');
+    payErr.classList.remove('visible');
 
-    if (!isValidEmail(email)) {
-      input.classList.add('error');
-      errEl.classList.add('visible');
-      input.focus();
-      return;
+    /* Validate, marking each field with the same .error / .visible pattern
+       the rest of the page already uses. */
+    var ok = true;
+    function mark(el, valid) {
+      var err = document.getElementById(el.id + 'Err');
+      if (valid) { el.classList.remove('error'); if (err) err.classList.remove('visible'); }
+      else       { el.classList.add('error');    if (err) err.classList.add('visible'); ok = false; }
     }
-    input.classList.remove('error');
-    errEl.classList.remove('visible');
+    mark(nameEl,  nameEl.value.trim().length >= 2);
+    mark(emailEl, isValidEmail(emailEl.value.trim()));
+    mark(phoneEl, phoneEl.value.replace(/\D/g, '').length >= 9);
+    if (!ok) return;
 
-    var btn = document.getElementById('waitlistBtn');
+    var name  = nameEl.value.trim();
+    var email = emailEl.value.trim();
+    var phone = phoneEl.value.trim();
+
+    var btn = document.getElementById('payBtn');
+    var prevLabel = btn.textContent;
     btn.disabled    = true;
-    btn.textContent = 'שולח...';
+    btn.textContent = 'מעבירים אותך לתשלום מאובטח...';
 
-    /* Persist to Google Sheet via the existing Apps Script endpoint.
-       `source` is tagged with the plan so you can see in your sheet
-       which package each waitlist signup was viewing. */
-    if (window.NGFMTrack && typeof NGFMTrack.discount === 'function') {
-      NGFMTrack.discount(email, 'waitlist_' + planKey);
+    /* Record the lead in the Google Sheet now, so a drop-off on SUMIT's page
+       is still captured as a "started" checkout. */
+    if (window.NGFMTrack && typeof NGFMTrack.started === 'function') {
+      NGFMTrack.started({ name: name, email: email, phone: phone, plan: planKey });
     }
 
-    /* Meta Pixel: standard "Lead" event — used by Meta to optimize ad
-       delivery toward people likely to give their email, and lets you
-       build a Custom Audience of waitlist signups for a launch-day blast. */
+    /* Meta Pixel: standard funnel step once the user commits to pay. */
     if (typeof fbq === 'function') {
-      fbq('track', 'Lead', {
-        content_name:     plan.name,
-        content_category: 'waitlist',
-        value:            plan.price,
-        currency:         'ILS'
+      fbq('track', 'AddPaymentInfo', {
+        content_name: plan.name,
+        value:        plan.price,
+        currency:     'ILS'
       });
     }
 
-    /* Repurpose the existing success overlay for the waitlist confirmation. */
-    document.getElementById('successOrderNum').style.display = 'none';
-    document.querySelector('.success-title').textContent     = 'נרשמת בהצלחה! 🎉';
-    document.querySelector('.success-sub').textContent       =
-      'תודה — נעדכן אותך במייל ברגע ש-NOGYMFORME מוכן להזמנה.';
-    document.querySelector('.success-note').innerHTML        =
-      'בינתיים, אתה רשמית בראש התור.<br>צפה לעדכון מאיתנו בשבועות הקרובים.';
-
-    document.getElementById('successOverlay').classList.add('visible');
-    document.body.style.overflow = 'hidden';
+    /* Ask OUR backend to create the SUMIT payment page. We send only the plan
+       key + contact details — never an amount. The server decides the price. */
+    fetch('/api/create-payment', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ plan: planKey, name: name, email: email, phone: phone })
+    })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+      .then(function (res) {
+        if (res.ok && res.body && res.body.paymentUrl) {
+          window.location.href = res.body.paymentUrl; // → SUMIT secure payment page
+        } else {
+          throw new Error((res.body && res.body.error) || 'no payment url');
+        }
+      })
+      .catch(function (err) {
+        console.error('payment init failed:', err);
+        btn.disabled    = false;
+        btn.textContent = prevLabel;
+        payErr.classList.add('visible');
+      });
   });
 
   /* ── Clear error on type ── */
@@ -989,6 +1014,30 @@
 
   /* ── Init ── */
   renderSummary();
+
+  /* Plan-aware payment button label. */
+  document.getElementById('payBtn').textContent =
+    plan.isSubscription ? 'התחל מנוי חודשי מאובטח' : 'המשך לתשלום מאובטח';
+
+  /* Meta Pixel: standard "InitiateCheckout" — fires once when the visitor
+     reaches this order page with a plan selected. Lets Meta optimize ad
+     delivery toward people who actually reach checkout, and measures the
+     drop-off between landing and reaching this step.
+
+     NOTE: there is intentionally NO "Purchase" event here — this page is
+     currently a waitlist (no payment gateway connected), so firing Purchase
+     would report fake conversions and mis-train ad optimization. When the
+     real payment flow goes live, fire it at the verified success step:
+       fbq('track', 'Purchase', { value: currentTotal, currency: 'ILS',
+           content_name: plan.name }); */
+  if (typeof fbq === 'function') {
+    fbq('track', 'InitiateCheckout', {
+      content_name:     plan.name,
+      content_category: plan.isSubscription ? 'subscription' : 'one_time',
+      value:            plan.price,
+      currency:         'ILS'
+    });
+  }
 </script>
 
 <!-- FLOATING WHATSAPP CTA -->
