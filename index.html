@@ -235,6 +235,21 @@
       line-height: 1.2;
     }
 
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: clamp(14px, 2.2vw, 24px);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.2;
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+      margin: 0 0 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px dashed var(--gold);
+      opacity: 0;
+      animation: fadeUp .6s ease forwards .1s;
+    }
+
     .hero-subtitle {
       font-family: var(--font-display);
       font-size: clamp(22px, 2.8vw, 42px);
@@ -1490,6 +1505,7 @@
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
       .hero { padding-top: 52px; }
+      .hero-headline { white-space: normal; font-size: clamp(26px, 7vw, 40px); letter-spacing: 0; }
 
       .problem-grid,
       .ingredients-grid,
@@ -1883,6 +1899,7 @@
 
     <!-- Right: Text content -->
     <div class="hero-content-col">
+      <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
       <p class="hero-eyebrow">תוסף תזונה לגברים · נוסחה ייחודית</p>
       <p class="hero-subtitle">
         הפתרון הטבעי הראשון בישראל שמיועד <span style="color:var(--gold)">לגברים.</span><br>תומך בחילוף חומרים ותורם לתחושת שובע, גם בלי ללכת לחדר כושר.
@@ -2144,14 +2161,12 @@
             <li>משלוח חינם</li>
             <li>הנחה קבועה</li>
             <li>אספקה חודשית אוטומטית</li>
-            <li>ביטול בכל עת — בלי שאלות</li>
           </ul>
 
           <div class="sub-cta-row">
             <a href="order.html?plan=subscription"
                class="btn-sub"
                onclick="handlePurchase('subscription',event)">אני בפנים ←</a>
-            <span class="sub-cancel-note">ביטול בכל רגע. בלי קנסות. בלי הסברים.</span>
           </div>
         </div>
 
