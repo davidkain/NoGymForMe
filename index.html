@@ -174,10 +174,7 @@
 
     /* ── HERO ── */
     .hero {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: stretch;
+      display: block;
       padding-top: 112px; /* header (72) + announcement bar (40) */
       position: relative;
       overflow: hidden;
@@ -186,23 +183,21 @@
     .hero-image-col {
       position: relative;
       overflow: hidden;
-      min-height: 100vh;
     }
 
     .hero-image-col img {
       width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center center;
+      height: auto;
       display: block;
     }
 
-    /* gradient fade from image into dark bg on the right edge */
+    /* top scrim over the image so the overlaid headline stays legible */
     .hero-image-col::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(to left, var(--black) 0%, transparent 40%);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 24%, transparent 42%);
+      pointer-events: none;
     }
 
     .hero-content-col {
@@ -236,16 +231,21 @@
     }
 
     .hero-headline {
+      position: absolute;
+      top: 5%;
+      right: 4%;
+      left: 4%;
+      z-index: 4;
       font-family: var(--font-display);
-      font-size: clamp(14px, 2.2vw, 24px);
+      font-size: clamp(13px, 3vw, 42px);
       font-weight: 900;
       color: var(--white);
       line-height: 1.2;
       letter-spacing: -0.3px;
       white-space: nowrap;
-      margin: 0 0 20px;
-      padding-bottom: 16px;
-      border-bottom: 2px dashed var(--gold);
+      text-align: right;
+      margin: 0;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.85);
       opacity: 0;
       animation: fadeUp .6s ease forwards .1s;
     }
@@ -1505,7 +1505,7 @@
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
       .hero { padding-top: 52px; }
-      .hero-headline { white-space: normal; font-size: clamp(26px, 7vw, 40px); letter-spacing: 0; }
+      .hero-headline { white-space: normal; top: 5%; right: 4%; left: auto; max-width: 64%; font-size: clamp(18px, 5.4vw, 30px); letter-spacing: 0; }
 
       .problem-grid,
       .ingredients-grid,
@@ -1548,7 +1548,7 @@
         margin-top: 0;
       }
       .hero-image-col::after {
-        display: none;
+        display: block;
       }
       .hero-content-col { padding: 24px 20px 40px; }
       .hero-eyebrow { font-size: clamp(20px, 6vw, 28px); }
@@ -1895,11 +1895,11 @@
     <!-- Left: Dr. Kain image -->
     <div class="hero-image-col">
       <img src="hero.png" alt="ד&quot;ר דוד קיין עם מוצר NOGYMFORME">
+      <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
     </div>
 
     <!-- Right: Text content -->
     <div class="hero-content-col">
-      <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
       <p class="hero-eyebrow">תוסף תזונה לגברים · נוסחה ייחודית</p>
       <p class="hero-subtitle">
         הפתרון הטבעי הראשון בישראל שמיועד <span style="color:var(--gold)">לגברים.</span><br>תומך בחילוף חומרים ותורם לתחושת שובע, גם בלי ללכת לחדר כושר.
