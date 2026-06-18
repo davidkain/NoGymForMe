@@ -1419,7 +1419,17 @@
       letter-spacing: 4px;
       padding: 12px 32px;
       border-radius: var(--radius-md);
+      cursor: pointer;
+      user-select: all;
+      transition: transform .12s, background .2s, border-color .2s, color .2s;
     }
+    .popup-coupon:hover { transform: translateY(-1px); }
+    .popup-coupon.copied {
+      background: rgba(76,175,80,0.15);
+      border-color: #4caf50;
+      color: #4caf50;
+    }
+    .popup-copy-hint { font-size: 13px; color: var(--grey-light); margin-top: 12px; }
 
     @media (max-width: 768px) {
       .popup-card { padding: 44px 24px 36px; }
@@ -2479,6 +2489,51 @@
       return getStoredDiscountEmails().indexOf(normalizeEmail(email)) !== -1;
     }
 
+    // Per-email code cache so a returning visitor can re-copy their code without
+    // waiting on the server. The server stays the source of truth (one per email).
+    var DISCOUNT_CODE_LS_KEY = 'ngfm_discount_codes';
+    function getStoredCodes() {
+      try { return JSON.parse(localStorage.getItem(DISCOUNT_CODE_LS_KEY) || '{}') || {}; } catch (e) { return {}; }
+    }
+    function rememberDiscountCode(email, code) {
+      if (!code) return;
+      var map = getStoredCodes();
+      map[normalizeEmail(email)] = code;
+      try { localStorage.setItem(DISCOUNT_CODE_LS_KEY, JSON.stringify(map)); } catch (e) {}
+    }
+    function getLocalDiscountCode(email) {
+      return getStoredCodes()[normalizeEmail(email)] || '';
+    }
+
+    // Copy `text` to the clipboard (Clipboard API, with a legacy fallback) and
+    // flash "הועתק!" feedback on the code element.
+    function copyCodeToClipboard(el, text, hintEl) {
+      function feedback() {
+        var prev = el.getAttribute('data-code') || el.textContent;
+        el.textContent = 'הועתק! ✓';
+        el.classList.add('copied');
+        if (hintEl) hintEl.textContent = 'הקוד הועתק ללוח';
+        setTimeout(function () {
+          el.textContent = prev;
+          el.classList.remove('copied');
+          if (hintEl) hintEl.textContent = 'לחץ על הקוד כדי להעתיק';
+        }, 1500);
+      }
+      function legacy() {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.focus(); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+        } catch (e) {}
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(feedback).catch(function () { legacy(); feedback(); });
+      } else {
+        legacy(); feedback();
+      }
+    }
+
     /** Replace the popup form with the brand-voice "already got it" message.
      *  Also hides the popup's original header (countdown / "10% הנחה" /
      *  sub) because it directly contradicts the new message. The success
@@ -2518,8 +2573,10 @@
       form.appendChild(wrap);
     }
 
-    /** Replace the popup form with the success state showing the coupon code. */
-    function showCouponSuccess(code) {
+    /** Replace the popup form with the success state showing the unique code.
+     *  The code box is click-to-copy (Clipboard API). `already` = the email had
+     *  already claimed this code (one per email). */
+    function showCouponSuccess(code, already) {
       var form = document.getElementById('popupForm');
       while (form.firstChild) form.removeChild(form.firstChild);
 
@@ -2528,17 +2585,44 @@
 
       var successText = document.createElement('div');
       successText.className = 'popup-success-text';
-      successText.textContent = '✓ הקוד שלך מוכן!';
+
+      if (!code) {
+        // No code came back (e.g. the Apps Script isn't redeployed yet) — show a
+        // graceful thank-you rather than a broken/empty code box.
+        successText.textContent = already ? 'אחי, כבר קיבלת את ההנחה.' : '✓ נרשמת בהצלחה!';
+        successDiv.appendChild(successText);
+        form.appendChild(successDiv);
+        setTimeout(closePopup, 6000);
+        return;
+      }
+
+      successText.textContent = already ? 'כבר קיבלת קוד — הנה הוא שוב:' : '✓ הקוד שלך מוכן!';
 
       var couponDiv = document.createElement('div');
       couponDiv.className = 'popup-coupon';
       couponDiv.textContent = code;
+      couponDiv.setAttribute('data-code', code);
+      couponDiv.setAttribute('role', 'button');
+      couponDiv.setAttribute('tabindex', '0');
+      couponDiv.setAttribute('aria-label', 'העתק קוד ' + code);
+      couponDiv.title = 'לחץ להעתקה';
+
+      var hint = document.createElement('div');
+      hint.className = 'popup-copy-hint';
+      hint.textContent = 'לחץ על הקוד כדי להעתיק';
+
+      couponDiv.addEventListener('click', function () { copyCodeToClipboard(couponDiv, code, hint); });
+      couponDiv.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); copyCodeToClipboard(couponDiv, code, hint); }
+      });
 
       successDiv.appendChild(successText);
       successDiv.appendChild(couponDiv);
+      successDiv.appendChild(hint);
       form.appendChild(successDiv);
 
-      setTimeout(closePopup, 5000);
+      // Longer auto-close so there's time to copy (was 5s).
+      setTimeout(closePopup, 15000);
     }
 
     function submitPopup() {
@@ -2552,9 +2636,11 @@
 
       sessionStorage.setItem('ngfm_popup_seen', '1');
 
-      // Fast path: localStorage already has this email → show "אחי" instantly.
-      if (discountEmailKnownLocally(email)) {
-        showAlreadyReceived();
+      // Fast path: we already cached this email's code locally → show it
+      // instantly (re-copyable) without waiting on the server.
+      var cached = getLocalDiscountCode(email);
+      if (cached) {
+        showCouponSuccess(cached, true);
         return;
       }
 
@@ -2562,23 +2648,20 @@
       var btn = document.querySelector('.popup-btn');
       if (btn) { btn.disabled = true; btn.textContent = 'בודק...'; }
 
-      // Server-side per-email check via Apps Script.
-      // Falls open on timeout/error: returning visitor on a fresh device
-      // gets a second coupon code rather than a hard failure message.
+      // Server-side per-email check via Apps Script. Returns the unique code —
+      // the SAME code if this email already claimed one (one per email).
       if (window.NGFMTrack && typeof NGFMTrack.discountCheck === 'function') {
         NGFMTrack.discountCheck(email, 'popup', function (resp) {
-          rememberDiscountEmail(email); // remember either way
-          if (resp && resp.alreadyExists) {
-            showAlreadyReceived();
-          } else {
-            showCouponSuccess('NOGYM10');
-          }
+          rememberDiscountEmail(email);
+          var code = resp && resp.code ? resp.code : '';
+          if (code) rememberDiscountCode(email, code);
+          showCouponSuccess(code, !!(resp && resp.alreadyExists));
         });
       } else {
-        // Legacy fallback (older tracking.js without discountCheck)
-        if (window.NGFMTrack) NGFMTrack.discount(email);
+        // Legacy fallback (older tracking.js without discountCheck).
+        if (window.NGFMTrack && typeof NGFMTrack.discount === 'function') NGFMTrack.discount(email);
         rememberDiscountEmail(email);
-        showCouponSuccess('NOGYM10');
+        showCouponSuccess('', false);
       }
     }
 

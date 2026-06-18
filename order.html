@@ -704,6 +704,21 @@
                    placeholder="טלפון" autocomplete="tel" required dir="auto">
             <span class="field-error" id="custPhoneErr">נא להזין מספר טלפון</span>
           </div>
+
+          <!-- Discount code — always visible (previously buried in the
+               collapsible order summary, hidden on mobile). Validated
+               server-side against the email above before it applies. -->
+          <div class="field-group" id="couponRow">
+            <div class="coupon-row">
+              <input class="coupon-input" type="text" id="couponInput"
+                     placeholder="קוד הנחה (לא חובה)" dir="ltr" autocomplete="off"
+                     style="direction:ltr;text-align:left;text-transform:uppercase;">
+              <button class="coupon-apply-btn" type="button" id="couponApplyBtn" onclick="couponBtnClick()">החל</button>
+            </div>
+            <span class="coupon-success" id="couponSuccess">✓ קוד הנחה הוחל — 10% הנחה</span>
+            <span class="field-error" id="couponError">קוד לא תקין</span>
+          </div>
+
           <button class="co-submit-btn waitlist-btn" type="submit" id="payBtn">
             המשך לתשלום מאובטח
           </button>
@@ -753,12 +768,8 @@
           <div class="product-price-right" id="productPriceRight">₪396</div>
         </div>
 
-        <!-- coupon -->
-        <div class="coupon-row" id="couponRow">
-          <input class="coupon-input" type="text" id="couponInput" placeholder="קוד קופון" dir="ltr">
-          <button class="coupon-apply-btn" onclick="applyCoupon()">החל</button>
-        </div>
-        <div class="coupon-success" id="couponSuccess">✓ קוד קופון הוחל — 10% הנחה</div>
+        <!-- (Discount code field moved to the form column so it's always
+             visible — see #couponRow there.) -->
 
         <!-- Shown only for subscription plans: replaces the coupon row -->
         <div class="sub-discount-note" id="subDiscountNote" style="display:none;">
@@ -850,6 +861,7 @@
   var plan    = PLANS[planKey] || PLANS.results;
 
   var couponApplied = false;
+  var couponCode    = '';     // server-validated code, forwarded to checkout
   var currentTotal  = plan.price;
 
   function formatPrice(n) { return '₪' + n.toLocaleString('he-IL'); }
@@ -913,20 +925,84 @@
     txt.lastChild.textContent = open ? 'הסתר סיכום הזמנה' : 'הצג סיכום הזמנה';
   }
 
-  /* ── Coupon ── */
-  function applyCoupon() {
-    var code = document.getElementById('couponInput').value.trim().toUpperCase();
-    if (code === 'NOGYM10' || code === 'MADGLOW10') {
-      couponApplied = true;
-      updateTotal();
-      document.getElementById('couponSuccess').classList.add('visible');
-      document.getElementById('couponInput').disabled = true;
-    } else {
-      document.getElementById('couponInput').style.borderColor = 'var(--red)';
-      setTimeout(function () {
-        document.getElementById('couponInput').style.borderColor = '';
-      }, 1200);
+  /* ── Coupon ──────────────────────────────────────────────────────────────
+     Codes are unique + single-use + tied to the email they were generated with,
+     so we validate SERVER-SIDE against the checkout email before applying.
+     Validation is read-only; the code is only consumed after a confirmed
+     payment (see api/payment-callback.js). */
+  function couponBtnClick() { if (couponApplied) removeCoupon(); else applyCoupon(); }
+
+  function couponReason(reason) {
+    switch (reason) {
+      case 'used':       return 'הקוד הזה כבר נוצל.';
+      case 'wrongemail': return 'הקוד שייך לאימייל אחר — השתמש באימייל שאיתו קיבלת אותו.';
+      case 'notfound':   return 'קוד הנחה לא תקין.';
+      case 'timeout':    return 'האימות לקח יותר מדי זמן. נסה שוב.';
+      default:           return 'לא ניתן להחיל את הקוד. נסה שוב או הסר אותו.';
     }
+  }
+
+  function showCouponError(msg) {
+    var okEl  = document.getElementById('couponSuccess');
+    var errEl = document.getElementById('couponError');
+    okEl.classList.remove('visible');
+    errEl.textContent = msg;
+    errEl.classList.add('visible');
+  }
+
+  function applyCoupon() {
+    var input = document.getElementById('couponInput');
+    var btn   = document.getElementById('couponApplyBtn');
+    var code  = input.value.trim().toUpperCase();
+    var email = document.getElementById('custEmail').value.trim();
+
+    document.getElementById('couponError').classList.remove('visible');
+    if (!code) return;
+
+    if (!isValidEmail(email)) {
+      showCouponError('הזן קודם את האימייל שאיתו קיבלת את הקוד.');
+      document.getElementById('custEmail').focus();
+      return;
+    }
+    if (!window.NGFMTrack || typeof NGFMTrack.validateCode !== 'function') {
+      showCouponError('לא ניתן לאמת קוד כרגע. נסה שוב מאוחר יותר.');
+      return;
+    }
+
+    var prev = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'בודק...';
+
+    NGFMTrack.validateCode(code, email, function (resp) {
+      btn.disabled = false;
+      if (resp && resp.valid) {
+        couponApplied = true;
+        couponCode    = code;
+        input.disabled = true;
+        btn.textContent = 'הסר';
+        document.getElementById('couponSuccess').classList.add('visible');
+        document.getElementById('couponError').classList.remove('visible');
+        updateTotal();
+      } else {
+        couponApplied = false;
+        couponCode    = '';
+        btn.textContent = prev;
+        updateTotal();
+        showCouponError(couponReason(resp && resp.reason));
+      }
+    });
+  }
+
+  function removeCoupon() {
+    couponApplied = false;
+    couponCode    = '';
+    var input = document.getElementById('couponInput');
+    input.disabled = false;
+    input.value = '';
+    document.getElementById('couponApplyBtn').textContent = 'החל';
+    document.getElementById('couponSuccess').classList.remove('visible');
+    document.getElementById('couponError').classList.remove('visible');
+    updateTotal();
   }
 
   /* ── Checkout submit → create a SUMIT payment, then redirect ── */
@@ -975,7 +1051,7 @@
     if (typeof fbq === 'function') {
       fbq('track', 'AddPaymentInfo', {
         content_name: plan.name,
-        value:        plan.price,
+        value:        currentTotal,   // reflects an applied discount
         currency:     'ILS'
       });
     }
@@ -985,14 +1061,24 @@
     fetch('/api/create-payment', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ plan: planKey, name: name, email: email, phone: phone })
+      body:    JSON.stringify({ plan: planKey, name: name, email: email, phone: phone, code: couponCode })
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
       .then(function (res) {
         if (res.ok && res.body && res.body.paymentUrl) {
           window.location.href = res.body.paymentUrl; // → SUMIT secure payment page
+          return;
+        }
+        // Blocked. If the discount code is the problem, surface it on the coupon
+        // field with the option to remove it — never silently charge full price.
+        btn.disabled    = false;
+        btn.textContent = prevLabel;
+        var body = res.body || {};
+        if (couponCode && body.reason) {
+          showCouponError((body.error || couponReason(body.reason)) + ' אפשר להסיר את הקוד ולשלם מחיר מלא.');
         } else {
-          throw new Error((res.body && res.body.error) || 'no payment url');
+          payErr.textContent = (body && body.error) || 'אירעה תקלה ביצירת התשלום. נסה שוב או דברו איתנו בוואטסאפ.';
+          payErr.classList.add('visible');
         }
       })
       .catch(function (err) {
@@ -1009,6 +1095,9 @@
       inp.classList.remove('error');
       var errEl = document.getElementById(inp.id + 'Err');
       if (errEl) errEl.classList.remove('visible');
+      // A code is bound to the email it was validated with — if the email
+      // changes after applying, drop the code so it's re-validated.
+      if (inp.id === 'custEmail' && couponApplied) removeCoupon();
     });
   });
 
