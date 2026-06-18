@@ -3,7 +3,7 @@
  *
  * Receives POSTs from the website, writes a row to the right tab of the
  * configured Google Sheet, highlights the new row yellow, and emails
- * davidkain1@gmail.com a notification with the full sheet attached as XLSX.
+ * nogymforme2026@gmail.com a notification with the full sheet attached as XLSX.
  *
  * Initial setup:
  *   1) Create a new Google Sheet you own. Note its ID (the long string in
@@ -28,7 +28,7 @@
 // reads the real value from Script Properties at runtime (see getSheetId()).
 // You ONLY need to fill this in once during initial setup; it auto-migrates.
 const SHEET_ID = '';
-const NOTIFY_EMAIL = 'davidkain1@gmail.com';
+const NOTIFY_EMAIL = 'nogymforme2026@gmail.com';
 const TIMEZONE = 'Asia/Jerusalem';
 
 // Owner/admin emails that always pass the members-area gate, regardless of
@@ -37,7 +37,7 @@ const TIMEZONE = 'Asia/Jerusalem';
 // to place a real order. Add team members here as needed.
 // All comparisons are case-insensitive + whitespace-trimmed.
 const OWNER_EMAILS = [
-  NOTIFY_EMAIL,                       // davidkain1@gmail.com — operator
+  NOTIFY_EMAIL,                       // nogymforme2026@gmail.com — operator
   'davidkain1+stores@gmail.com'       // App Store + Google Play reviewer credential
                                       // (Gmail plus-addressing — routes to davidkain1@gmail.com inbox)
 ];

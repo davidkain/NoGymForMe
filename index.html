@@ -1138,66 +1138,7 @@
       .plan-card-hover:hover { border-color: var(--gold) !important; }
     }
 
-    /* ── MEMBERS-AREA APP STORE BUTTONS ── */
-    .app-store-buttons {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: stretch;
-    }
-    .app-store-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--black);
-      border: 1px solid var(--border);
-      color: var(--white);
-      padding: 12px 22px;
-      border-radius: 12px;
-      text-decoration: none;
-      min-width: 180px;
-      transition: border-color .2s, background .2s, transform .15s;
-    }
-    @media (hover: hover) {
-      .app-store-btn:hover {
-        border-color: var(--gold);
-        transform: translateY(-1px);
-      }
-    }
-    .app-store-glyph {
-      width: 28px;
-      height: 28px;
-      color: var(--white);          /* applies to inline SVG via currentColor */
-      flex-shrink: 0;
-    }
-    .app-store-glyph.play {
-      /* Google Play triangle is multicolored — don't tint */
-      color: transparent;
-    }
-    .app-store-text {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-      text-align: left;             /* English store names read LTR even inside RTL parent */
-      direction: ltr;
-    }
-    .app-store-eyebrow {
-      font-size: 10px;
-      color: var(--grey-light);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    .app-store-name {
-      font-family: var(--font-display);
-      font-size: 18px;
-      font-weight: 900;
-      color: var(--white);
-    }
-    @media (max-width: 480px) {
-      .app-store-buttons { flex-direction: column; align-items: center; }
-      .app-store-btn { width: 100%; max-width: 280px; justify-content: center; }
-    }
+    /* (Members-area app-store buttons removed pre-launch — apps not yet live.) */
 
     /* ── DISCLAIMER ── */
     .disclaimer {
@@ -1500,11 +1441,31 @@
     }
 
     @media (max-width: 768px) {
-      header { display: none; }
+      /* Keep the header on mobile so the Members Area button stays reachable.
+         Slim it to a transparent bar holding just the outlined pill; the solid
+         order CTA is dropped because the sticky bottom bar handles ordering. */
+      header {
+        display: flex;
+        justify-content: flex-end;
+        top: 42px;                 /* sit just below the announcement bar */
+        padding: 6px 16px;
+        background: transparent;
+        backdrop-filter: none;
+        border-bottom: none;
+        pointer-events: none;      /* don't block taps on the hero behind it */
+      }
+      header .logo { display: none; }
       .header-cta { display: none; }
+      .header-link {
+        pointer-events: auto;
+        background: rgba(10,10,10,0.72);
+        backdrop-filter: blur(6px);
+        padding: 8px 14px;
+        font-size: 13px;
+      }
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
-      .hero { padding-top: 52px; }
+      .hero { padding-top: 86px; } /* clear announcement bar + members pill */
       .hero-headline { white-space: normal; top: 5%; right: 4%; left: auto; max-width: 64%; font-size: clamp(18px, 5.4vw, 30px); letter-spacing: 0; }
 
       .problem-grid,
@@ -1839,49 +1800,8 @@
             <span style="font-size:28px;">✓</span>
           </div>
           <h2 style="font-family:var(--font-display);font-size:clamp(22px,3vw,28px);font-weight:900;color:var(--white);margin-bottom:10px;">ברוך הבא, אחי</h2>
-          <p style="color:var(--grey-light);font-size:15px;line-height:1.6;margin-bottom:24px;">
-            ההזמנה שלך אומתה. הורד את האפליקציה למובייל:
-          </p>
-
-          <!-- ─────────────────────────────────────────────────────────────
-               APP STORE BUTTONS
-               Swap the two href="#" placeholders below with the real
-               Apple App Store and Google Play URLs once the apps are live.
-               ───────────────────────────────────────────────────────────── -->
-          <div class="app-store-buttons">
-            <a class="app-store-btn"
-               id="appStoreLink"
-               href="#"
-               target="_blank"
-               rel="noopener noreferrer"
-               aria-label="הורד מ-App Store">
-              <svg class="app-store-glyph" viewBox="0 0 384 512" aria-hidden="true">
-                <path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM260.1 80.4c25.7-30.5 25.4-58.3 24.3-68.4-21.8 1.3-47.1 14.9-61.5 31.6-15.9 17.9-25.3 40-23.3 64 23.7 1.8 45.3-10.4 60.5-27.2z"/>
-              </svg>
-              <div class="app-store-text">
-                <span class="app-store-eyebrow">Download on the</span>
-                <strong class="app-store-name">App Store</strong>
-              </div>
-            </a>
-
-            <a class="app-store-btn"
-               id="playStoreLink"
-               href="#"
-               target="_blank"
-               rel="noopener noreferrer"
-               aria-label="הורד מ-Google Play">
-              <svg class="app-store-glyph play" viewBox="0 0 512 512" aria-hidden="true">
-                <path fill="#5BC9F4" d="M325.3 234.3 104.6 13l280.8 161.2-60.1 60.1z"/>
-                <path fill="#EA4335" d="M104.6 13l220.7 221.3-220.7 220.7V13z"/>
-                <path fill="#FBBC04" d="M385.4 174.2l60.5 35-60.6 60.6-60.1-60.1 60.2-35.5z"/>
-                <path fill="#34A853" d="M104.6 455l280.8-161.2-60.1-60.1L104.6 455z"/>
-              </svg>
-              <div class="app-store-text">
-                <span class="app-store-eyebrow">GET IT ON</span>
-                <strong class="app-store-name">Google Play</strong>
-              </div>
-            </a>
-          </div>
+          <p style="color:var(--grey-light);font-size:16px;line-height:1.7;margin-bottom:8px;">אנחנו מכינים לכם משהו טוב! האפליקציה שלנו מתעדכנת ממש עכשיו ותיהיה זמינה להורדה בקרוב. נעדכן אתכם במייל ברגע שהגרסה החדשה תהיה באוויר.</p>
+          <p style="color:var(--gold);font-weight:800;font-size:15px;margin-top:14px;margin-bottom:0;">צוות NOGYMFORME</p>
           <button type="button" onclick="logoutMember()" style="display:block;margin:24px auto 0;background:none;border:none;color:var(--grey);font-size:13px;cursor:pointer;text-decoration:underline;">
             התחבר עם מייל אחר
           </button>
