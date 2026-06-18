@@ -21,6 +21,44 @@
 
 const SUMIT_BEGIN_REDIRECT = 'https://api.sumit.co.il/billing/payments/beginredirect/';
 
+// Public Apps Script web-app URL (the same one tracking.js posts to) — used to
+// validate discount codes server-side. Overridable via env if the deployed
+// Apps Script URL ever changes.
+const TRACKING_WEBAPP_URL = process.env.TRACKING_WEBAPP_URL ||
+  'https://script.google.com/macros/s/AKfycbwBmCaPLs3cFn2zvJw4vuMoFypgigvDIJbPuLxnLTebWOISz5o892F_H0gLtBtFvfn5/exec';
+
+const DISCOUNT_PERCENT = 10;
+
+// POST a JSON payload to the Apps Script web app and return its parsed JSON.
+// text/plain avoids a CORS preflight (matches the browser tracking client).
+async function callTracking(payload, timeoutMs) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs || 6000);
+  try {
+    const r = await fetch(TRACKING_WEBAPP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal,
+    });
+    return await r.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Friendly Hebrew message for each discount-rejection reason.
+function discountMessage(reason) {
+  switch (reason) {
+    case 'used':       return 'קוד ההנחה הזה כבר נוצל.';
+    case 'wrongemail': return 'הקוד שייך לכתובת מייל אחרת — השתמש במייל שאיתו קיבלת את הקוד.';
+    case 'notfound':   return 'קוד הנחה לא תקין.';
+    case 'noemail':    return 'נדרש אימייל כדי להחיל קוד הנחה.';
+    case 'unreachable':return 'לא הצלחנו לאמת את קוד ההנחה כרגע. נסה שוב או הסר את הקוד.';
+    default:           return 'לא ניתן להחיל את קוד ההנחה.';
+  }
+}
+
 // SOURCE OF TRUTH for what each plan costs. Prices are VAT-inclusive (ILS).
 const PLANS = {
   single:       { name: 'חבילת הביישן',                      price: 198, qty: 1, recurring: false },
@@ -51,19 +89,49 @@ module.exports = async (req, res) => {
   // SUMIT expects a numeric CompanyID when the value is numeric.
   const CompanyID = /^\d+$/.test(companyIdRaw) ? Number(companyIdRaw) : companyIdRaw;
 
-  // Where SUMIT returns the customer after a successful payment. Falls back to
-  // the request's own host so it works on Vercel preview + production alike.
-  const origin = process.env.SITE_URL || `https://${req.headers.host}`;
-  const redirectURL = `${origin}/thank-you.html?plan=${encodeURIComponent(planKey)}`;
-
   // Light, defensive normalization of customer fields (SUMIT also validates).
   const clean = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
+  const email = clean(body.email, 150);
 
-  // Build the single line item.
+  // ── Discount code (non-subscription only) ──────────────────────────────
+  // Validated SERVER-SIDE: the code must belong to THIS email and be unused.
+  // We do NOT mark it used here — that happens only after SUMIT confirms the
+  // payment (api/payment-callback.js). On ANY failure we BLOCK with an error
+  // so a customer is never charged full price while expecting a discount.
+  const code = clean(body.code, 40).toUpperCase();
+  let unitPrice = plan.price;
+  let discountCode = '';
+  if (code && !plan.recurring) {
+    if (!email) return res.status(400).json({ error: discountMessage('noemail'), reason: 'noemail' });
+    let check;
+    try {
+      check = await callTracking({ type: 'redeemCheck', code, email });
+    } catch (err) {
+      console.error('[create-payment] discount validation unreachable:', err);
+      return res.status(502).json({ error: discountMessage('unreachable'), reason: 'unreachable' });
+    }
+    if (!check || !check.ok || !check.valid) {
+      const reason = (check && check.reason) || 'invalid';
+      return res.status(400).json({ error: discountMessage(reason), reason });
+    }
+    unitPrice = Math.round(plan.price * (1 - DISCOUNT_PERCENT / 100));
+    discountCode = code;
+  }
+
+  // Where SUMIT returns the customer after payment → our callback, which
+  // verifies the payment with SUMIT and then marks any code used. Falls back to
+  // the request host so it works on Vercel preview + production alike.
+  const origin = process.env.SITE_URL || `https://${req.headers.host}`;
+  let redirectURL = `${origin}/api/payment-callback?plan=${encodeURIComponent(planKey)}`;
+  if (discountCode) {
+    redirectURL += `&code=${encodeURIComponent(discountCode)}&email=${encodeURIComponent(email)}`;
+  }
+
+  // Build the single line item (UnitPrice already reflects any discount).
   const item = {
     Item: { Name: plan.name, SearchMode: 'Automatic' },
     Quantity: plan.qty,
-    UnitPrice: plan.price,
+    UnitPrice: unitPrice,
     Currency: 'ILS',
   };
 
@@ -81,7 +149,7 @@ module.exports = async (req, res) => {
     Credentials: { CompanyID, APIKey: apiKey },
     Customer: {
       Name:         clean(body.name, 100),
-      EmailAddress: clean(body.email, 150),
+      EmailAddress: email,
       Phone:        clean(body.phone, 30),
       SearchMode:   'Automatic',
     },
@@ -93,7 +161,7 @@ module.exports = async (req, res) => {
     // so the charged total stays exactly ₪155 even if the rate changes.
     VATIncluded: 'true',
     RedirectURL: redirectURL,
-    ExternalIdentifier: `ngfm-${planKey}-${Date.now()}`,
+    ExternalIdentifier: `ngfm-${planKey}-${discountCode || 'nocode'}-${Date.now()}`,
   };
 
   try {

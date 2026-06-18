@@ -112,7 +112,7 @@
           keepalive: true
         })
           .then(function (r) { return r.json(); })
-          .then(function (json) { finish({ ok: !!(json && json.ok), alreadyExists: !!(json && json.alreadyExists) }); })
+          .then(function (json) { finish({ ok: !!(json && json.ok), alreadyExists: !!(json && json.alreadyExists), code: (json && json.code) || '' }); })
           .catch(function (err) { finish({ ok: false, alreadyExists: false, error: String(err) }); });
       } catch (e) {
         finish({ ok: false, alreadyExists: false, error: String(e) });
@@ -164,6 +164,44 @@
           .catch(function (err) { finish({ ok: false, verified: false, error: String(err) }); });
       } catch (e) {
         finish({ ok: false, verified: false, error: String(e) });
+      }
+    },
+
+    /**
+     * Validate a discount code at checkout. Read-only — never marks the code
+     * used (that happens server-side only after a confirmed payment).
+     *
+     * FAILS CLOSED (valid:false) on network/timeout, so a code is never treated
+     * as valid unless the server confirms it — matching the "block & explain"
+     * rule (we'd rather tell the user to retry than apply an unverified code).
+     *
+     * @param {function({ ok:boolean, valid:boolean, percent:number, reason:string }): void} callback
+     */
+    validateCode: function (code, email, callback, timeoutMs) {
+      if (!CONFIG.URL) { callback({ ok: false, valid: false, reason: 'notconfigured' }); return; }
+      var payload = {
+        type:  'redeemCheck',
+        code:  String(code || '').slice(0, 40),
+        email: String(email || '').slice(0, 150),
+        _ua:   (navigator.userAgent || '').slice(0, 200),
+        _ts:   Date.now()
+      };
+      var done = false;
+      function finish(resp) { if (done) return; done = true; callback(resp); }
+      setTimeout(function () { finish({ ok: false, valid: false, reason: 'timeout' }); }, timeoutMs || 5000);
+      try {
+        fetch(CONFIG.URL, {
+          method:  'POST',
+          mode:    'cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body:    JSON.stringify(payload),
+          keepalive: true
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (j) { finish({ ok: !!(j && j.ok), valid: !!(j && j.valid), percent: (j && j.percent) || 0, reason: (j && j.reason) || '' }); })
+          .catch(function (err) { finish({ ok: false, valid: false, reason: String(err) }); });
+      } catch (e) {
+        finish({ ok: false, valid: false, reason: String(e) });
       }
     },
 

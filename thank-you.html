@@ -77,30 +77,40 @@
     /* Map the plan passed back in the URL to a human label + value, so we can
        both show a confirmation line and report a Purchase to the Meta Pixel.
 
-       NOTE: this is a CLIENT-side confirmation. For production-grade accuracy
-       you should confirm the payment server-side (a SUMIT webhook / Server-Side
-       API verification) before counting revenue — a user could open this URL
-       directly. The pixel Purchase below is the standard, good-enough signal for
-       ad optimization, but treat the SUMIT dashboard as the financial source of
-       truth. */
+       The Purchase pixel is now gated on paid=1, which api/payment-callback.js
+       only sets AFTER verifying the payment with SUMIT server-to-server. So a
+       user opening this URL directly (no paid=1) will NOT fire a Purchase.
+       Treat the SUMIT dashboard as the financial source of truth regardless. */
     var PLAN_LABELS = {
       single:       { label: 'חבילת הביישן',  value: 198 },
       starter:      { label: 'חבילת יאללה, בוא ננסה', value: 396 },
       results:      { label: 'חבילת אול-אין', value: 496 },
       subscription: { label: 'מנוי חודשי',     value: 155 }
     };
-    var planKey = new URLSearchParams(location.search).get('plan');
-    var info = PLAN_LABELS[planKey];
+    var params  = new URLSearchParams(location.search);
+    var planKey = params.get('plan');
+    var paid    = params.get('paid');        // '1' = server-verified payment
+    var disc    = params.get('disc') === '1'; // a 10% code was applied
+    var info    = PLAN_LABELS[planKey];
 
-    if (info) {
+    // Purchase fires ONLY on a payment our server verified with SUMIT (paid=1),
+    // so it can't be triggered by someone opening this URL directly.
+    if (paid === '1' && info) {
       document.getElementById('planLine').textContent = 'ההזמנה שלך: ' + info.label;
       if (typeof fbq === 'function') {
         fbq('track', 'Purchase', {
           content_name: info.label,
-          value: info.value,
+          value: disc ? Math.round(info.value * 0.9) : info.value,
           currency: 'ILS'
         });
       }
+    } else if (paid === '0') {
+      // Payment not confirmed — show a neutral message instead of a success one.
+      document.querySelector('h1').textContent = 'התשלום לא הושלם';
+      document.querySelector('.sub').textContent =
+        'נראה שהתשלום לא הושלם או בוטל. אפשר לנסות שוב, ואם חויבת בטעות — דברו איתנו בוואטסאפ ונסדר.';
+      var check = document.querySelector('.check');
+      if (check) { check.textContent = '!'; check.style.color = '#ffb020'; check.style.background = 'rgba(255,176,32,.12)'; }
     }
   </script>
 </body>

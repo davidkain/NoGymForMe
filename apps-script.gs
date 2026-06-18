@@ -49,13 +49,15 @@ const TABS = {
 };
 
 const HEADERS = {
-  discount:  ['Timestamp', 'Email', 'Source', 'User-Agent'],
+  discount:  ['Timestamp', 'Email', 'Source', 'User-Agent', 'Code', 'Used', 'Used At'],
   started:   ['Timestamp', 'Name', 'Email', 'Phone', 'Plan', 'Status', 'User-Agent'],
   completed: ['Timestamp', 'Order #', 'Name', 'Email', 'Phone', 'Address', 'City', 'Plan', 'Total', 'User-Agent']
 };
 
 const HEADER_BG = '#E8D900';   // brand gold
 const HIGHLIGHT_BG = '#FFF59D'; // soft yellow for newly added rows
+
+const DISCOUNT_PERCENT = 10;    // first-order discount the codes grant
 
 // Human-readable label for each `source` value the site sends.
 // Used in email subject + body so a glance at the inbox tells you
@@ -106,6 +108,42 @@ function doPost(e) {
       return jsonOut({ ok: true, verified: completedEmailExists(sheet, reqEmail) });
     }
 
+    // ── READ-ONLY: validate a discount code at checkout ────────────────────
+    // The code must exist, belong to the given email (anti-sharing), and be
+    // unused. Does NOT mark it used — that happens only after SUMIT confirms
+    // payment (see the markUsed branch + the payment-callback function).
+    if (type === 'redeemCheck') {
+      const sheetId = getSheetId();
+      if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
+      const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(TABS.discount);
+      if (!sheet) return jsonOut({ ok: true, valid: false, reason: 'notfound' });
+      const rec = findDiscountByCode(sheet, data.code);
+      if (!rec)                                                  return jsonOut({ ok: true, valid: false, reason: 'notfound' });
+      if (rec.email !== String(data.email || '').toLowerCase().trim()) return jsonOut({ ok: true, valid: false, reason: 'wrongemail' });
+      if (rec.used)                                              return jsonOut({ ok: true, valid: false, reason: 'used' });
+      return jsonOut({ ok: true, valid: true, percent: DISCOUNT_PERCENT });
+    }
+
+    // ── WRITE: mark a code used (called by the server AFTER SUMIT confirms a
+    // valid payment). Idempotent: re-marking an already-used code is a no-op. ─
+    if (type === 'markUsed') {
+      const sheetId = getSheetId();
+      if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
+      const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(TABS.discount);
+      if (!sheet) return jsonOut({ ok: false, error: 'no discount tab' });
+      const rec = findDiscountByCode(sheet, data.code);
+      if (!rec) return jsonOut({ ok: false, error: 'notfound' });
+      if (data.email && rec.email !== String(data.email).toLowerCase().trim()) {
+        return jsonOut({ ok: false, error: 'wrongemail' });
+      }
+      if (!rec.used) {
+        sheet.getRange(rec.rowIndex, 6).setValue('Yes'); // col 6 = Used
+        sheet.getRange(rec.rowIndex, 7).setValue(        // col 7 = Used At
+          Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm:ss'));
+      }
+      return jsonOut({ ok: true, used: true, alreadyUsed: rec.used });
+    }
+
     if (!TABS[type]) return jsonOut({ ok: false, error: 'unknown type' });
 
     const sheetId = getSheetId();
@@ -135,9 +173,14 @@ function doPost(e) {
     // legitimate "submit twice" path — checkouts CAN happen twice for the
     // same email, so dedup is scoped to `discount` only.
     if (type === 'discount' && data.email) {
-      if (discountEmailExists(sheet, data.email)) {
-        return jsonOut({ ok: true, alreadyExists: true });
+      // One code per email: if this email already claimed a code, return the
+      // SAME code (don't append a new row or notify again).
+      var existing = findDiscountByEmail(sheet, data.email);
+      if (existing) {
+        return jsonOut({ ok: true, alreadyExists: true, code: existing.code });
       }
+      // New email → mint a unique code; buildRow() writes it to the sheet.
+      data._code = generateUniqueCode(sheet);
     }
 
     const row = buildRow(type, data);
@@ -152,7 +195,7 @@ function doPost(e) {
 
     sendNotification(type, data, ss);
 
-    return jsonOut({ ok: true, alreadyExists: false });
+    return jsonOut({ ok: true, alreadyExists: false, code: data._code || '' });
   } catch (err) {
     // Best-effort error log; never throw to the client.
     try {
@@ -160,6 +203,66 @@ function doPost(e) {
     } catch (_) {}
     return jsonOut({ ok: false, error: String(err) });
   }
+}
+
+/* ── Discount-code helpers ──────────────────────────────────────────────── */
+
+// A code from an unambiguous alphabet (no 0/O/1/I), prefixed NGF-.
+function genCode() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var s = '';
+  for (var i = 0; i < 6; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+  return 'NGF-' + s;
+}
+
+// Generate a code not already present in the sheet (collisions are vanishingly
+// rare, but loop a few times to be safe).
+function generateUniqueCode(sheet) {
+  for (var attempt = 0; attempt < 10; attempt++) {
+    var code = genCode();
+    if (!findDiscountByCode(sheet, code)) return code;
+  }
+  return genCode() + Date.now().toString(36).toUpperCase(); // last-resort uniqueness
+}
+
+// Find a discount row by email → { rowIndex, code, used } | null.
+function findDiscountByEmail(sheet, email) {
+  var last = sheet.getLastRow();
+  if (last < 2) return null;
+  var norm = String(email).toLowerCase().trim();
+  var width = Math.max(7, sheet.getLastColumn());
+  var values = sheet.getRange(2, 1, last - 1, width).getValues();
+  for (var i = 0; i < values.length; i++) {
+    if (String(values[i][1]).toLowerCase().trim() === norm) {      // col 2 = Email
+      return {
+        rowIndex: i + 2,
+        code: String(values[i][4] || '').toUpperCase().trim(),     // col 5 = Code
+        used: String(values[i][5] || '').toLowerCase() === 'yes'   // col 6 = Used
+      };
+    }
+  }
+  return null;
+}
+
+// Find a discount row by code → { rowIndex, email, code, used } | null.
+function findDiscountByCode(sheet, code) {
+  var norm = String(code || '').toUpperCase().trim();
+  if (!norm) return null;
+  var last = sheet.getLastRow();
+  if (last < 2) return null;
+  var width = Math.max(7, sheet.getLastColumn());
+  var values = sheet.getRange(2, 1, last - 1, width).getValues();
+  for (var i = 0; i < values.length; i++) {
+    if (String(values[i][4] || '').toUpperCase().trim() === norm) { // col 5 = Code
+      return {
+        rowIndex: i + 2,
+        email: String(values[i][1] || '').toLowerCase().trim(),     // col 2 = Email
+        code: norm,
+        used: String(values[i][5] || '').toLowerCase() === 'yes'    // col 6 = Used
+      };
+    }
+  }
+  return null;
 }
 
 /**
@@ -223,20 +326,25 @@ function getSheetId() {
 
 function ensureSheet(ss, type) {
   const name = TABS[type];
+  const headers = HEADERS[type];
   let sheet = ss.getSheetByName(name);
   if (!sheet) {
     sheet = ss.insertSheet(name);
-    const headers = HEADERS[type];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setBackground(HEADER_BG);
     sheet.setFrozenRows(1);
     sheet.autoResizeColumns(1, headers.length);
+  } else if (sheet.getLastColumn() < headers.length) {
+    // Migration: an existing tab is missing newer columns (e.g. the discount
+    // tab gained Code/Used/Used At). Extend the header row so new appends stay
+    // aligned; existing rows simply keep blank cells in the new columns.
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setBackground(HEADER_BG);
   }
   return sheet;
 }
 
 function buildRow(type, d) {
   const ts = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm:ss');
-  if (type === 'discount')  return [ts, d.email || '', d.source || 'popup', d._ua || ''];
+  if (type === 'discount')  return [ts, d.email || '', d.source || 'popup', d._ua || '', d._code || '', 'No', ''];
   if (type === 'started')   return [ts, d.name || '', d.email || '', d.phone || '', d.plan || '', 'Abandoned', d._ua || ''];
   if (type === 'completed') return [ts, d.orderNum || '', d.name || '', d.email || '', d.phone || '', d.address || '', d.city || '', d.plan || '', d.total || '', d._ua || ''];
   return [];
