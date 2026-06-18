@@ -86,7 +86,12 @@ module.exports = async (req, res) => {
       SearchMode:   'Automatic',
     },
     Items: [item],
-    VATIncludedInPrices: true, // our prices already include VAT
+    // Tell SUMIT our UnitPrice already INCLUDES VAT, so it splits the tax out
+    // of ₪155 instead of adding it on top. Field name + string value match
+    // SUMIT's own WooCommerce gateway ($Request['VATIncluded'] = 'true';).
+    // No VATRate sent on purpose — SUMIT uses the company's configured rate,
+    // so the charged total stays exactly ₪155 even if the rate changes.
+    VATIncluded: 'true',
     RedirectURL: redirectURL,
     ExternalIdentifier: `ngfm-${planKey}-${Date.now()}`,
   };
