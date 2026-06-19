@@ -2655,7 +2655,7 @@
 
       // Disable submit while the server check runs (cold-start can be slow).
       var btn = document.querySelector('.popup-btn');
-      if (btn) { btn.disabled = true; btn.textContent = 'בודק...'; }
+      if (btn) { btn.disabled = true; btn.textContent = 'רגע, מכינים את הקוד שלך...'; }
 
       // Server-side per-email check via Apps Script. Returns the unique code —
       // the SAME code if this email already claimed one (one per email).
@@ -2665,7 +2665,7 @@
           var code = resp && resp.code ? resp.code : '';
           if (code) rememberDiscountCode(email, code);
           showCouponSuccess(code, !!(resp && resp.alreadyExists));
-        });
+        }, 15000); // the signup writes a row + sends emails before replying (~3-5s) — wait for it
       } else {
         // Legacy fallback (older tracking.js without discountCheck).
         if (window.NGFMTrack && typeof NGFMTrack.discount === 'function') NGFMTrack.discount(email);
