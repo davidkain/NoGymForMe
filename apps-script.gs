@@ -177,6 +177,17 @@ function doPost(e) {
       // SAME code (don't append a new row or notify again).
       var existing = findDiscountByEmail(sheet, data.email);
       if (existing) {
+        // Self-heal: a row from before codes existed (blank Code cell) gets a
+        // freshly-minted code backfilled + emailed, so legacy signups aren't
+        // stuck without a code.
+        if (!existing.code) {
+          var backfill = generateUniqueCode(sheet);
+          sheet.getRange(existing.rowIndex, 5).setValue(backfill); // col 5 = Code
+          sheet.getRange(existing.rowIndex, 6).setValue('No');     // col 6 = Used
+          sendCustomerCode(data.email, backfill);
+          sheet.getRange(existing.rowIndex, 8).setValue(new Date()); // col 8 = Code Emailed At
+          return jsonOut({ ok: true, alreadyExists: true, code: backfill });
+        }
         maybeResendCode(sheet, existing, data.email); // re-email, max once / 24h
         return jsonOut({ ok: true, alreadyExists: true, code: existing.code });
       }
