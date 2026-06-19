@@ -195,6 +195,10 @@ function doPost(e) {
 
     sendNotification(type, data, ss);
 
+    // Email the customer their freshly-minted discount code (new signups only;
+    // returning emails short-circuit above and aren't re-emailed).
+    if (type === 'discount' && data._code) sendCustomerCode(data.email, data._code);
+
     return jsonOut({ ok: true, alreadyExists: false, code: data._code || '' });
   } catch (err) {
     // Best-effort error log; never throw to the client.
@@ -367,6 +371,30 @@ function promoteAbandonedToCompleted(ss, d) {
       sheet.getRange(i + 2, 1, 1, HEADERS.started.length).setBackground('#C8E6C9'); // soft green
     }
   }
+}
+
+// Email the customer their personal discount code. Best-effort: a mail failure
+// must never break the signup (the code is already saved + shown in the popup).
+function sendCustomerCode(email, code) {
+  if (!email || !code) return;
+  var subject = 'קוד ההנחה שלך ל-NOGYMFORME 🎁';
+  var html =
+    '<div dir="rtl" style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:auto;' +
+      'background:#0A0A0A;color:#ffffff;padding:32px 24px;border-radius:12px;text-align:center;">' +
+      '<div style="font-size:22px;font-weight:900;color:#E8D900;letter-spacing:1px;">NOGYM' +
+        '<span style="color:#ffffff;">FORME</span></div>' +
+      '<h1 style="font-size:20px;margin:18px 0 8px;">קוד ההנחה שלך מוכן 🎉</h1>' +
+      '<p style="color:#cfccc6;font-size:15px;line-height:1.6;margin:0 0 20px;">' +
+        'הנה קוד ההנחה האישי שלך — <strong>10% הנחה</strong> על ההזמנה הראשונה. ' +
+        'הזן אותו בעמוד התשלום עם כתובת המייל הזו.</p>' +
+      '<div style="display:inline-block;background:#E8D900;color:#0A0A0A;font-family:monospace;' +
+        'font-size:28px;font-weight:900;letter-spacing:3px;padding:14px 30px;border-radius:10px;">' +
+        code + '</div>' +
+      '<p style="color:#8a8680;font-size:13px;margin-top:22px;">הקוד אישי, חד-פעמי ותקף להזמנה אחת.</p>' +
+    '</div>';
+  try {
+    MailApp.sendEmail({ to: email, subject: subject, htmlBody: html, name: 'NOGYMFORME' });
+  } catch (e) { /* never break signup over the customer email */ }
 }
 
 function sendNotification(type, d, ss) {
