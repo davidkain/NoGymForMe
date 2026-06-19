@@ -382,20 +382,21 @@ function promoteAbandonedToCompleted(ss, d) {
 // must never break the signup (the code is already saved + shown in the popup).
 function sendCustomerCode(email, code) {
   if (!email || !code) return;
-  var subject = 'קוד ההנחה שלך ל-NOGYMFORME 🎁';
+  var subject = 'ה-10% הנחה שלך בפנים! הצעד הראשון שלך מתחיל עכשיו 🚀';
   var html =
-    '<div dir="rtl" style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:auto;' +
-      'background:#0A0A0A;color:#ffffff;padding:32px 24px;border-radius:12px;text-align:center;">' +
-      '<div style="font-size:22px;font-weight:900;color:#E8D900;letter-spacing:1px;">NOGYM' +
-        '<span style="color:#ffffff;">FORME</span></div>' +
-      '<h1 style="font-size:20px;margin:18px 0 8px;">קוד ההנחה שלך מוכן 🎉</h1>' +
-      '<p style="color:#cfccc6;font-size:15px;line-height:1.6;margin:0 0 20px;">' +
-        'הנה קוד ההנחה האישי שלך — <strong>10% הנחה</strong> על ההזמנה הראשונה. ' +
-        'הזן אותו בעמוד התשלום עם כתובת המייל הזו.</p>' +
-      '<div style="display:inline-block;background:#E8D900;color:#0A0A0A;font-family:monospace;' +
-        'font-size:28px;font-weight:900;letter-spacing:3px;padding:14px 30px;border-radius:10px;">' +
-        code + '</div>' +
-      '<p style="color:#8a8680;font-size:13px;margin-top:22px;">הקוד אישי, חד-פעמי ותקף להזמנה אחת.</p>' +
+    '<div dir="rtl" style="font-family: Arial, sans-serif; font-size: 16px; color: #333;">' +
+      '<p><strong>היי!</strong></p>' +
+      '<p>שמחים שבחרת לקחת שליטה על המטרות שלך ולהצטרף אלינו.<br>' +
+      'הנה קוד ההנחה האישי שלך, המעניק לך 10% הנחה ברכישה הראשונה באתר:</p>' +
+      '<p style="text-align: center; margin: 20px 0;">' +
+        '<strong style="font-size: 24px; background-color: #f4f4f4; padding: 10px 20px; border-radius: 5px; border: 1px dashed #ccc;">' +
+          code +
+        '</strong>' +
+      '</p>' +
+      '<p><em>התוצאות הכי גדולות מגיעות מההחלטות הקטנות והעקביות של כל יום. לא צריך חדר כושר כדי להשיג את המטרות שלך – צריך רק החלטה אחת טובה, ולהתחיל.</em></p>' +
+      '<p>מחכים לראות את ההתקדמות שלך!</p>' +
+      '<p>שלך,<br>' +
+      '<strong>צוות NOGYMFORME</strong></p>' +
     '</div>';
   try {
     MailApp.sendEmail({ to: email, subject: subject, htmlBody: html, name: 'NOGYMFORME' });
