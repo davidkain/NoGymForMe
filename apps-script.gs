@@ -49,7 +49,7 @@ const TABS = {
 };
 
 const HEADERS = {
-  discount:  ['Timestamp', 'Email', 'Source', 'User-Agent', 'Code', 'Used', 'Used At'],
+  discount:  ['Timestamp', 'Email', 'Source', 'User-Agent', 'Code', 'Used', 'Used At', 'Code Emailed At'],
   started:   ['Timestamp', 'Name', 'Email', 'Phone', 'Plan', 'Status', 'User-Agent'],
   completed: ['Timestamp', 'Order #', 'Name', 'Email', 'Phone', 'Address', 'City', 'Plan', 'Total', 'User-Agent']
 };
@@ -177,6 +177,7 @@ function doPost(e) {
       // SAME code (don't append a new row or notify again).
       var existing = findDiscountByEmail(sheet, data.email);
       if (existing) {
+        maybeResendCode(sheet, existing, data.email); // re-email, max once / 24h
         return jsonOut({ ok: true, alreadyExists: true, code: existing.code });
       }
       // New email → mint a unique code; buildRow() writes it to the sheet.
@@ -194,6 +195,13 @@ function doPost(e) {
     if (type === 'completed') promoteAbandonedToCompleted(ss, data);
 
     sendNotification(type, data, ss);
+
+    // Email the customer their freshly-minted code, and stamp the send time
+    // (col 8) so re-sends to returning visitors are rate-limited to once / 24h.
+    if (type === 'discount' && data._code) {
+      sendCustomerCode(data.email, data._code);
+      sheet.getRange(sheet.getLastRow(), 8).setValue(new Date());
+    }
 
     return jsonOut({ ok: true, alreadyExists: false, code: data._code || '' });
   } catch (err) {
@@ -230,14 +238,15 @@ function findDiscountByEmail(sheet, email) {
   var last = sheet.getLastRow();
   if (last < 2) return null;
   var norm = String(email).toLowerCase().trim();
-  var width = Math.max(7, sheet.getLastColumn());
+  var width = Math.max(8, sheet.getLastColumn());
   var values = sheet.getRange(2, 1, last - 1, width).getValues();
   for (var i = 0; i < values.length; i++) {
     if (String(values[i][1]).toLowerCase().trim() === norm) {      // col 2 = Email
       return {
         rowIndex: i + 2,
         code: String(values[i][4] || '').toUpperCase().trim(),     // col 5 = Code
-        used: String(values[i][5] || '').toLowerCase() === 'yes'   // col 6 = Used
+        used: String(values[i][5] || '').toLowerCase() === 'yes',  // col 6 = Used
+        emailedAt: values[i][7]                                    // col 8 = Code Emailed At (Date | '')
       };
     }
   }
@@ -367,6 +376,43 @@ function promoteAbandonedToCompleted(ss, d) {
       sheet.getRange(i + 2, 1, 1, HEADERS.started.length).setBackground('#C8E6C9'); // soft green
     }
   }
+}
+
+// Email the customer their personal discount code. Best-effort: a mail failure
+// must never break the signup (the code is already saved + shown in the popup).
+function sendCustomerCode(email, code) {
+  if (!email || !code) return;
+  var subject = 'קוד ההנחה שלך ל-NOGYMFORME 🎁';
+  var html =
+    '<div dir="rtl" style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:auto;' +
+      'background:#0A0A0A;color:#ffffff;padding:32px 24px;border-radius:12px;text-align:center;">' +
+      '<div style="font-size:22px;font-weight:900;color:#E8D900;letter-spacing:1px;">NOGYM' +
+        '<span style="color:#ffffff;">FORME</span></div>' +
+      '<h1 style="font-size:20px;margin:18px 0 8px;">קוד ההנחה שלך מוכן 🎉</h1>' +
+      '<p style="color:#cfccc6;font-size:15px;line-height:1.6;margin:0 0 20px;">' +
+        'הנה קוד ההנחה האישי שלך — <strong>10% הנחה</strong> על ההזמנה הראשונה. ' +
+        'הזן אותו בעמוד התשלום עם כתובת המייל הזו.</p>' +
+      '<div style="display:inline-block;background:#E8D900;color:#0A0A0A;font-family:monospace;' +
+        'font-size:28px;font-weight:900;letter-spacing:3px;padding:14px 30px;border-radius:10px;">' +
+        code + '</div>' +
+      '<p style="color:#8a8680;font-size:13px;margin-top:22px;">הקוד אישי, חד-פעמי ותקף להזמנה אחת.</p>' +
+    '</div>';
+  try {
+    MailApp.sendEmail({ to: email, subject: subject, htmlBody: html, name: 'NOGYMFORME' });
+  } catch (e) { /* never break signup over the customer email */ }
+}
+
+// Re-send the code email to a RETURNING visitor — but at most once per 24h per
+// email. This gives the standard "switched device / cleared cache → get my code
+// by email" recovery without burning the shared Gmail send quota. The last send
+// time lives in col 8 (Code Emailed At) as a Date.
+function maybeResendCode(sheet, rec, email) {
+  if (!rec || !rec.code) return;
+  var last = (rec.emailedAt instanceof Date) ? rec.emailedAt : null;
+  var DAY_MS = 24 * 60 * 60 * 1000;
+  if (last && (Date.now() - last.getTime()) < DAY_MS) return; // emailed < 24h ago → skip
+  sendCustomerCode(email, rec.code);
+  sheet.getRange(rec.rowIndex, 8).setValue(new Date());
 }
 
 function sendNotification(type, d, ss) {

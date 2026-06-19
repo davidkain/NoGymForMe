@@ -1409,25 +1409,27 @@
     }
     .popup-coupon {
       display: inline-block;
-      margin-top: 8px;
-      background: var(--gold-muted);
-      border: 1px dashed var(--gold);
-      color: var(--gold);
+      margin-top: 10px;
+      background: var(--gold);
+      border: 2px solid var(--gold);
+      color: #0A0A0A;
       font-family: monospace;
       font-size: 28px;
       font-weight: 900;
-      letter-spacing: 4px;
-      padding: 12px 32px;
+      letter-spacing: 3px;
+      padding: 14px 30px;
       border-radius: var(--radius-md);
       cursor: pointer;
       user-select: all;
-      transition: transform .12s, background .2s, border-color .2s, color .2s;
+      box-shadow: 0 0 22px rgba(232,217,0,0.5);
+      transition: transform .12s, box-shadow .2s, background .2s, color .2s;
     }
-    .popup-coupon:hover { transform: translateY(-1px); }
+    .popup-coupon:hover { transform: translateY(-1px); box-shadow: 0 0 30px rgba(232,217,0,0.65); }
     .popup-coupon.copied {
-      background: rgba(76,175,80,0.15);
+      background: #4caf50;
       border-color: #4caf50;
-      color: #4caf50;
+      color: #ffffff;
+      box-shadow: 0 0 22px rgba(76,175,80,0.55);
     }
     .popup-copy-hint { font-size: 13px; color: var(--grey-light); margin-top: 12px; }
 
@@ -2619,10 +2621,17 @@
       successDiv.appendChild(successText);
       successDiv.appendChild(couponDiv);
       successDiv.appendChild(hint);
+
+      if (!already) {
+        var emailed = document.createElement('div');
+        emailed.style.cssText = 'font-size:13px;color:var(--grey-light);margin-top:10px;';
+        emailed.textContent = '📧 שלחנו את הקוד גם למייל שלך.';
+        successDiv.appendChild(emailed);
+      }
       form.appendChild(successDiv);
 
-      // Longer auto-close so there's time to copy (was 5s).
-      setTimeout(closePopup, 15000);
+      // No auto-close on the code state — let the customer copy/save it and
+      // close manually via the × button, so the code is never missed.
     }
 
     function submitPopup() {
