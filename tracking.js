@@ -101,7 +101,7 @@
 
       // Hard timeout — Apps Script can be slow under cold-start.
       // Fail open so a slow server never blocks the popup UX.
-      setTimeout(function () { finish({ ok: false, alreadyExists: false, error: 'timeout' }); }, timeoutMs || 3500);
+      setTimeout(function () { finish({ ok: false, alreadyExists: false, error: 'timeout' }); }, timeoutMs || 12000);
 
       try {
         fetch(CONFIG.URL, {
