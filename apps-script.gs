@@ -427,13 +427,22 @@ function maybeResendCode(sheet, rec, email) {
 }
 
 function sendNotification(type, d, ss) {
+  const subject = subjectFor(type, d);
+  const body = bodyFor(type, d);
+
+  // Discount popups: the customer is actively waiting on this response in the
+  // popup, so skip the slow XLSX export + attachment and send a fast,
+  // attachment-free notification (the body still has the data + sheet link).
+  // This keeps the popup's round-trip well under the client timeout.
+  if (type === 'discount') {
+    MailApp.sendEmail({ to: NOTIFY_EMAIL, subject: subject, htmlBody: body });
+    return;
+  }
+
   const url = 'https://docs.google.com/spreadsheets/d/' + getSheetId() + '/export?format=xlsx';
   const blob = UrlFetchApp.fetch(url, {
     headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() }
   }).getBlob().setName('NoGymForMe_Data.xlsx');
-
-  const subject = subjectFor(type, d);
-  const body = bodyFor(type, d);
 
   MailApp.sendEmail({
     to: NOTIFY_EMAIL,
