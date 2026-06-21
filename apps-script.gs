@@ -45,13 +45,15 @@ const OWNER_EMAILS = [
 const TABS = {
   discount:  'Discount Signups',
   started:   'Abandoned Checkouts',
-  completed: 'Completed Orders'
+  completed: 'Completed Orders',
+  appwait:   'App Waitlist (iOS)'
 };
 
 const HEADERS = {
   discount:  ['Timestamp', 'Email', 'Source', 'User-Agent', 'Code', 'Used', 'Used At', 'Code Emailed At'],
   started:   ['Timestamp', 'Name', 'Email', 'Phone', 'Plan', 'Status', 'User-Agent'],
-  completed: ['Timestamp', 'Order #', 'Name', 'Email', 'Phone', 'Address', 'City', 'Plan', 'Total', 'User-Agent']
+  completed: ['Timestamp', 'Order #', 'Name', 'Email', 'Phone', 'Address', 'City', 'Plan', 'Total', 'User-Agent'],
+  appwait:   ['Timestamp', 'Email', 'Source', 'User-Agent']
 };
 
 const HEADER_BG = '#E8D900';   // brand gold
@@ -367,6 +369,7 @@ function buildRow(type, d) {
   if (type === 'discount')  return [ts, d.email || '', d.source || 'popup', d._ua || '', d._code || '', 'No', ''];
   if (type === 'started')   return [ts, d.name || '', d.email || '', d.phone || '', d.plan || '', 'Abandoned', d._ua || ''];
   if (type === 'completed') return [ts, d.orderNum || '', d.name || '', d.email || '', d.phone || '', d.address || '', d.city || '', d.plan || '', d.total || '', d._ua || ''];
+  if (type === 'appwait')   return [ts, d.email || '', d.source || 'ios', d._ua || ''];
   return [];
 }
 
@@ -457,6 +460,9 @@ function subjectFor(type, d) {
   if (type === 'completed') {
     return '🟢 NGFM NEW ORDER — ' + (d.orderNum || '') + ' (' + (d.name || d.email || '') + ')';
   }
+  if (type === 'appwait') {
+    return '📲 NGFM app waitlist — ' + (d.email || '');
+  }
   return 'NoGymForMe — event';
 }
 
@@ -467,6 +473,7 @@ function bodyFor(type, d) {
   const sheetUrl = 'https://docs.google.com/spreadsheets/d/' + getSheetId() + '/edit';
   const label = (type === 'discount') ? 'Discount / waitlist signup' :
                 (type === 'started')  ? 'Abandoned checkout' :
+                (type === 'appwait')  ? 'App download waitlist (iOS)' :
                 'Completed order';
 
   // Big "which package?" callout at the top — replaces the need to scan
