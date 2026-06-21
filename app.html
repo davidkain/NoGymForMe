@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOGYMFORME | הורדת האפליקציה</title>
+  <link rel="icon" type="image/svg+xml" href="/app-icon.svg">
+  <meta name="theme-color" content="#0A0A0A">
+  <!-- This page is the QR-code target for app downloads. Reachable at /app. -->
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800;900&family=Rubik:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Meta Pixel — lets QR scans show up as PageViews alongside the main site -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1001650429062777');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1001650429062777&ev=PageView&noscript=1"
+  /></noscript>
+
+  <style>
+    :root {
+      --black: #111111;
+      --deep: #181818;
+      --card: #1e1e1e;
+      --border: #2a2a2a;
+      --gold: #E8D900;
+      --white: #f0ece4;
+      --grey: #8a8680;
+      --grey-light: #b0aba4;
+      --font-display: 'Rubik', 'Assistant', sans-serif;
+      --font-body: 'Assistant', sans-serif;
+      --radius-pill: 100px;
+      --radius-md: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { overflow-x: hidden; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-body);
+      direction: rtl;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    /* ── Noise texture overlay (matches index.html) ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .6;
+    }
+
+    .wordmark {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: 1px;
+      color: var(--gold);
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+    }
+    .wordmark span { color: var(--white); }
+
+    .download-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      border: 1.5px solid var(--gold);
+      border-radius: var(--radius-md);
+      padding: 44px 32px 40px;
+      text-align: center;
+    }
+
+    .download-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: rgba(232,217,0,0.12);
+      border: 1px solid var(--gold);
+      margin-bottom: 20px;
+    }
+    .download-icon img { width: 44px; height: 44px; }
+
+    .download-card h1 {
+      font-family: var(--font-display);
+      font-size: clamp(24px, 5vw, 30px);
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 12px;
+    }
+    .download-card .lead {
+      color: var(--grey-light);
+      font-size: 16px;
+      line-height: 1.65;
+      max-width: 380px;
+      margin: 0 auto 30px;
+    }
+
+    /* ── APP STORE BUTTONS (restored original design) ── */
+    .app-store-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: stretch;
+    }
+    .app-store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--black);
+      border: 1px solid var(--border);
+      color: var(--white);
+      padding: 12px 22px;
+      border-radius: 12px;
+      text-decoration: none;
+      min-width: 180px;
+      cursor: pointer;
+      font: inherit;
+      transition: border-color .2s, background .2s, transform .15s;
+    }
+    @media (hover: hover) {
+      .app-store-btn:hover {
+        border-color: var(--gold);
+        transform: translateY(-1px);
+      }
+    }
+    .app-store-glyph {
+      width: 28px;
+      height: 28px;
+      color: var(--white);          /* applies to inline SVG via currentColor */
+      flex-shrink: 0;
+    }
+    .app-store-glyph.play {
+      color: transparent;           /* Google Play triangle is multicolored — don't tint */
+    }
+    .app-store-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+      text-align: left;             /* English store names read LTR even inside RTL parent */
+      direction: ltr;
+    }
+    .app-store-eyebrow {
+      font-size: 10px;
+      color: var(--grey-light);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .app-store-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--white);
+    }
+    @media (max-width: 480px) {
+      .app-store-buttons { flex-direction: column; align-items: center; }
+      .app-store-btn { width: 100%; max-width: 280px; justify-content: center; }
+    }
+
+    .back-link {
+      position: relative;
+      z-index: 1;
+      margin-top: 28px;
+      color: var(--grey);
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--grey-light); }
+
+    /* ── iOS WAITLIST MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(6px);
+      overflow-y: auto;
+    }
+    .modal-overlay.open { display: block; }
+    .modal-shell { max-width: 480px; margin: 60px auto; padding: 0 16px 60px; }
+    .modal-box {
+      position: relative;
+      background: var(--card);
+      border: 1.5px solid var(--gold);
+      border-radius: var(--radius-md);
+      padding: 48px 32px 36px;
+      text-align: center;
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      background: none;
+      border: none;
+      color: var(--grey);
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .modal-emoji {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(232,217,0,0.12);
+      border: 1px solid var(--gold);
+      margin-bottom: 18px;
+      font-size: 28px;
+    }
+    .modal-copy {
+      color: var(--white);
+      font-size: 17px;
+      line-height: 1.85;
+      margin-bottom: 24px;
+    }
+    .modal-copy .team {
+      display: block;
+      margin-top: 12px;
+      color: var(--gold);
+      font-weight: 800;
+    }
+    #waitForm { display: flex; flex-direction: column; gap: 12px; }
+    #waitEmail {
+      background: var(--black);
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 16px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      text-align: left;
+      direction: ltr;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #waitEmail:focus { border-color: var(--gold); }
+    #waitSubmit {
+      background: var(--gold);
+      color: var(--black);
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 16px;
+      padding: 16px 24px;
+      border-radius: var(--radius-pill);
+      border: none;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+    }
+    #waitSubmit:hover { transform: translateY(-1px); }
+    #waitError {
+      display: none;
+      color: #ff6b6b;
+      font-size: 14px;
+      margin-top: 2px;
+    }
+    .modal-dismiss {
+      display: block;
+      margin: 18px auto 0;
+      background: none;
+      border: none;
+      color: var(--grey);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    /* success state */
+    #waitSuccess { display: none; }
+    #waitSuccess .check {
+      background: rgba(37,211,102,0.12);
+      border-color: #25d366;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wordmark">NOGYM<span>FORME</span></div>
+
+  <main class="download-card">
+    <div class="download-icon">
+      <img src="/app-icon.svg" alt="" aria-hidden="true">
+    </div>
+    <h1>הורד את האפליקציה</h1>
+    <p class="lead">עקוב אחרי ההתקדמות שלך, קבל את הפרוטוקול האישי שלך — הכל במקום אחד.</p>
+
+    <div class="app-store-buttons">
+      <!-- App Store: opens the iOS waitlist modal (app is mid-update, not yet live) -->
+      <button type="button" class="app-store-btn" id="appStoreBtn" aria-label="הורד מ-App Store">
+        <svg class="app-store-glyph" viewBox="0 0 384 512" aria-hidden="true">
+          <path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM260.1 80.4c25.7-30.5 25.4-58.3 24.3-68.4-21.8 1.3-47.1 14.9-61.5 31.6-15.9 17.9-25.3 40-23.3 64 23.7 1.8 45.3-10.4 60.5-27.2z"/>
+        </svg>
+        <span class="app-store-text">
+          <span class="app-store-eyebrow">Download on the</span>
+          <strong class="app-store-name">App Store</strong>
+        </span>
+      </button>
+
+      <!-- Google Play: direct deep link into the web app -->
+      <a class="app-store-btn"
+         id="playStoreLink"
+         href="https://app.nogymforme.com"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="הורד מ-Google Play">
+        <svg class="app-store-glyph play" viewBox="0 0 512 512" aria-hidden="true">
+          <path fill="#5BC9F4" d="M325.3 234.3 104.6 13l280.8 161.2-60.1 60.1z"/>
+          <path fill="#EA4335" d="M104.6 13l220.7 221.3-220.7 220.7V13z"/>
+          <path fill="#FBBC04" d="M385.4 174.2l60.5 35-60.6 60.6-60.1-60.1 60.2-35.5z"/>
+          <path fill="#34A853" d="M104.6 455l280.8-161.2-60.1-60.1L104.6 455z"/>
+        </svg>
+        <span class="app-store-text">
+          <span class="app-store-eyebrow">GET IT ON</span>
+          <strong class="app-store-name">Google Play</strong>
+        </span>
+      </a>
+    </div>
+  </main>
+
+  <a href="/" class="back-link">← חזרה לאתר</a>
+
+  <!-- ── iOS WAITLIST MODAL ── -->
+  <div class="modal-overlay" id="waitModal" role="dialog" aria-modal="true" aria-labelledby="waitHeading">
+    <div class="modal-shell">
+      <div class="modal-box">
+        <button class="modal-close" id="waitClose" aria-label="סגור">×</button>
+
+        <!-- FORM state -->
+        <div id="waitFormView">
+          <div class="modal-emoji">🍏</div>
+          <p class="modal-copy" id="waitHeading">אחי, האפליקציה בעידכון קטן כדי שתוכל לעוף על ההתקדמות שלך, נעדכן אותך במייל ברגע שתיפתח.<span class="team">צוות NOGYMFORME</span></p>
+
+          <form id="waitForm" novalidate>
+            <input
+              id="waitEmail"
+              type="email"
+              autocomplete="email"
+              inputmode="email"
+              placeholder="your@email.com"
+              required
+            >
+            <button id="waitSubmit" type="submit">עדכנו אותי במייל</button>
+            <p id="waitError" role="alert"></p>
+          </form>
+        </div>
+
+        <!-- SUCCESS state -->
+        <div id="waitSuccess">
+          <div class="modal-emoji check">✓</div>
+          <p class="modal-copy">מעולה, אחי! רשמנו את המייל שלך — נעדכן אותך ברגע שהאפליקציה תיפתח.<span class="team">צוות NOGYMFORME</span></p>
+          <button type="button" class="modal-dismiss" id="waitDone">סגור</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared tracker: NGFMTrack.appWaitlist() posts the email to the Apps Script sheet -->
+  <script src="/tracking.js" defer></script>
+  <script>
+    (function () {
+      var modal     = document.getElementById('waitModal');
+      var formView  = document.getElementById('waitFormView');
+      var successEl  = document.getElementById('waitSuccess');
+      var form      = document.getElementById('waitForm');
+      var input     = document.getElementById('waitEmail');
+      var submit    = document.getElementById('waitSubmit');
+      var errEl     = document.getElementById('waitError');
+
+      function openModal() {
+        formView.style.display = 'block';
+        successEl.style.display = 'none';
+        errEl.style.display = 'none';
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        setTimeout(function () { input.focus(); }, 50);
+      }
+      function closeModal() {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      document.getElementById('appStoreBtn').addEventListener('click', openModal);
+      document.getElementById('waitClose').addEventListener('click', closeModal);
+      document.getElementById('waitDone').addEventListener('click', closeModal);
+      modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+      });
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var email = (input.value || '').trim();
+        errEl.style.display = 'none';
+
+        // Cheap client-side sanity check before hitting the backend.
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          errEl.textContent = 'נא להזין כתובת מייל תקינה';
+          errEl.style.display = 'block';
+          input.focus();
+          return;
+        }
+
+        submit.disabled = true;
+        var originalLabel = submit.textContent;
+        submit.textContent = 'שומר…';
+        submit.style.opacity = '0.7';
+
+        function showSuccess() {
+          formView.style.display = 'none';
+          successEl.style.display = 'block';
+        }
+        function reset() {
+          submit.disabled = false;
+          submit.textContent = originalLabel;
+          submit.style.opacity = '';
+        }
+
+        // tracking.js loads async (defer) — if it hasn't booted, surface a
+        // friendly retry instead of crashing on undefined.NGFMTrack.
+        if (!window.NGFMTrack || !window.NGFMTrack.appWaitlist) {
+          reset();
+          errEl.textContent = 'תקלה זמנית. נסה שוב בעוד רגע.';
+          errEl.style.display = 'block';
+          return;
+        }
+
+        window.NGFMTrack.appWaitlist(email, 'ios', function (resp) {
+          reset();
+          if (resp && resp.ok) {
+            showSuccess();
+          } else {
+            errEl.textContent = 'תקלה בחיבור. נסה שוב.';
+            errEl.style.display = 'block';
+            input.focus();
+          }
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

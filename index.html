@@ -1707,7 +1707,7 @@
   <header>
     <div class="logo">NOGYM<span>FORME</span></div>
     <div class="header-actions">
-      <a href="#" class="header-link" onclick="openMembersGate(event)">אזור חברים</a>
+      <a href="/app" class="header-link">אזור חברים</a>
       <a href="#" class="header-cta" onclick="openPlanModal(event)">להזמנה עכשיו →</a>
     </div>
   </header>
@@ -1768,58 +1768,6 @@
             </div>
           </a>
 
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MEMBERS-AREA GATE MODAL -->
-  <div id="membersModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.82);backdrop-filter:blur(6px);overflow-y:auto;">
-    <div style="max-width:520px;margin:60px auto;padding:0 16px 60px;">
-      <div style="background:var(--card);border:1.5px solid var(--gold);border-radius:var(--radius-md);padding:48px 32px 40px;position:relative;">
-        <button onclick="closeMembersGate()" aria-label="סגור" style="position:absolute;top:16px;left:20px;background:none;border:none;color:var(--grey);font-size:28px;cursor:pointer;line-height:1;">×</button>
-
-        <!-- GATE state -->
-        <div id="membersGateView">
-          <div style="text-align:center;margin-bottom:24px;">
-            <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:rgba(232,217,0,0.12);border:1px solid var(--gold);margin-bottom:16px;">
-              <span style="font-size:28px;">🔒</span>
-            </div>
-            <h2 style="font-family:var(--font-display);font-size:clamp(22px,3vw,28px);font-weight:900;color:var(--white);margin-bottom:14px;">אזור חברים</h2>
-            <p style="color:var(--grey-light);font-size:15px;line-height:1.6;max-width:420px;margin:0 auto;">
-              הכלים האלו זמינים אך ורק ללקוחות המותג. רכשת מוצר? התחבר עם המייל שאיתו ביצעת את ההזמנה
-            </p>
-          </div>
-
-          <form id="membersGateForm" novalidate style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
-            <input
-              id="membersEmailInput"
-              type="email"
-              autocomplete="email"
-              inputmode="email"
-              dir="ltr"
-              placeholder="your@email.com"
-              required
-              style="background:var(--black);border:1px solid var(--border);color:var(--white);font-family:var(--font-body);font-size:16px;padding:14px 16px;border-radius:var(--radius-md);text-align:left;outline:none;transition:border-color .2s;"
-            >
-            <button id="membersGateSubmit" type="submit" style="background:var(--gold);color:var(--black);font-family:var(--font-display);font-weight:900;font-size:16px;padding:16px 24px;border-radius:var(--radius-pill);border:none;cursor:pointer;transition:background .2s,transform .15s;">
-              התחבר
-            </button>
-            <p id="membersGateError" role="alert" style="display:none;color:#ff6b6b;font-size:14px;text-align:center;margin-top:4px;"></p>
-          </form>
-        </div>
-
-        <!-- SUCCESS state -->
-        <div id="membersSuccessView" style="display:none;text-align:center;">
-          <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:rgba(37,211,102,0.12);border:1px solid #25d366;margin-bottom:16px;">
-            <span style="font-size:28px;">✓</span>
-          </div>
-          <h2 style="font-family:var(--font-display);font-size:clamp(22px,3vw,28px);font-weight:900;color:var(--white);margin-bottom:10px;">ברוך הבא, אחי</h2>
-          <p style="color:var(--white);font-size:18px;line-height:1.8;margin-bottom:8px;">אנחנו מכינים לכם משהו טוב! האפליקציה שלנו מתעדכנת ממש עכשיו ותיהיה זמינה להורדה בקרוב. נעדכן אתכם במייל ברגע שהגרסה החדשה תהיה באוויר.</p>
-          <p style="color:var(--gold);font-weight:800;font-size:16px;margin-top:16px;margin-bottom:0;">צוות NOGYMFORME</p>
-          <button type="button" onclick="logoutMember()" style="display:block;margin:24px auto 0;background:none;border:none;color:var(--grey);font-size:13px;cursor:pointer;text-decoration:underline;">
-            התחבר עם מייל אחר
-          </button>
         </div>
       </div>
     </div>
@@ -2325,7 +2273,7 @@
   <footer>
     <span class="logo">NOGYM<span style="color: var(--white)">FORME</span></span>
     <p>© 2025 NOGYMFORME. כל הזכויות שמורות.</p>
-    <p style="margin-top: 8px;"><a href="#" onclick="openMembersGate(event)" style="color: var(--gold); text-decoration: none; margin: 0 12px; font-weight: 700;">אזור חברים</a> · <a href="/privacy.html" style="color: var(--grey); text-decoration: none; margin: 0 12px;">מדיניות פרטיות</a> · <a href="/terms.html" style="color: var(--grey); text-decoration: none; margin: 0 12px;">תנאי שימוש</a> · <a href="https://wa.me/972559190077" target="_blank" rel="noopener noreferrer" style="color: var(--grey); text-decoration: none; margin: 0 12px;">יצירת קשר</a></p>
+    <p style="margin-top: 8px;"><a href="/app" style="color: var(--gold); text-decoration: none; margin: 0 12px; font-weight: 700;">אזור חברים</a> · <a href="/privacy.html" style="color: var(--grey); text-decoration: none; margin: 0 12px;">מדיניות פרטיות</a> · <a href="/terms.html" style="color: var(--grey); text-decoration: none; margin: 0 12px;">תנאי שימוש</a> · <a href="https://wa.me/972559190077" target="_blank" rel="noopener noreferrer" style="color: var(--grey); text-decoration: none; margin: 0 12px;">יצירת קשר</a></p>
   </footer>
 
   <!-- DISCOUNT POPUP (centred floating modal) -->
@@ -2734,133 +2682,9 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closePlanModal();
-        closeMembersGate();
       }
     });
 
-    /* ──────────────────────────────────────────────────────────────────────
-       MEMBERS-AREA GATE
-       Soft gate: the *real* auth lives on app.nogymforme.com. This page just
-       checks the email against Completed Orders (via NGFMTrack.verifyMember)
-       and caches the success state in localStorage for 30 days so returning
-       customers skip the form.
-       ────────────────────────────────────────────────────────────────────── */
-    var MEMBERS_LS_KEY = 'ngfm_verified_v1';
-    var MEMBERS_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-
-    function readMemberCache() {
-      try {
-        var raw = localStorage.getItem(MEMBERS_LS_KEY);
-        if (!raw) return null;
-        var parsed = JSON.parse(raw);
-        if (!parsed || !parsed.email || !parsed.expiresAt) return null;
-        if (Date.now() > parsed.expiresAt) { localStorage.removeItem(MEMBERS_LS_KEY); return null; }
-        return parsed;
-      } catch (e) { return null; }
-    }
-
-    function writeMemberCache(email) {
-      try {
-        localStorage.setItem(MEMBERS_LS_KEY, JSON.stringify({
-          email: email,
-          expiresAt: Date.now() + MEMBERS_TTL_MS
-        }));
-      } catch (e) {}
-    }
-
-    function showMembersView(which) {
-      document.getElementById('membersGateView').style.display    = (which === 'gate')    ? 'block' : 'none';
-      document.getElementById('membersSuccessView').style.display = (which === 'success') ? 'block' : 'none';
-    }
-
-    function openMembersGate(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      var cached = readMemberCache();
-      showMembersView(cached ? 'success' : 'gate');
-      document.getElementById('membersGateError').style.display = 'none';
-      document.getElementById('membersModal').style.display = 'block';
-      document.body.style.overflow = 'hidden';
-      if (!cached) {
-        setTimeout(function () {
-          var inp = document.getElementById('membersEmailInput');
-          if (inp) inp.focus();
-        }, 50);
-      }
-    }
-
-    function closeMembersGate() {
-      var m = document.getElementById('membersModal');
-      if (!m) return;
-      m.style.display = 'none';
-      document.body.style.overflow = '';
-    }
-
-    function logoutMember() {
-      try { localStorage.removeItem(MEMBERS_LS_KEY); } catch (e) {}
-      var inp = document.getElementById('membersEmailInput');
-      if (inp) inp.value = '';
-      showMembersView('gate');
-      setTimeout(function () { if (inp) inp.focus(); }, 50);
-    }
-
-    document.getElementById('membersModal').addEventListener('click', function(e) {
-      if (e.target === this) closeMembersGate();
-    });
-
-    document.getElementById('membersGateForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var inp     = document.getElementById('membersEmailInput');
-      var btn     = document.getElementById('membersGateSubmit');
-      var errEl   = document.getElementById('membersGateError');
-      var email   = (inp.value || '').trim();
-
-      errEl.style.display = 'none';
-
-      // Cheap client-side email sanity check before burning an Apps Script call.
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errEl.textContent = 'נא להזין כתובת מייל תקינה';
-        errEl.style.display = 'block';
-        inp.focus();
-        return;
-      }
-
-      btn.disabled = true;
-      var originalLabel = btn.textContent;
-      btn.textContent = 'בודק…';
-      btn.style.opacity = '0.7';
-
-      // Defensive: tracking.js loads async — if it hasn't booted yet, surface
-      // a friendly error instead of crashing on undefined.NGFMTrack.
-      if (!window.NGFMTrack || !window.NGFMTrack.verifyMember) {
-        btn.disabled = false; btn.textContent = originalLabel; btn.style.opacity = '';
-        errEl.textContent = 'תקלה זמנית. נסה שוב בעוד רגע.';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      window.NGFMTrack.verifyMember(email, function (resp) {
-        btn.disabled = false;
-        btn.textContent = originalLabel;
-        btn.style.opacity = '';
-
-        if (resp.ok && resp.verified) {
-          writeMemberCache(email);
-          showMembersView('success');
-          return;
-        }
-
-        if (!resp.ok) {
-          // Network / timeout / cold start — let them retry.
-          errEl.textContent = 'תקלה בחיבור. נסה שוב.';
-        } else {
-          // Per spec.
-          errEl.textContent = 'המייל לא נמצא במערכת הלקוחות';
-        }
-        errEl.style.display = 'block';
-        inp.focus();
-        inp.select();
-      });
-    });
   </script>
 
   <!-- FLOATING WHATSAPP CTA -->
