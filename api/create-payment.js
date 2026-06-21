@@ -123,9 +123,12 @@ module.exports = async (req, res) => {
   // the request host so it works on Vercel preview + production alike.
   const origin = process.env.SITE_URL || `https://${req.headers.host}`;
   let redirectURL = `${origin}/api/payment-callback?plan=${encodeURIComponent(planKey)}`;
-  if (discountCode) {
-    redirectURL += `&code=${encodeURIComponent(discountCode)}&email=${encodeURIComponent(email)}`;
-  }
+  // Pass the customer email to the callback for ALL orders (not only discounted
+  // ones) so the server-side Meta CAPI Purchase can match on a hashed email —
+  // materially better attribution than cookies/IP alone. The callback hashes it
+  // before sending to Meta; it is never transmitted to Meta in clear text.
+  if (email) redirectURL += `&email=${encodeURIComponent(email)}`;
+  if (discountCode) redirectURL += `&code=${encodeURIComponent(discountCode)}`;
 
   // Build the single line item (UnitPrice already reflects any discount).
   const item = {

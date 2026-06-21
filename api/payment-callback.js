@@ -21,6 +21,27 @@ const SUMIT_PAYMENT_GET = 'https://api.sumit.co.il/billing/payments/get/';
 const TRACKING_WEBAPP_URL = process.env.TRACKING_WEBAPP_URL ||
   'https://script.google.com/macros/s/AKfycbwBmCaPLs3cFn2zvJw4vuMoFypgigvDIJbPuLxnLTebWOISz5o892F_H0gLtBtFvfn5/exec';
 
+const { sendPurchaseEvent } = require('../lib/meta-capi');
+
+// Plan → VAT-inclusive price (ILS) for the CAPI Purchase value. KEEP IN SYNC
+// with PLANS in create-payment.js and PLAN_LABELS in thank-you.html.
+const PLAN_PRICES = { single: 198, starter: 396, results: 496, subscription: 155 };
+const DISCOUNT_PERCENT = 10;
+
+// Parse a Cookie header into a plain object so we can read the first-party
+// _fbp / _fbc cookies the Meta Pixel set on this domain (better match quality).
+function parseCookies(header) {
+  const out = {};
+  if (!header) return out;
+  for (const part of String(header).split(';')) {
+    const i = part.indexOf('=');
+    if (i === -1) continue;
+    const k = part.slice(0, i).trim();
+    if (k) out[k] = decodeURIComponent(part.slice(i + 1).trim());
+  }
+  return out;
+}
+
 function redirect(res, url) {
   res.statusCode = 302;
   res.setHeader('Location', url);
@@ -81,6 +102,43 @@ module.exports = async (req, res) => {
   }
 
   if (!valid) return redirect(res, thankYou('0'));
+
+  // ── Server-side Meta CAPI Purchase (primary, most reliable signal) ─────────
+  // Fire from here — the verified-payment point — so the conversion reaches Meta
+  // even if the browser tab closes or an ad-blocker drops the Pixel. We mint the
+  // event_id HERE and hand it to thank-you.html (?eid=) so the browser Pixel
+  // reuses it and Meta DEDUPES the two reports into one conversion. We await it
+  // (it self-limits to 5s and never throws) so the function doesn't freeze the
+  // request before the event is sent.
+  const eventId = `purchase_${String(paymentId)}`;
+  let capiSent = false;
+  const base = PLAN_PRICES[planKey];
+  if (base) {
+    const value = code ? Math.round(base * (1 - DISCOUNT_PERCENT / 100)) : base;
+    const cookies = parseCookies(req.headers.cookie);
+    const xff = req.headers['x-forwarded-for'];
+    const result = await sendPurchaseEvent({
+      value,
+      currency: 'ILS',
+      email,                                   // hashed inside; '' when we have none
+      fbp: cookies._fbp,
+      fbc: cookies._fbc,
+      clientIp: xff ? String(xff).split(',')[0].trim() : (req.socket && req.socket.remoteAddress),
+      userAgent: req.headers['user-agent'],
+      eventId,
+      eventSourceUrl: thankYou('1'),
+      orderId: String(paymentId),
+    });
+    capiSent = !!(result && result.ok);
+  } else {
+    console.error('[payment-callback] No price for plan — CAPI Purchase skipped:', planKey);
+  }
+
   // disc=1 lets the thank-you page report the discounted value to the pixel.
-  return redirect(res, thankYou('1') + (code ? '&disc=1' : ''));
+  // eid lets the browser Pixel reuse our event_id; capi=1 tells it the server
+  // already sent the CAPI event, so it skips the browser fallback call.
+  let dest = thankYou('1') + (code ? '&disc=1' : '');
+  dest += `&eid=${encodeURIComponent(eventId)}`;
+  if (capiSent) dest += '&capi=1';
+  return redirect(res, dest);
 };

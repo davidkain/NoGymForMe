@@ -94,15 +94,49 @@
     var info    = PLAN_LABELS[planKey];
 
     // Purchase fires ONLY on a payment our server verified with SUMIT (paid=1),
-    // so it can't be triggered by someone opening this URL directly.
+    // so it can't be triggered by someone opening this URL directly. We report it
+    // BOTH ways — browser Pixel + server CAPI — sharing ONE event_id so Meta
+    // deduplicates them into a single conversion instead of double-counting.
     if (paid === '1' && info) {
       document.getElementById('planLine').textContent = 'ההזמנה שלך: ' + info.label;
+
+      var value   = disc ? Math.round(info.value * 0.9) : info.value;
+      // Prefer the event_id our server minted (passed as ?eid=) so the browser
+      // Pixel and the server CAPI event share one id and Meta dedupes them. Fall
+      // back to a local id only if the server didn't provide one.
+      var eventId = params.get('eid') || ('purchase_' + planKey + '_' + Date.now());
+      var capiAlreadySent = params.get('capi') === '1';
+
+      // 1) Browser Pixel — pass eventID so Meta can match it to the server event.
       if (typeof fbq === 'function') {
         fbq('track', 'Purchase', {
           content_name: info.label,
-          value: disc ? Math.round(info.value * 0.9) : info.value,
+          value: value,
           currency: 'ILS'
-        });
+        }, { eventID: eventId });
+      }
+
+      // 2) Server CAPI — only as a FALLBACK. Normally api/payment-callback.js has
+      // already sent the server event (capi=1) using the customer's hashed email,
+      // which matches better than cookies alone. We fire here ONLY when the server
+      // didn't (capi missing) — e.g. an older/direct link — still reusing eventId.
+      if (!capiAlreadySent) {
+        var getCookie = function (n) {
+          var m = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)');
+          return m ? m.pop() : undefined;
+        };
+        fetch('/api/meta-capi-purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event_id: eventId,
+            value: value,
+            currency: 'ILS',
+            fbp: getCookie('_fbp'),
+            fbc: getCookie('_fbc'),
+            event_source_url: location.href
+          })
+        }).catch(function () { /* tracking must never break the thank-you page */ });
       }
     } else if (paid === '0') {
       // Payment not confirmed — show a neutral message instead of a success one.
