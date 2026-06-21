@@ -302,6 +302,71 @@
       background: rgba(37,211,102,0.12);
       border-color: #25d366;
     }
+
+    /* ── MEMBERS GATE (customers only) ── */
+    #membersView { display: none; }   /* shown only after a verified email */
+    .gate-lock {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(232,217,0,0.12);
+      border: 1px solid var(--gold);
+      margin-bottom: 20px;
+      font-size: 30px;
+    }
+    #gateForm {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 360px;
+      margin: 4px auto 0;
+    }
+    #gateEmail {
+      background: var(--black);
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 16px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      text-align: left;
+      direction: ltr;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #gateEmail:focus { border-color: var(--gold); }
+    #gateSubmit {
+      background: var(--gold);
+      color: var(--black);
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 16px;
+      padding: 16px 24px;
+      border-radius: var(--radius-pill);
+      border: none;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+    }
+    #gateSubmit:hover { transform: translateY(-1px); }
+    #gateError {
+      display: none;
+      color: #ff6b6b;
+      font-size: 14px;
+      margin-top: 2px;
+    }
+    .gate-logout {
+      display: block;
+      margin: 22px auto 0;
+      background: none;
+      border: none;
+      color: var(--grey);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -309,6 +374,31 @@
   <div class="wordmark">NOGYM<span>FORME</span></div>
 
   <main class="download-card">
+
+    <!-- ── GATE VIEW: customers only (default) ──────────────────────────────
+         Verifies the email against Completed Orders via NGFMTrack.verifyMember.
+         Only verified buyers are shown the download buttons below. -->
+    <div id="gateView">
+      <div class="gate-lock">🔒</div>
+      <h1>אזור חברים</h1>
+      <p class="lead">הורדת האפליקציה זמינה ללקוחות בלבד. התחבר עם כתובת המייל שאיתה ביצעת את ההזמנה.</p>
+
+      <form id="gateForm" novalidate>
+        <input
+          id="gateEmail"
+          type="email"
+          autocomplete="email"
+          inputmode="email"
+          placeholder="your@email.com"
+          required
+        >
+        <button id="gateSubmit" type="submit">התחבר</button>
+        <p id="gateError" role="alert"></p>
+      </form>
+    </div>
+
+    <!-- ── MEMBERS VIEW: shown only after a verified email ── -->
+    <div id="membersView">
     <div class="download-icon">
       <img src="/app-icon.svg" alt="" aria-hidden="true">
     </div>
@@ -346,6 +436,9 @@
         </span>
       </a>
     </div>
+
+      <button type="button" class="gate-logout" id="gateLogout">התחבר עם מייל אחר</button>
+    </div><!-- /#membersView -->
   </main>
 
   <a href="/" class="back-link">← חזרה לאתר</a>
@@ -385,8 +478,109 @@
     </div>
   </div>
 
-  <!-- Shared tracker: NGFMTrack.appWaitlist() posts the email to the Apps Script sheet -->
+  <!-- Shared tracker: NGFMTrack.appWaitlist() + NGFMTrack.verifyMember() -->
   <script src="/tracking.js" defer></script>
+
+  <!-- ── MEMBERS GATE ──────────────────────────────────────────────────────
+       Customers only: the email is checked against Completed Orders (the sheet
+       you populate from purchases) via NGFMTrack.verifyMember. A verified
+       result is cached for 30 days so returning buyers skip the form. -->
+  <script>
+    (function () {
+      var GATE_LS_KEY = 'ngfm_verified_v1';
+      var GATE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+      var gateView   = document.getElementById('gateView');
+      var membersView = document.getElementById('membersView');
+      var gateForm   = document.getElementById('gateForm');
+      var gateInput  = document.getElementById('gateEmail');
+      var gateSubmit = document.getElementById('gateSubmit');
+      var gateError  = document.getElementById('gateError');
+
+      function readCache() {
+        try {
+          var parsed = JSON.parse(localStorage.getItem(GATE_LS_KEY));
+          if (!parsed || !parsed.email || !parsed.expiresAt) return null;
+          if (Date.now() > parsed.expiresAt) { localStorage.removeItem(GATE_LS_KEY); return null; }
+          return parsed;
+        } catch (e) { return null; }
+      }
+      function writeCache(email) {
+        try {
+          localStorage.setItem(GATE_LS_KEY, JSON.stringify({ email: email, expiresAt: Date.now() + GATE_TTL_MS }));
+        } catch (e) {}
+      }
+
+      function showMembers() {
+        gateView.style.display = 'none';
+        membersView.style.display = 'block';
+      }
+      function showGate() {
+        membersView.style.display = 'none';
+        gateView.style.display = 'block';
+        setTimeout(function () { gateInput.focus(); }, 50);
+      }
+
+      // Returning verified buyer → skip the form.
+      if (readCache()) { showMembers(); } else { showGate(); }
+
+      document.getElementById('gateLogout').addEventListener('click', function () {
+        try { localStorage.removeItem(GATE_LS_KEY); } catch (e) {}
+        gateInput.value = '';
+        gateError.style.display = 'none';
+        showGate();
+      });
+
+      gateForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var email = (gateInput.value || '').trim();
+        gateError.style.display = 'none';
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          gateError.textContent = 'נא להזין כתובת מייל תקינה';
+          gateError.style.display = 'block';
+          gateInput.focus();
+          return;
+        }
+
+        gateSubmit.disabled = true;
+        var label = gateSubmit.textContent;
+        gateSubmit.textContent = 'בודק…';
+        gateSubmit.style.opacity = '0.7';
+
+        function reset() {
+          gateSubmit.disabled = false;
+          gateSubmit.textContent = label;
+          gateSubmit.style.opacity = '';
+        }
+
+        // tracking.js loads async (defer) — guard against an early submit.
+        if (!window.NGFMTrack || !window.NGFMTrack.verifyMember) {
+          reset();
+          gateError.textContent = 'תקלה זמנית. נסה שוב בעוד רגע.';
+          gateError.style.display = 'block';
+          return;
+        }
+
+        // Longer timeout than the library default to tolerate Apps Script cold starts.
+        window.NGFMTrack.verifyMember(email, function (resp) {
+          reset();
+          if (resp.ok && resp.verified) {
+            writeCache(email);
+            showMembers();
+            return;
+          }
+          gateError.textContent = resp.ok
+            ? 'המייל לא נמצא במערכת הלקוחות'   // verified=false → not a customer
+            : 'תקלה בחיבור. נסה שוב.';          // network / timeout
+          gateError.style.display = 'block';
+          gateInput.focus();
+          gateInput.select();
+        }, 15000);
+      });
+    })();
+  </script>
+
   <script>
     (function () {
       var modal     = document.getElementById('waitModal');
