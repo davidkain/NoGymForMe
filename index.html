@@ -197,22 +197,23 @@
       aspect-ratio: 1 / 1;
       object-fit: cover;
     }
-    /* On larger screens, cap + centre the square video so it isn't huge or upscaled */
+    /* On desktop, widen + centre the video (mobile stays full-width). */
     @media (min-width: 769px) {
       .hero-image-col {
-        max-width: 540px;
+        max-width: 760px;
         margin-left: auto;
         margin-right: auto;
       }
     }
 
-    /* top scrim over the image so the overlaid headline stays legible */
-    .hero-image-col::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 24%, transparent 42%);
-      pointer-events: none;
+    /* Text row sitting directly above the video: members link + headline, one line */
+    .hero-toprow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 14px 16px 12px;
     }
 
     .hero-content-col {
@@ -246,21 +247,15 @@
     }
 
     .hero-headline {
-      position: absolute;
-      top: 5%;
-      right: 4%;
-      left: 4%;
-      z-index: 4;
       font-family: var(--font-display);
-      font-size: clamp(13px, 3vw, 42px);
+      font-size: clamp(18px, 2.4vw, 32px);
       font-weight: 900;
       color: var(--white);
       line-height: 1.2;
       letter-spacing: -0.3px;
-      white-space: nowrap;
       text-align: right;
       margin: 0;
-      text-shadow: 0 2px 16px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.85);
+      flex: 1 1 auto;
       opacity: 0;
       animation: fadeUp .6s ease forwards .1s;
     }
@@ -1496,7 +1491,7 @@
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
       .hero { padding-top: 100px; } /* clear announcement bar + members pill */
-      .hero-headline { white-space: normal; top: 5%; right: 4%; left: auto; max-width: 64%; font-size: clamp(18px, 5.4vw, 30px); letter-spacing: 0; }
+      .hero-headline { font-size: clamp(16px, 4.4vw, 24px); letter-spacing: 0; }
 
       .problem-grid,
       .ingredients-grid,
@@ -1722,7 +1717,6 @@
   <header>
     <div class="logo">NOGYM<span>FORME</span></div>
     <div class="header-actions">
-      <a href="/app" class="header-link">אזור חברים</a>
       <a href="#" class="header-cta" onclick="openPlanModal(event)">להזמנה עכשיו →</a>
     </div>
   </header>
@@ -1792,17 +1786,22 @@
   <section class="hero">
     <!-- Left: promotional video (poster keeps the original image look until played) -->
     <div class="hero-image-col">
+      <!-- Text row: members link + headline on one horizontal line, directly above the video -->
+      <div class="hero-toprow">
+        <a href="/app" class="header-link">אזור חברים</a>
+        <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
+      </div>
       <video
         class="hero-video"
         src="edited_video_no_watermark_clean.mp4"
         playsinline
         preload="metadata"
         poster="hero.png"
+        muted
         controls
         disablepictureinpicture
         x-webkit-airplay="deny"
       ></video>
-      <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
     </div>
 
     <!-- Right: Text content -->
@@ -2681,6 +2680,18 @@
         closePlanModal();
       }
     });
+
+    // Hero video: play on hover, pause on leave. Muted, so the browser
+    // allows the programmatic play() without a user gesture.
+    (function () {
+      var v = document.querySelector('.hero-video');
+      if (!v) return;
+      v.addEventListener('mouseenter', function () {
+        var p = v.play();
+        if (p && p.catch) p.catch(function () {}); // ignore autoplay rejections
+      });
+      v.addEventListener('mouseleave', function () { v.pause(); });
+    })();
 
   </script>
 
