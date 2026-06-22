@@ -185,10 +185,25 @@
       overflow: hidden;
     }
 
-    .hero-image-col img {
+    .hero-image-col img,
+    .hero-image-col video {
       width: 100%;
       height: auto;
       display: block;
+      background: var(--black);
+    }
+    /* Square ad video: force 1:1 so it never letterboxes/stretches */
+    .hero-image-col video.hero-video {
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+    }
+    /* On larger screens, cap + centre the square video so it isn't huge or upscaled */
+    @media (min-width: 769px) {
+      .hero-image-col {
+        max-width: 540px;
+        margin-left: auto;
+        margin-right: auto;
+      }
     }
 
     /* top scrim over the image so the overlaid headline stays legible */
@@ -1775,9 +1790,18 @@
 
   <!-- HERO -->
   <section class="hero">
-    <!-- Left: Dr. Kain image -->
+    <!-- Left: promotional video (poster keeps the original image look until played) -->
     <div class="hero-image-col">
-      <img src="hero.png" alt="ד&quot;ר דוד קיין עם מוצר NOGYMFORME">
+      <video
+        class="hero-video"
+        src="edited_video_no_watermark_clean.mp4"
+        playsinline
+        preload="metadata"
+        poster="hero.png"
+        controls
+        disablepictureinpicture
+        x-webkit-airplay="deny"
+      ></video>
       <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
     </div>
 
@@ -1943,17 +1967,8 @@
       </div>
 
       <div class="reveal" style="display:flex; justify-content:center; margin-top:48px;">
-        <div class="video-wrap" id="videoWrap" style="max-width:640px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); box-shadow:0 32px 100px rgba(0,0,0,0.7);">
-          <video
-            src="edited_video_no_watermark_clean.mp4"
-            playsinline
-            preload="metadata"
-            poster="hero.png"
-            controls
-            disablepictureinpicture
-            x-webkit-airplay="deny"
-            style="width:100%; display:block; background:var(--black);"
-          ></video>
+        <div class="video-wrap" style="max-width:640px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); box-shadow:0 32px 100px rgba(0,0,0,0.7);">
+          <img src="hero.png" alt="ד&quot;ר דוד קיין עם מוצר NOGYMFORME" style="width:100%; display:block; height:auto;">
         </div>
       </div>
     </div>
@@ -2621,24 +2636,6 @@
         showCouponSuccess('', false);
       }
     }
-
-    // Video: autoplay on scroll into view, pause when out
-    (function() {
-      var wrap = document.getElementById('videoWrap');
-      if (!wrap) return;
-      var video = wrap.querySelector('video');
-      var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            video.muted = false;
-            video.play();
-          } else {
-            video.pause();
-          }
-        });
-      }, { threshold: 0.5 });
-      observer.observe(video);
-    })();
 
     // Shared 1-minute countdown for announcement bar + popup
     (function() {
