@@ -212,8 +212,8 @@
       .hero-image-col   { order: 2; flex: 0 0 540px; max-width: 540px; margin: 0; } /* video on the left */
     }
 
-    /* Top scrim over the video so the overlaid headline stays legible */
-    .hero-image-col::after {
+    /* Top scrim over the solution image so the overlaid headline stays legible */
+    .video-wrap::after {
       content: '';
       position: absolute;
       inset: 0;
@@ -1545,9 +1545,6 @@
         display: block;
         margin-top: 0;
       }
-      .hero-image-col::after {
-        display: block;
-      }
       .hero-content-col { padding: 24px 20px 40px; }
       .hero-eyebrow { font-size: clamp(20px, 6vw, 28px); }
       .hero-subtitle { font-size: clamp(18px, 5vw, 24px); }
@@ -1809,8 +1806,6 @@
         disablepictureinpicture
         x-webkit-airplay="deny"
       ></video>
-      <!-- Headline overlaid on the video, like the original hero -->
-      <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
     </div>
 
     <!-- Right: Text content -->
@@ -1977,6 +1972,8 @@
       <div class="reveal" style="display:flex; justify-content:center; margin-top:48px;">
         <div class="video-wrap" style="max-width:640px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); box-shadow:0 32px 100px rgba(0,0,0,0.7);">
           <img src="hero.png" alt="ד&quot;ר דוד קיין עם מוצר NOGYMFORME" style="width:100%; display:block; height:auto;">
+          <!-- Headline overlaid on the image -->
+          <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
         </div>
       </div>
     </div>
