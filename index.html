@@ -1220,6 +1220,77 @@
     .doctor-content .section-title { text-align: right; }
     .doctor-content .section-body { text-align: right; }
 
+    /* ── FOUNDER / TRUST ── */
+    .founder-section {
+      background: var(--deep);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .founder-inner {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .founder-portrait {
+      position: relative;
+      width: 100%;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 32px 100px rgba(0,0,0,0.6);
+    }
+    .founder-portrait img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: var(--black);
+    }
+    .founder-content .section-label,
+    .founder-content .section-title,
+    .founder-content .section-body { text-align: right; }
+    .founder-creds {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin: 28px 0 26px;
+    }
+    .founder-cred {
+      flex: 1;
+      min-width: 120px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 14px;
+      text-align: center;
+    }
+    .founder-cred-num {
+      display: block;
+      font-family: var(--font-display);
+      font-size: clamp(18px, 2.2vw, 24px);
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1.15;
+    }
+    .founder-cred-label {
+      display: block;
+      font-size: 13px;
+      color: var(--grey-light);
+      margin-top: 6px;
+    }
+    .founder-link {
+      display: inline-block;
+      color: var(--gold);
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 16px;
+      text-decoration: none;
+    }
+    .founder-link:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      .founder-inner { grid-template-columns: 1fr; gap: 28px; }
+    }
+
     .mechanism-list {
       margin-top: 32px;
       display: flex;
@@ -1981,6 +2052,44 @@
 
   <div class="section-divider"></div>
 
+  <!-- FOUNDER / TRUST -->
+  <div class="founder-section">
+    <div class="section reveal">
+      <div class="founder-inner">
+        <div class="founder-portrait">
+          <!-- Portrait of the founder. Swap new_me.png for a dedicated portrait if you have one. -->
+          <img src="new_me.png" alt="ד&quot;ר דוד קיין — מייסד ומפתח NOGYMFORME">
+        </div>
+        <div class="founder-content">
+          <p class="section-label">מי עומד מאחורי המוצר</p>
+          <h2 class="section-title">הפורמולה שפיתח <em>ד&quot;ר דוד קיין</em></h2>
+          <p class="section-body">
+            NOGYMFORME פותח על ידי ד&quot;ר דוד קיין — חוקר בתחומי הלב והמוח עם למעלה מ-20 שנות ניסיון מדעי.
+            מתוך תשוקה אמיתית להפוך את העולם למקום טוב יותר, הוא יצר פורמולה שמבוססת על מדע אמיתי ועל הבנה
+            עמוקה של הגוף — לא על הבטחות ריקות ולא על טרנדים חולפים, אלא על מה שבאמת עובד.
+          </p>
+          <div class="founder-creds">
+            <div class="founder-cred">
+              <span class="founder-cred-num">20+</span>
+              <span class="founder-cred-label">שנות ניסיון מדעי</span>
+            </div>
+            <div class="founder-cred">
+              <span class="founder-cred-num">לב ומוח</span>
+              <span class="founder-cred-label">תחומי המחקר</span>
+            </div>
+            <div class="founder-cred">
+              <span class="founder-cred-num">מדע</span>
+              <span class="founder-cred-label">לא הבטחות ריקות</span>
+            </div>
+          </div>
+          <a href="/about.html" class="founder-link">קראו עוד על הסיפור שלנו ←</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
   <!-- TESTIMONIALS -->
   <div class="section reveal">
     <p class="section-label">מה גברים אומרים</p>
@@ -2293,7 +2402,7 @@
   <footer>
     <span class="logo">NOGYM<span style="color: var(--white)">FORME</span></span>
     <p>© 2025 NOGYMFORME. כל הזכויות שמורות.</p>
-    <p style="margin-top: 8px;"><a href="/app" style="color: var(--gold); text-decoration: none; margin: 0 12px; font-weight: 700;">אזור חברים</a> · <a href="/privacy.html" style="color: var(--grey); text-decoration: none; margin: 0 12px;">מדיניות פרטיות</a> · <a href="/terms.html" style="color: var(--grey); text-decoration: none; margin: 0 12px;">תנאי שימוש</a> · <a href="https://wa.me/972559190077" target="_blank" rel="noopener noreferrer" style="color: var(--grey); text-decoration: none; margin: 0 12px;">יצירת קשר</a></p>
+    <p style="margin-top: 8px;"><a href="/app" style="color: var(--gold); text-decoration: none; margin: 0 12px; font-weight: 700;">אזור חברים</a> · <a href="/about.html" style="color: var(--grey); text-decoration: none; margin: 0 12px;">אודות</a> · <a href="/privacy.html" style="color: var(--grey); text-decoration: none; margin: 0 12px;">מדיניות פרטיות</a> · <a href="/terms.html" style="color: var(--grey); text-decoration: none; margin: 0 12px;">תנאי שימוש</a> · <a href="https://wa.me/972559190077" target="_blank" rel="noopener noreferrer" style="color: var(--grey); text-decoration: none; margin: 0 12px;">יצירת קשר</a></p>
   </footer>
 
   <!-- DISCOUNT POPUP (centred floating modal) -->

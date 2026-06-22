@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>אודות · NOGYMFORME</title>
+  <link rel="icon" type="image/svg+xml" href="/app-icon.svg">
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="הסיפור מאחורי NOGYMFORME — פותח על ידי ד״ר דוד קיין, חוקר לב ומוח עם למעלה מ-20 שנות ניסיון מדעי, מתוך תשוקה להפוך את העולם למקום טוב יותר.">
+
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1001650429062777');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1001650429062777&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
+
+  <style>
+    :root {
+      --black: #0A0A0A;
+      --white: #FFFFFF;
+      --gold: #E8D900;
+      --grey: #999999;
+      --grey-light: #CCCCCC;
+      --card: #161616;
+      --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Heebo', 'Assistant', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--grey);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+    .eyebrow {
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin: 0 0 10px;
+    }
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 900;
+      margin: 0 0 16px;
+      color: var(--white);
+      line-height: 1.15;
+    }
+    .lead {
+      font-size: 18px;
+      color: var(--grey-light);
+      margin: 0 0 8px;
+    }
+    h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--white);
+      margin: 40px 0 12px;
+      border-right: 3px solid var(--gold);
+      padding-right: 14px;
+    }
+    p, li { color: var(--grey-light); }
+    ul { padding-right: 24px; }
+    li { margin-bottom: 8px; }
+    strong { color: var(--white); }
+
+    /* Founder portrait + intro */
+    .founder-card {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin: 28px 0 8px;
+    }
+    .founder-card img {
+      width: 130px;
+      height: 130px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--black);
+    }
+    .founder-card .name {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--gold);
+      margin: 0 0 4px;
+    }
+    .founder-card .role {
+      font-size: 14px;
+      color: var(--grey-light);
+      margin: 0;
+    }
+    @media (max-width: 560px) {
+      .founder-card { flex-direction: column; text-align: center; }
+      .founder-card img { width: 150px; height: 150px; }
+    }
+
+    /* Stat chips */
+    .stat-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+    .stat-chip {
+      flex: 1;
+      min-width: 130px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-right: 3px solid var(--gold);
+      border-radius: 10px;
+      padding: 16px 14px;
+      text-align: center;
+    }
+    .stat-chip .num {
+      display: block;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--gold);
+    }
+    .stat-chip .label {
+      display: block;
+      font-size: 13px;
+      color: var(--grey-light);
+      margin-top: 4px;
+    }
+
+    .pull-quote {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-right: 3px solid var(--gold);
+      padding: 18px 20px;
+      border-radius: 8px;
+      margin: 28px 0;
+      font-size: 17px;
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    .cta-wrap { margin: 40px 0 8px; text-align: center; }
+    .cta-btn {
+      display: inline-block;
+      background: var(--gold);
+      color: #0A0A0A;
+      font-weight: 900;
+      font-size: 16px;
+      padding: 15px 30px;
+      border-radius: 100px;
+      text-decoration: none;
+    }
+    .cta-btn:hover { text-decoration: none; opacity: .92; }
+
+    .disclaimer {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-right: 3px solid var(--gold);
+      padding: 16px 20px;
+      border-radius: 6px;
+      margin: 32px 0;
+      font-size: 13px;
+      color: var(--grey-light);
+    }
+    .footer-meta {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--grey);
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">→ חזרה לאתר</a>
+
+    <p class="eyebrow">הסיפור שלנו</p>
+    <h1>מדע אמיתי. מתוך אכפתיות אמיתית.</h1>
+    <p class="lead">
+      NOGYMFORME לא נולד בחדר שיווק. הוא נולד מתוך שנים של מחקר, מתוך הבנה עמוקה של הגוף האנושי,
+      ומתוך רצון פשוט לעזור לגברים להרגיש טוב יותר בגוף שלהם — בלי קסמים ובלי הבטחות ריקות.
+    </p>
+
+    <div class="founder-card">
+      <img src="/new_me.png" alt="ד״ר דוד קיין — מייסד ומפתח NOGYMFORME">
+      <div>
+        <p class="name">ד״ר דוד קיין</p>
+        <p class="role">מייסד ומפתח NOGYMFORME · חוקר לב ומוח · למעלה מ-20 שנות ניסיון מדעי</p>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-chip"><span class="num">20+</span><span class="label">שנות ניסיון מדעי</span></div>
+      <div class="stat-chip"><span class="num">לב ומוח</span><span class="label">תחומי המחקר</span></div>
+      <div class="stat-chip"><span class="num">מבוסס מדע</span><span class="label">לא הבטחות ריקות</span></div>
+    </div>
+
+    <h2>האדם מאחורי הפורמולה</h2>
+    <p>
+      את NOGYMFORME פיתח <strong>ד״ר דוד קיין</strong> — חוקר שהקדיש למעלה מ-20 שנה למחקר מדעי בתחומי
+      <strong>הלב והמוח</strong>, שתי המערכות שמכתיבות יותר מכל איך אנחנו מרגישים, אוכלים ומתפקדים לאורך היום.
+      רקע מחקרי מעמיק כזה מלמד דבר אחד היטב: הגוף לא מגיב לסיסמאות. הוא מגיב למנגנונים. ולכן כל החלטה
+      בפיתוח המוצר נשענה על שאלה אחת — <strong>האם זה באמת עובד, ולמה?</strong>
+    </p>
+
+    <div class="pull-quote">
+      „לא רציתי עוד מוצר שמבטיח הרים וגבעות. רציתי משהו שאני בעצמי הייתי נותן לחבר — מבוסס, כן, ועם כבוד לגוף."
+    </div>
+
+    <h2>המדע שמאחורי המותג</h2>
+    <p>
+      NOGYMFORME בנוי סביב שילוב של <strong>סיבים תזונתיים מסיסים ורכיבים תומכי מטבוליזם</strong> שנבחרו
+      בקפידה, כל אחד בזכות תפקיד ברור ומובן:
+    </p>
+    <ul>
+      <li><strong>קונג׳אק (Glucomannan) ופסיליום (Psyllium)</strong> — סיבים מסיסים שתורמים לתחושת מלאות ולשליטה טובה יותר בין הארוחות.</li>
+      <li><strong>כרומיום פיקולינט</strong> — מינרל קורט התורם לחילוף חומרים תקין של פחמימות ולשמירה על רמות סוכר תקינות בדם.</li>
+      <li><strong>תמצית תה ירוק</strong> — רכיב טבעי שנחקר בהקשר של חילוף חומרים וניצול אנרגיה.</li>
+    </ul>
+    <p>
+      הפורמולה אינה תחליף לתזונה או לתנועה, ואינה „פתרון פלא". היא כלי יומי חכם שנועד להשתלב בשגרה קיימת
+      ולעזור לך להחזיק תהליך — מתוך כבוד לאינטליגנציה שלך ולגוף שלך.
+    </p>
+
+    <h2>למה דווקא לגברים</h2>
+    <p>
+      רוב המוצרים בתחום ההרזיה בישראל מדברים אל נשים — בצבעים, בטעמים ובשפה. אבל מעל גיל 35, גברים
+      רבים מתמודדים עם <strong>האטה בחילוף החומרים, שומן בטני עיקש ועומס יומיומי</strong> שלא משאיר
+      אנרגיה לחדר כושר. NOGYMFORME נוצר כדי לסגור בדיוק את הפער הזה: פתרון ראשון מסוגו בישראל, שמדבר
+      אל גברים, בגובה העיניים, בלי בושה ובלי סיפורים.
+    </p>
+
+    <h2>הערכים שמנחים אותנו</h2>
+    <ul>
+      <li><strong>מדע לפני שיווק</strong> — כל טענה נבחנת מול ההיגיון המדעי, לא מול טרנד.</li>
+      <li><strong>שקיפות מלאה</strong> — מרכיבים גלויים, ציפיות ריאליות, ובלי אותיות קטנות.</li>
+      <li><strong>כבוד ללקוח</strong> — 14 יום החזר כספי מלא לפי חוק, וליווי אמיתי לאורך הדרך.</li>
+      <li><strong>איכות בלי פשרות</strong> — ייצור במפעל בתקן GMP, בכשרות בד״ץ העדה החרדית ירושלים.</li>
+    </ul>
+
+    <div class="cta-wrap">
+      <a href="/" class="cta-btn">להכיר את המוצר ←</a>
+    </div>
+
+    <div class="disclaimer">
+      <strong>הבהרה.</strong> NOGYMFORME הוא תוסף תזונה המסייע בתהליך הדיאטה כחלק מאורח חיים בריא ומאוזן.
+      אינו תחליף לייעוץ רפואי, אבחנה או טיפול. משרד הבריאות לא אישר את טענות המוצר. תוצאות עשויות להשתנות
+      בין אנשים שונים. בעלי מצב רפואי, נשים בהריון או מניקות ואנשים הנוטלים תרופות מרשם — יש להתייעץ עם
+      רופא לפני השימוש.
+    </div>
+
+    <div class="footer-meta">
+      © 2026 NOGYMFORME. כל הזכויות שמורות. ·
+      <a href="/">דף הבית</a> ·
+      <a href="/privacy.html">מדיניות פרטיות</a> ·
+      <a href="/terms.html">תנאי שימוש</a>
+    </div>
+  </div>
+</body>
+</html>
