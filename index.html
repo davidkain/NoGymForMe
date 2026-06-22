@@ -196,6 +196,10 @@
     .hero-image-col video.hero-video {
       aspect-ratio: 1 / 1;
       object-fit: cover;
+      /* Non-interactive: the user can't tap/click to pause, mute, or go
+         fullscreen (desktop + mobile). Autoplay + auto-unmute still work
+         because those are driven by window-level listeners, not the video. */
+      pointer-events: none;
     }
     /* Desktop: two-column hero — copy beside the video (mobile stays stacked). */
     @media (min-width: 769px) {
