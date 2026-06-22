@@ -212,14 +212,14 @@
       .hero-image-col   { order: 2; flex: 0 0 540px; max-width: 540px; margin: 0; } /* video on the left */
     }
 
-    /* Text row sitting directly above the video: members link + headline, one line */
-    .hero-toprow {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-      padding: 14px 16px 12px;
+    /* Top scrim over the video so the overlaid headline stays legible */
+    .hero-image-col::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 24%, transparent 42%);
+      pointer-events: none;
+      z-index: 1;
     }
 
     .hero-content-col {
@@ -253,15 +253,21 @@
     }
 
     .hero-headline {
+      position: absolute;
+      top: 4%;
+      right: 5%;
+      left: 5%;
+      z-index: 4;
       font-family: var(--font-display);
-      font-size: clamp(18px, 2.4vw, 32px);
+      font-size: clamp(18px, 3.2vw, 32px);
       font-weight: 900;
       color: var(--white);
       line-height: 1.2;
       letter-spacing: -0.3px;
       text-align: right;
       margin: 0;
-      flex: 1 1 auto;
+      pointer-events: none;            /* never intercept clicks on the video */
+      text-shadow: 0 2px 16px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.85);
       opacity: 0;
       animation: fadeUp .6s ease forwards .1s;
     }
@@ -1497,7 +1503,7 @@
       .logo { font-size: 24px; }
       .announcement-bar { font-size: 11px; padding: 8px 16px 16px; }
       .hero { padding-top: 100px; } /* clear announcement bar + members pill */
-      .hero-headline { font-size: clamp(16px, 4.4vw, 24px); letter-spacing: 0; }
+      .hero-headline { font-size: clamp(18px, 5.2vw, 28px); letter-spacing: 0; }
 
       .problem-grid,
       .ingredients-grid,
@@ -1625,12 +1631,11 @@
       body { padding-bottom: 80px; }
     }
 
-    /* ── VIDEO PLAY OVERLAY ── */
+    /* Static image wrapper (in the solution section) — not interactive */
     .video-wrap {
       position: relative;
       display: inline-block;
       width: 100%;
-      cursor: pointer;
     }
     /* Hide AirPlay / PiP / wireless picker buttons from native video controls */
     video::-webkit-media-controls-wireless-playback-picker-button,
@@ -1793,10 +1798,6 @@
   <section class="hero">
     <!-- Left: promotional video (poster keeps the original image look until played) -->
     <div class="hero-image-col">
-      <!-- Headline row directly above the video (no overlap) -->
-      <div class="hero-toprow">
-        <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
-      </div>
       <video
         class="hero-video"
         src="edited_video_no_watermark_clean.mp4"
@@ -1805,10 +1806,11 @@
         poster="hero.png"
         muted
         autoplay
-        controls
         disablepictureinpicture
         x-webkit-airplay="deny"
       ></video>
+      <!-- Headline overlaid on the video, like the original hero -->
+      <h1 class="hero-headline">אחי,עזוב אותך...אתה לא באמת <span style="color:var(--gold)">טיפוס של חדר כושר</span></h1>
     </div>
 
     <!-- Right: Text content -->
