@@ -197,13 +197,19 @@
       aspect-ratio: 1 / 1;
       object-fit: cover;
     }
-    /* On desktop, widen + centre the video (mobile stays full-width). */
+    /* Desktop: two-column hero — copy beside the video (mobile stays stacked). */
     @media (min-width: 769px) {
-      .hero-image-col {
-        max-width: 760px;
-        margin-left: auto;
-        margin-right: auto;
+      .hero {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 48px;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 124px 40px 28px;
       }
+      .hero-content-col { order: 1; flex: 1 1 0; padding: 0; }   /* copy on the right (RTL start) */
+      .hero-image-col   { order: 2; flex: 0 0 540px; max-width: 540px; margin: 0; } /* video on the left */
     }
 
     /* Text row sitting directly above the video: members link + headline, one line */
@@ -1798,6 +1804,7 @@
         preload="metadata"
         poster="hero.png"
         muted
+        autoplay
         controls
         disablepictureinpicture
         x-webkit-airplay="deny"
@@ -2681,16 +2688,37 @@
       }
     });
 
-    // Hero video: play on hover, pause on leave. Muted, so the browser
-    // allows the programmatic play() without a user gesture.
+    // Hero video: autoplay (muted) whenever it's on screen, and switch to sound
+    // automatically — browsers block unmuted autoplay until the first user
+    // gesture, so we unmute on the earliest tap/click/scroll-touch/keypress.
     (function () {
       var v = document.querySelector('.hero-video');
       if (!v) return;
-      v.addEventListener('mouseenter', function () {
-        var p = v.play();
-        if (p && p.catch) p.catch(function () {}); // ignore autoplay rejections
-      });
-      v.addEventListener('mouseleave', function () { v.pause(); });
+      var gestureSeen = false;
+
+      function play() { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      function unmute() { if (v.muted) { v.muted = false; play(); } }
+
+      // Browsers block unmuted autoplay until the first real user gesture.
+      var gestures = ['pointerdown', 'touchstart', 'click', 'keydown'];
+      function onGesture() {
+        gestureSeen = true;
+        unmute();
+        gestures.forEach(function (e) { window.removeEventListener(e, onGesture); });
+      }
+      gestures.forEach(function (e) { window.addEventListener(e, onGesture, { passive: true }); });
+
+      // Play (muted) whenever the video is on screen; pause when it leaves.
+      // Once a gesture has happened, "on screen" also means "with sound".
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { play(); if (gestureSeen) unmute(); }
+          else { v.pause(); }
+        });
+      }, { threshold: 0.5 });
+      io.observe(v);
+
+      v.addEventListener('mouseenter', function () { play(); if (gestureSeen) unmute(); });
     })();
 
   </script>
