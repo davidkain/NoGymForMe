@@ -66,7 +66,7 @@
   <div class="card">
     <div class="logo">NOGYM<span>FORME</span></div>
     <div class="check">✓</div>
-    <h1>התשלום התקבל — תודה! 🎉</h1>
+    <h1>התשלום התקבל - תודה! 🎉</h1>
     <p class="sub">קיבלנו את ההזמנה שלך וחשבונית/קבלה תישלח אליך למייל מחברת הסליקה SUMIT.</p>
     <div class="plan" id="planLine"></div>
     <p class="note">המשלוח יוצא לדרך בימים הקרובים. יש שאלה? דברו איתנו בוואטסאפ ונשמח לעזור.</p>
@@ -95,7 +95,7 @@
 
     // Purchase fires ONLY on a payment our server verified with SUMIT (paid=1),
     // so it can't be triggered by someone opening this URL directly. We report it
-    // BOTH ways — browser Pixel + server CAPI — sharing ONE event_id so Meta
+    // BOTH ways - browser Pixel + server CAPI - sharing ONE event_id so Meta
     // deduplicates them into a single conversion instead of double-counting.
     if (paid === '1' && info) {
       document.getElementById('planLine').textContent = 'ההזמנה שלך: ' + info.label;
@@ -107,7 +107,7 @@
       var eventId = params.get('eid') || ('purchase_' + planKey + '_' + Date.now());
       var capiAlreadySent = params.get('capi') === '1';
 
-      // 1) Browser Pixel — pass eventID so Meta can match it to the server event.
+      // 1) Browser Pixel - pass eventID so Meta can match it to the server event.
       if (typeof fbq === 'function') {
         fbq('track', 'Purchase', {
           content_name: info.label,
@@ -116,10 +116,10 @@
         }, { eventID: eventId });
       }
 
-      // 2) Server CAPI — only as a FALLBACK. Normally api/payment-callback.js has
+      // 2) Server CAPI - only as a FALLBACK. Normally api/payment-callback.js has
       // already sent the server event (capi=1) using the customer's hashed email,
       // which matches better than cookies alone. We fire here ONLY when the server
-      // didn't (capi missing) — e.g. an older/direct link — still reusing eventId.
+      // didn't (capi missing) - e.g. an older/direct link - still reusing eventId.
       if (!capiAlreadySent) {
         var getCookie = function (n) {
           var m = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)');
@@ -139,10 +139,10 @@
         }).catch(function () { /* tracking must never break the thank-you page */ });
       }
     } else if (paid === '0') {
-      // Payment not confirmed — show a neutral message instead of a success one.
+      // Payment not confirmed - show a neutral message instead of a success one.
       document.querySelector('h1').textContent = 'התשלום לא הושלם';
       document.querySelector('.sub').textContent =
-        'נראה שהתשלום לא הושלם או בוטל. אפשר לנסות שוב, ואם חויבת בטעות — דברו איתנו בוואטסאפ ונסדר.';
+        'נראה שהתשלום לא הושלם או בוטל. אפשר לנסות שוב, ואם חויבת בטעות - דברו איתנו בוואטסאפ ונסדר.';
       var check = document.querySelector('.check');
       if (check) { check.textContent = '!'; check.style.color = '#ffb020'; check.style.background = 'rgba(255,176,32,.12)'; }
     }

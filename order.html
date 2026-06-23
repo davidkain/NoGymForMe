@@ -679,13 +679,13 @@
   <!-- ── FORM COLUMN ── -->
   <div class="form-col">
 
-    <!-- CHECKOUT — collect contact details, then redirect to SUMIT's secure payment page -->
+    <!-- CHECKOUT - collect contact details, then redirect to SUMIT's secure payment page -->
     <div class="co-section waitlist-section">
       <div class="co-section-body waitlist-body">
-        <h2 class="waitlist-heading">כמעט שם — נשאיר פרטים ועוברים לתשלום מאובטח</h2>
+        <h2 class="waitlist-heading">כמעט שם - נשאיר פרטים ועוברים לתשלום מאובטח</h2>
         <p class="waitlist-sub">
           נשלח אישור ופרטי מעקב למייל. התשלום עצמו מתבצע בעמוד המאובטח של חברת הסליקה
-          <span dir="ltr" class="brand-inline">SUMIT</span> — פרטי האשראי לעולם אינם נשמרים אצלנו.
+          <span dir="ltr" class="brand-inline">SUMIT</span> - פרטי האשראי לעולם אינם נשמרים אצלנו.
         </p>
 
         <form id="checkoutForm" class="waitlist-form" novalidate>
@@ -705,7 +705,7 @@
             <span class="field-error" id="custPhoneErr">נא להזין מספר טלפון</span>
           </div>
 
-          <!-- Discount code — always visible (previously buried in the
+          <!-- Discount code - always visible (previously buried in the
                collapsible order summary, hidden on mobile). Validated
                server-side against the email above before it applies. -->
           <div class="field-group" id="couponRow">
@@ -715,7 +715,7 @@
                      style="direction:ltr;text-align:left;text-transform:uppercase;">
               <button class="coupon-apply-btn" type="button" id="couponApplyBtn" onclick="couponBtnClick()">החל</button>
             </div>
-            <span class="coupon-success" id="couponSuccess">✓ קוד הנחה הוחל — 10% הנחה</span>
+            <span class="coupon-success" id="couponSuccess">✓ קוד הנחה הוחל - 10% הנחה</span>
             <span class="field-error" id="couponError">קוד לא תקין</span>
           </div>
 
@@ -771,15 +771,15 @@
         <!-- Trust badge: formulated by a doctor / scientist -->
         <div style="display:flex;align-items:center;gap:8px;background:var(--gold-muted);border:1px solid var(--border);border-right:3px solid var(--gold);border-radius:var(--radius-sm);padding:10px 12px;margin-top:12px;font-size:12.5px;color:var(--grey-light);line-height:1.5;">
           <span aria-hidden="true" style="font-size:15px;">🔬</span>
-          <span>פותח על ידי <strong style="color:var(--white);">ד&quot;ר דייויד קיין</strong> — חוקר לב ומוח · מבוסס מדע, לא הבטחות</span>
+          <span>פותח על ידי <strong style="color:var(--white);">ד&quot;ר דייויד קיין</strong> - חוקר לב ומוח · מבוסס מדע, לא הבטחות</span>
         </div>
 
         <!-- (Discount code field moved to the form column so it's always
-             visible — see #couponRow there.) -->
+             visible - see #couponRow there.) -->
 
         <!-- Shown only for subscription plans: replaces the coupon row -->
         <div class="sub-discount-note" id="subDiscountNote" style="display:none;">
-          ✓ המנוי כולל <strong>הנחה קבועה של 21%</strong> — אין צורך בקוד קופון.
+          ✓ המנוי כולל <strong>הנחה קבועה של 21%</strong> - אין צורך בקוד קופון.
         </div>
 
         <hr class="totals-divider">
@@ -941,7 +941,7 @@
   function couponReason(reason) {
     switch (reason) {
       case 'used':       return 'הקוד הזה כבר נוצל.';
-      case 'wrongemail': return 'הקוד שייך לאימייל אחר — השתמש באימייל שאיתו קיבלת אותו.';
+      case 'wrongemail': return 'הקוד שייך לאימייל אחר - השתמש באימייל שאיתו קיבלת אותו.';
       case 'notfound':   return 'קוד הנחה לא תקין.';
       case 'timeout':    return 'האימות לקח יותר מדי זמן. נסה שוב.';
       default:           return 'לא ניתן להחיל את הקוד. נסה שוב או הסר אותו.';
@@ -1063,7 +1063,7 @@
     }
 
     /* Ask OUR backend to create the SUMIT payment page. We send only the plan
-       key + contact details — never an amount. The server decides the price. */
+       key + contact details - never an amount. The server decides the price. */
     fetch('/api/create-payment', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1076,7 +1076,7 @@
           return;
         }
         // Blocked. If the discount code is the problem, surface it on the coupon
-        // field with the option to remove it — never silently charge full price.
+        // field with the option to remove it - never silently charge full price.
         btn.disabled    = false;
         btn.textContent = prevLabel;
         var body = res.body || {};
@@ -1101,7 +1101,7 @@
       inp.classList.remove('error');
       var errEl = document.getElementById(inp.id + 'Err');
       if (errEl) errEl.classList.remove('visible');
-      // A code is bound to the email it was validated with — if the email
+      // A code is bound to the email it was validated with - if the email
       // changes after applying, drop the code so it's re-validated.
       if (inp.id === 'custEmail' && couponApplied) removeCoupon();
     });
@@ -1114,12 +1114,12 @@
   document.getElementById('payBtn').textContent =
     plan.isSubscription ? 'התחל מנוי חודשי מאובטח' : 'המשך לתשלום מאובטח';
 
-  /* Meta Pixel: standard "InitiateCheckout" — fires once when the visitor
+  /* Meta Pixel: standard "InitiateCheckout" - fires once when the visitor
      reaches this order page with a plan selected. Lets Meta optimize ad
      delivery toward people who actually reach checkout, and measures the
      drop-off between landing and reaching this step.
 
-     NOTE: there is intentionally NO "Purchase" event here — this page is
+     NOTE: there is intentionally NO "Purchase" event here - this page is
      currently a waitlist (no payment gateway connected), so firing Purchase
      would report fake conversions and mis-train ad optimization. When the
      real payment flow goes live, fire it at the verified success step:
