@@ -19,8 +19,8 @@
   // Fields the tracker will EVER forward. Anything else is dropped.
   var ALLOWED = {
     discount:  ['email', 'source'],
-    started:   ['name', 'email', 'phone', 'plan'],
-    completed: ['orderNum', 'name', 'email', 'phone', 'address', 'city', 'plan', 'total']
+    started:   ['name', 'email', 'phone', 'plan', 'address', 'city', 'comments'],
+    completed: ['orderNum', 'name', 'email', 'phone', 'address', 'city', 'comments', 'plan', 'total']
   };
 
   function pick(obj, keys) {

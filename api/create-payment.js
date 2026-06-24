@@ -148,14 +148,23 @@ module.exports = async (req, res) => {
     item.Recurrence = 1;
   }
 
+  // Shipping address (collected on the order page for subscriptions). Forwarded
+  // to SUMIT's customer record when present; unknown/empty fields are simply
+  // omitted so non-subscription orders are unaffected.
+  const customer = {
+    Name:         clean(body.name, 100),
+    EmailAddress: email,
+    Phone:        clean(body.phone, 30),
+    SearchMode:   'Automatic',
+  };
+  const address = clean(body.address, 200);
+  const city    = clean(body.city, 100);
+  if (address) customer.Address = address;
+  if (city)    customer.City = city;
+
   const sumitRequest = {
     Credentials: { CompanyID, APIKey: apiKey },
-    Customer: {
-      Name:         clean(body.name, 100),
-      EmailAddress: email,
-      Phone:        clean(body.phone, 30),
-      SearchMode:   'Automatic',
-    },
+    Customer: customer,
     Items: [item],
     // Tell SUMIT our UnitPrice already INCLUDES VAT, so it splits the tax out
     // of ₪155 instead of adding it on top. Field name + string value match

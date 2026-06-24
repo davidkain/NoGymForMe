@@ -1777,7 +1777,7 @@
 
   <!-- ANNOUNCEMENT BAR -->
   <div class="announcement-bar">
-    <span id="barCountdown" style="font-variant-numeric:tabular-nums;min-width:3.2ch;display:inline-block;text-align:center">1:00</span> <strong>משלוח חינם</strong> על כל הזמנה &nbsp;·&nbsp; 12 תשלומים ללא ריבית &nbsp;·&nbsp; <strong>100% החזר כספי</strong> תוך 14 יום
+    <strong>משלוח חינם</strong> על כל הזמנה &nbsp;·&nbsp; 12 תשלומים ללא ריבית &nbsp;·&nbsp; <strong>100% החזר כספי</strong> תוך 14 יום
   </div>
 
   <!-- HEADER -->
@@ -2731,10 +2731,8 @@
       var secs = 60;
       function fmt(s) { return '0:' + (s < 10 ? '0' : '') + s; }
       function tick() {
-        var bar = document.getElementById('barCountdown');
         var pop = document.getElementById('popupCountdown');
         var label = fmt(secs);
-        if (bar) bar.textContent = label;
         if (pop) pop.textContent = label;
         secs = secs > 0 ? secs - 1 : 60;
       }
