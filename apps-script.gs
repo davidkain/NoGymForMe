@@ -52,8 +52,10 @@ const TABS = {
 
 const HEADERS = {
   discount:  ['Timestamp', 'Email', 'Source', 'User-Agent', 'Code', 'Used', 'Used At', 'Code Emailed At'],
-  started:   ['Timestamp', 'Name', 'Email', 'Phone', 'Plan', 'Status', 'User-Agent'],
-  completed: ['Timestamp', 'Order #', 'Name', 'Email', 'Phone', 'Address', 'City', 'Plan', 'Total', 'User-Agent'],
+  // New address columns are APPENDED at the end so the auto-migration in
+  // ensureSheet() keeps existing rows aligned (old rows just get blank cells).
+  started:   ['Timestamp', 'Name', 'Email', 'Phone', 'Plan', 'Status', 'User-Agent', 'Address', 'City', 'Comments'],
+  completed: ['Timestamp', 'Order #', 'Name', 'Email', 'Phone', 'Address', 'City', 'Plan', 'Total', 'User-Agent', 'Comments'],
   appwait:   ['Timestamp', 'Email', 'Source', 'User-Agent']
 };
 
@@ -75,6 +77,15 @@ const SOURCE_LABELS = {
 function labelForSource(source) {
   return SOURCE_LABELS[source] || source || '(unknown source)';
 }
+
+// Clean plan names (no emoji prefixes) for the customer-facing confirmation
+// email. KEEP IN SYNC with PLAN_LABELS in thank-you.html.
+const PLAN_NAMES = {
+  single:       'חבילת הביישן',
+  starter:      'חבילת יאללה, בוא ננסה',
+  results:      'חבילת אול-אין',
+  subscription: 'מנוי חודשי'
+};
 
 // ─── ENTRY POINTS ────────────────────────────────────────────────────────────
 function doGet() {
@@ -205,8 +216,12 @@ function doPost(e) {
     sheet.getRange(lastRow, 1, 1, row.length).setBackground(HIGHLIGHT_BG);
 
     // If a completed order arrives, mark earlier "Abandoned" rows for the same
-    // email/phone as Completed so the abandoned tab doesn't lie.
-    if (type === 'completed') promoteAbandonedToCompleted(ss, data);
+    // email/phone as Completed so the abandoned tab doesn't lie, and email the
+    // buyer a branded order confirmation.
+    if (type === 'completed') {
+      promoteAbandonedToCompleted(ss, data);
+      if (data.email) sendOrderConfirmation(data);
+    }
 
     sendNotification(type, data, ss);
 
@@ -368,8 +383,8 @@ function ensureSheet(ss, type) {
 function buildRow(type, d) {
   const ts = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm:ss');
   if (type === 'discount')  return [ts, d.email || '', d.source || 'popup', d._ua || '', d._code || '', 'No', ''];
-  if (type === 'started')   return [ts, d.name || '', d.email || '', d.phone || '', d.plan || '', 'Abandoned', d._ua || ''];
-  if (type === 'completed') return [ts, d.orderNum || '', d.name || '', d.email || '', d.phone || '', d.address || '', d.city || '', d.plan || '', d.total || '', d._ua || ''];
+  if (type === 'started')   return [ts, d.name || '', d.email || '', d.phone || '', d.plan || '', 'Abandoned', d._ua || '', d.address || '', d.city || '', d.comments || ''];
+  if (type === 'completed') return [ts, d.orderNum || '', d.name || '', d.email || '', d.phone || '', d.address || '', d.city || '', d.plan || '', d.total || '', d._ua || '', d.comments || ''];
   if (type === 'appwait')   return [ts, d.email || '', d.source || 'ios', d._ua || ''];
   return [];
 }
@@ -428,6 +443,58 @@ function maybeResendCode(sheet, rec, email) {
   if (last && (Date.now() - last.getTime()) < DAY_MS) return; // emailed < 24h ago → skip
   sendCustomerCode(email, rec.code);
   sheet.getRange(rec.rowIndex, 8).setValue(new Date());
+}
+
+// Branded order-confirmation email to the BUYER, sent once a payment is
+// confirmed (the `completed` event). SUMIT separately emails the tax invoice/
+// receipt; this is the friendly "we got your order" note with the shipping
+// details we collected. Best-effort: a mail failure must never break the
+// order recording.
+function sendOrderConfirmation(d) {
+  var email = String(d.email || '').trim();
+  if (!email) return;
+
+  var planName = PLAN_NAMES[d.plan] || d.plan || '';
+  var rows = '';
+  function row(label, value) {
+    if (!value) return '';
+    return '<tr><td style="padding:6px 0;color:#8a8680;font-size:14px">' + label + '</td>' +
+           '<td style="padding:6px 0;color:#ffffff;font-size:14px;font-weight:600">' + escapeHtml(value) + '</td></tr>';
+  }
+  rows += row('הזמנה', planName);
+  rows += row('מספר הזמנה', d.orderNum);
+  rows += row('סכום', d.total);
+
+  var shipping = '';
+  if (d.address || d.city) {
+    var line = [d.address, d.city].filter(function (x) { return x; }).join(', ');
+    shipping =
+      '<div style="text-align:right;background:#161616;border:1px solid #222;border-radius:10px;padding:16px 18px;margin:18px 0;">' +
+        '<div style="color:#E8D900;font-size:13px;font-weight:700;margin-bottom:6px;">כתובת למשלוח</div>' +
+        '<div style="color:#cfccc6;font-size:14px;line-height:1.6;">' + escapeHtml(line) +
+        (d.comments ? '<br><span style="color:#8a8680;">הערות: ' + escapeHtml(d.comments) + '</span>' : '') +
+        '</div>' +
+      '</div>';
+  }
+
+  var html =
+    '<div dir="rtl" style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:auto;' +
+      'background:#0A0A0A;color:#ffffff;padding:32px 24px;border-radius:12px;text-align:center;">' +
+      '<div style="font-size:22px;font-weight:900;color:#E8D900;letter-spacing:1px;">NOGYM' +
+        '<span style="color:#ffffff;">FORME</span></div>' +
+      '<h1 style="font-size:20px;margin:18px 0 8px;">ההזמנה שלך התקבלה! 🎉</h1>' +
+      '<p style="color:#cfccc6;font-size:15px;line-height:1.6;margin:0 0 18px;">' +
+        'תודה רבה על ההזמנה. קיבלנו את התשלום והמשלוח יוצא לדרך בימים הקרובים.</p>' +
+      '<table style="width:100%;border-collapse:collapse;text-align:right;">' + rows + '</table>' +
+      shipping +
+      '<p style="color:#8a8680;font-size:13px;line-height:1.6;margin:18px 0 0;">' +
+        'חשבונית/קבלה תישלח אליך בנפרד מחברת הסליקה SUMIT. ' +
+        'יש שאלה? פשוט השב/י למייל הזה ונשמח לעזור.</p>' +
+    '</div>';
+
+  try {
+    MailApp.sendEmail({ to: email, subject: 'ההזמנה שלך ב-NOGYMFORME התקבלה 🎉', htmlBody: html, name: 'NOGYMFORME' });
+  } catch (e) { /* never break order recording over the confirmation email */ }
 }
 
 function sendNotification(type, d, ss) {

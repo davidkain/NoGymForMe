@@ -73,6 +73,7 @@
     <a class="btn" href="index.html">חזרה לדף הבית</a>
   </div>
 
+  <script src="tracking.js"></script>
   <script>
     /* Map the plan passed back in the URL to a human label + value, so we can
        both show a confirmation line and report a Purchase to the Meta Pixel.
@@ -115,6 +116,30 @@
           currency: 'ILS'
         }, { eventID: eventId });
       }
+
+      // 1b) Record the COMPLETED order in the Google Sheet + trigger the buyer's
+      // confirmation email. The full order (incl. shipping address) was stashed
+      // in localStorage at checkout — the SUMIT redirect strips it from the URL,
+      // so this is the only place with the complete data. Clear it right after
+      // so a page refresh can't record the order or email the buyer twice.
+      try {
+        var pending = JSON.parse(localStorage.getItem('ngfm_order') || 'null');
+        if (pending && window.NGFMTrack && typeof NGFMTrack.completed === 'function') {
+          var orderNum = (params.get('eid') || '').replace(/^purchase_/, '');
+          NGFMTrack.completed({
+            orderNum: orderNum,
+            name:     pending.name,
+            email:    pending.email,
+            phone:    pending.phone,
+            address:  pending.address,
+            city:     pending.city,
+            comments: pending.comments,
+            plan:     planKey,
+            total:    '₪' + value + (planKey === 'subscription' ? '/חודש' : '')
+          });
+          localStorage.removeItem('ngfm_order');
+        }
+      } catch (e) { /* tracking must never break the thank-you page */ }
 
       // 2) Server CAPI — only as a FALLBACK. Normally api/payment-callback.js has
       // already sent the server event (capi=1) using the customer's hashed email,
