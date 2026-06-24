@@ -705,12 +705,12 @@
             <span class="field-error" id="custPhoneErr">נא להזין מספר טלפון</span>
           </div>
 
-          <!-- Shipping address — shown only for the subscription plan (toggled
-               in renderSummary). Required: city, street, house/apartment.
-               Floor + comments are optional. Captured with the "started"
-               tracking event so it reaches the fulfillment sheet, and forwarded
-               to SUMIT's customer record. -->
-          <div id="shippingFields" style="display:none;">
+          <!-- Shipping address — shown for ALL plans (every plan ships physical
+               bottles). Required: city, street, house/apartment. Floor +
+               comments are optional. Captured with the "started" tracking event
+               so it reaches the fulfillment sheet, and forwarded to SUMIT's
+               customer record. -->
+          <div id="shippingFields">
             <p class="waitlist-sub" style="margin:4px 0 12px;font-weight:600;color:var(--white);">כתובת למשלוח</p>
             <div class="field-row cols-2">
               <div class="field-group">
@@ -930,15 +930,15 @@
     var couponSuccess  = document.getElementById('couponSuccess');
     var subNote        = document.getElementById('subDiscountNote');
     var shipping       = document.getElementById('shippingFields');
+    // Shipping address is collected on every plan (all ship physical product).
+    if (shipping) shipping.style.display = 'block';
     if (plan.isSubscription) {
       if (couponRow)     couponRow.style.display     = 'none';
       if (couponSuccess) couponSuccess.style.display = 'none';
       if (subNote)       subNote.style.display       = 'block';
-      if (shipping)      shipping.style.display       = 'block';
     } else {
       if (couponRow)     couponRow.style.display     = '';
       if (subNote)       subNote.style.display       = 'none';
-      if (shipping)      shipping.style.display       = 'none';
     }
 
     updateTotal();
@@ -1078,18 +1078,15 @@
     mark(emailEl, isValidEmail(emailEl.value.trim()));
     mark(phoneEl, phoneEl.value.replace(/\D/g, '').length >= 9);
 
-    /* Shipping address is required only for the subscription plan, where the
-       address block is visible. */
+    /* Shipping address is required on every plan (all ship physical product). */
     var streetEl = document.getElementById('custStreet');
     var houseEl  = document.getElementById('custHouse');
     var cityEl   = document.getElementById('custCity');
     var floorEl  = document.getElementById('custFloor');
     var commEl   = document.getElementById('custComments');
-    if (plan.isSubscription) {
-      mark(streetEl, streetEl.value.trim().length >= 2);
-      mark(houseEl,  houseEl.value.trim().length  >= 1);
-      mark(cityEl,   cityEl.value.trim().length   >= 2);
-    }
+    mark(streetEl, streetEl.value.trim().length >= 2);
+    mark(houseEl,  houseEl.value.trim().length  >= 1);
+    mark(cityEl,   cityEl.value.trim().length   >= 2);
     if (!ok) return;
 
     var name  = nameEl.value.trim();
@@ -1098,14 +1095,11 @@
 
     /* Compose the shipping fields into a single address line for storage
        (street + house/apt, with floor appended) plus the city + free-text
-       comments. Empty for non-subscription plans. */
-    var city     = plan.isSubscription ? cityEl.value.trim()  : '';
-    var comments = plan.isSubscription ? commEl.value.trim()  : '';
-    var address  = '';
-    if (plan.isSubscription) {
-      address = (streetEl.value.trim() + ' ' + houseEl.value.trim()).trim();
-      if (floorEl.value.trim()) address += ', קומה ' + floorEl.value.trim();
-    }
+       comments. */
+    var city     = cityEl.value.trim();
+    var comments = commEl.value.trim();
+    var address  = (streetEl.value.trim() + ' ' + houseEl.value.trim()).trim();
+    if (floorEl.value.trim()) address += ', קומה ' + floorEl.value.trim();
 
     var btn = document.getElementById('payBtn');
     var prevLabel = btn.textContent;
