@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800;900&family=Rubik:wght@700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Meta Pixel — lets QR scans show up as PageViews alongside the main site -->
+  <!-- Meta Pixel - lets QR scans show up as PageViews alongside the main site -->
   <script>
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -161,7 +161,7 @@
       flex-shrink: 0;
     }
     .app-store-glyph.play {
-      color: transparent;           /* Google Play triangle is multicolored — don't tint */
+      color: transparent;           /* Google Play triangle is multicolored - don't tint */
     }
     .app-store-text {
       display: flex;
@@ -403,7 +403,7 @@
       <img src="/app-icon.svg" alt="" aria-hidden="true">
     </div>
     <h1>הורד את האפליקציה</h1>
-    <p class="lead">עקוב אחרי ההתקדמות שלך, קבל את הפרוטוקול האישי שלך — הכל במקום אחד.</p>
+    <p class="lead">עקוב אחרי ההתקדמות שלך, קבל את הפרוטוקול האישי שלך - הכל במקום אחד.</p>
 
     <div class="app-store-buttons">
       <!-- App Store: opens the iOS waitlist modal (app is mid-update, not yet live) -->
@@ -471,7 +471,7 @@
         <!-- SUCCESS state -->
         <div id="waitSuccess">
           <div class="modal-emoji check">✓</div>
-          <p class="modal-copy">מעולה, אחי! רשמנו את המייל שלך — נעדכן אותך ברגע שהאפליקציה תיפתח.<span class="team">צוות NOGYMFORME</span></p>
+          <p class="modal-copy">מעולה, אחי! רשמנו את המייל שלך - נעדכן אותך ברגע שהאפליקציה תיפתח.<span class="team">צוות NOGYMFORME</span></p>
           <button type="button" class="modal-dismiss" id="waitDone">סגור</button>
         </div>
       </div>
@@ -554,7 +554,7 @@
           gateSubmit.style.opacity = '';
         }
 
-        // tracking.js loads async (defer) — guard against an early submit.
+        // tracking.js loads async (defer) - guard against an early submit.
         if (!window.NGFMTrack || !window.NGFMTrack.verifyMember) {
           reset();
           gateError.textContent = 'תקלה זמנית. נסה שוב בעוד רגע.';
@@ -640,7 +640,7 @@
           submit.style.opacity = '';
         }
 
-        // tracking.js loads async (defer) — if it hasn't booted, surface a
+        // tracking.js loads async (defer) - if it hasn't booted, surface a
         // friendly retry instead of crashing on undefined.NGFMTrack.
         if (!window.NGFMTrack || !window.NGFMTrack.appWaitlist) {
           reset();
