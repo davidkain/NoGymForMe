@@ -29,6 +29,10 @@
 // You ONLY need to fill this in once during initial setup; it auto-migrates.
 const SHEET_ID = '';
 const NOTIFY_EMAIL = 'nogymforme2026@gmail.com';
+// CC'd ONLY on completed-order notifications (not discount/abandoned/app-waitlist
+// events), so a purchase is always seen by more than one person. Set to '' to
+// disable. SUMIT's own per-sale email is the primary fallback; this is backup.
+const ORDER_ALERT_CC = 'itaymid@gmail.com';
 const TIMEZONE = 'Asia/Jerusalem';
 
 // Owner/admin emails that always pass the members-area gate, regardless of
@@ -506,12 +510,16 @@ function sendNotification(type, d, ss) {
   const subject = subjectFor(type, d);
   const body = bodyFor(type, d);
 
-  MailApp.sendEmail({
+  const mail = {
     to: NOTIFY_EMAIL,
     subject: subject,
     htmlBody: body,
     attachments: [blob]
-  });
+  };
+  // Loop a second person in on actual purchases only, so an order can't be
+  // missed by a single inbox. Lead/popup events stay operator-only.
+  if (type === 'completed' && ORDER_ALERT_CC) mail.cc = ORDER_ALERT_CC;
+  MailApp.sendEmail(mail);
 }
 
 function subjectFor(type, d) {
