@@ -473,6 +473,31 @@ function promoteAbandonedToCompleted(ss, d) {
   }
 }
 
+// Send a customer-facing email From the NOGYMFORME brand inbox.
+// IMPORTANT: this uses GmailApp, not MailApp — MailApp silently ignores the
+// `from` option, so it can't send as an alias (that's why earlier sends still
+// showed davidkain1@gmail.com). GmailApp's `from` sends as a verified
+// "Send mail as" alias of the account running the script (davidkain1@gmail.com),
+// which must include NOTIFY_EMAIL. GmailApp needs a broader Gmail authorization
+// scope, so the owner must RE-AUTHORIZE the script once after pasting this.
+// If the alias/From is unavailable for any reason, we fall back to a plain
+// MailApp send (From = owner, Reply-To still the brand inbox) so mail always
+// goes out. Best-effort: never throws.
+function sendCustomerEmail_(to, subject, htmlBody) {
+  try {
+    GmailApp.sendEmail(to, subject, '', {
+      htmlBody: htmlBody,
+      name: 'NOGYMFORME',
+      from: NOTIFY_EMAIL,
+      replyTo: NOTIFY_EMAIL
+    });
+  } catch (e) {
+    try {
+      MailApp.sendEmail({ to: to, subject: subject, htmlBody: htmlBody, name: 'NOGYMFORME', replyTo: NOTIFY_EMAIL });
+    } catch (e2) { /* never break the caller */ }
+  }
+}
+
 // Email the customer their personal discount code. Best-effort: a mail failure
 // must never break the signup (the code is already saved + shown in the popup).
 function sendCustomerCode(email, code) {
@@ -492,9 +517,7 @@ function sendCustomerCode(email, code) {
         code + '</div>' +
       '<p style="color:#8a8680;font-size:13px;margin-top:22px;">הקוד אישי, חד-פעמי ותקף להזמנה אחת.</p>' +
     '</div>';
-  try {
-    MailApp.sendEmail({ to: email, subject: subject, htmlBody: html, name: 'NOGYMFORME' });
-  } catch (e) { /* never break signup over the customer email */ }
+  sendCustomerEmail_(email, subject, html);
 }
 
 // Re-send the code email to a RETURNING visitor — but at most once per 24h per
@@ -557,9 +580,7 @@ function sendOrderConfirmation(d) {
         'יש שאלה? פשוט השב/י למייל הזה ונשמח לעזור.</p>' +
     '</div>';
 
-  try {
-    MailApp.sendEmail({ to: email, subject: 'ההזמנה שלך ב-NOGYMFORME התקבלה 🎉', htmlBody: html, name: 'NOGYMFORME' });
-  } catch (e) { /* never break order recording over the confirmation email */ }
+  sendCustomerEmail_(email, 'ההזמנה שלך ב-NOGYMFORME התקבלה 🎉', html);
 }
 
 function sendNotification(type, d, ss) {
