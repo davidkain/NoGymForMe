@@ -367,6 +367,46 @@
       cursor: pointer;
       text-decoration: underline;
     }
+
+    /* ── VIP subscription management (cancel) ── */
+    .vip-manage { margin-top: 18px; }
+    .vip-cancel-link {
+      background: none;
+      border: none;
+      color: var(--grey);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .vip-cancel-link:hover { color: var(--grey-light); }
+    .vip-cancel-panel {
+      margin-top: 14px;
+      padding: 16px 18px;
+      background: var(--black);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      text-align: right;
+    }
+    .vip-cancel-note {
+      color: var(--grey-light);
+      font-size: 13px;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .vip-cancel-confirm {
+      background: none;
+      border: 1px solid #ff6b6b;
+      color: #ff6b6b;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 11px 20px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .vip-cancel-confirm:hover { background: #ff6b6b; color: #111; }
+    #vipCancelMsg { font-size: 13px; line-height: 1.6; margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -436,6 +476,19 @@
         </span>
       </a>
     </div>
+
+      <!-- VIP subscription management — meaningful only for VIP subscribers.
+           One-time buyers who click get a friendly "no active subscription". -->
+      <div class="vip-manage">
+        <button type="button" class="vip-cancel-link" id="vipCancelOpen">ניהול מנוי VIP / ביטול</button>
+        <div class="vip-cancel-panel" id="vipCancelPanel" hidden>
+          <p class="vip-cancel-note">
+            ביטול מנוי ה-VIP. אם תבטל לפני שהשלמת 90 יום, תשלים את ההפרש למחיר הרגיל (₪43 לבקבוק) על הבקבוקים שכבר קיבלת - בלי קנסות. 14 הימים הראשונים מכוסים בהחזר כספי מלא.
+          </p>
+          <button type="button" class="vip-cancel-confirm" id="vipCancelConfirm">כן, בטל את המנוי שלי</button>
+          <p id="vipCancelMsg" role="status"></p>
+        </div>
+      </div>
 
       <button type="button" class="gate-logout" id="gateLogout">התחבר עם מייל אחר</button>
     </div><!-- /#membersView -->
@@ -659,6 +712,82 @@
             input.focus();
           }
         });
+      });
+    })();
+  </script>
+
+<!-- ── VIP SUBSCRIPTION CANCEL ───────────────────────────────────────────────
+     Routes through the same-origin /api/cancel-subscription Vercel function
+     (NOT directly to Apps Script — cancelling moves money). Reuses the email the
+     members gate already verified + cached. The backend is in Safe Mode, so this
+     records the request and emails the operator; the customer gets the itemized
+     outcome by email. -->
+  <script>
+    (function () {
+      var GATE_LS_KEY = 'ngfm_verified_v1';   // same cache the gate writes
+      function verifiedEmail() {
+        try {
+          var p = JSON.parse(localStorage.getItem(GATE_LS_KEY));
+          return (p && p.email) || '';
+        } catch (e) { return ''; }
+      }
+
+      var openBtn = document.getElementById('vipCancelOpen');
+      var panel   = document.getElementById('vipCancelPanel');
+      var confirmBtn = document.getElementById('vipCancelConfirm');
+      var msg     = document.getElementById('vipCancelMsg');
+      if (!openBtn) return;
+
+      openBtn.addEventListener('click', function () {
+        panel.hidden = !panel.hidden;
+      });
+
+      confirmBtn.addEventListener('click', function () {
+        var email = verifiedEmail();
+        msg.style.color = '';
+        if (!email) {
+          msg.style.color = '#ff6b6b';
+          msg.textContent = 'התחבר מחדש כדי לנהל את המנוי.';
+          return;
+        }
+
+        confirmBtn.disabled = true;
+        var label = confirmBtn.textContent;
+        confirmBtn.textContent = 'מבטל…';
+        confirmBtn.style.opacity = '0.7';
+
+        function reset() {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = label;
+          confirmBtn.style.opacity = '';
+        }
+
+        fetch('/api/cancel-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        })
+          .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
+          .then(function (o) {
+            if (o.j && o.j.ok) {
+              confirmBtn.style.display = 'none';
+              msg.style.color = '#25d366';
+              msg.textContent = 'בקשת הביטול התקבלה. שלחנו לך מייל עם כל הפרטים.';
+            } else if (o.j && o.j.notFound) {
+              reset();
+              msg.style.color = '#ff6b6b';
+              msg.textContent = 'לא נמצא מנוי VIP פעיל למייל הזה.';
+            } else {
+              reset();
+              msg.style.color = '#ff6b6b';
+              msg.textContent = 'תקלה זמנית. נסה שוב בעוד רגע.';
+            }
+          })
+          .catch(function () {
+            reset();
+            msg.style.color = '#ff6b6b';
+            msg.textContent = 'תקלה בחיבור. נסה שוב.';
+          });
       });
     })();
   </script>
