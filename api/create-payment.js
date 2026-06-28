@@ -64,7 +64,6 @@ const PLANS = {
   single:       { name: 'חבילת הביישן',                      price: 198, qty: 1, recurring: false },
   starter:      { name: 'חבילת יאללה, בוא ננסה',             price: 396, qty: 1, recurring: false },
   results:      { name: 'חבילת אול-אין (כי הקיץ כבר פה...)', price: 496, qty: 1, recurring: false },
-  subscription: { name: 'מנוי חודשי',                        price: 155, qty: 1, recurring: true  },
 };
 
 module.exports = async (req, res) => {
