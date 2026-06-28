@@ -925,6 +925,17 @@
       color: var(--grey-light);
       font-weight: 500;
     }
+    .sub-reassure {
+      font-size: 13.5px;
+      color: var(--grey-light);
+      line-height: 1.6;
+      margin-bottom: 22px;
+      padding: 13px 16px;
+      background: rgba(232,217,0,0.05);
+      border: 1px solid rgba(232,217,0,0.20);
+      border-radius: 10px;
+    }
+    .sub-reassure strong { color: var(--white); font-weight: 700; }
 
     .sub-right {
       position: relative; z-index: 1;
@@ -1892,7 +1903,7 @@
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:40px 32px;position:relative;">
         <button onclick="closePlanModal()" style="position:absolute;top:16px;left:20px;background:none;border:none;color:var(--grey);font-size:28px;cursor:pointer;line-height:1;">×</button>
         <h2 style="font-family:var(--font-display);font-size:clamp(22px,3vw,32px);font-weight:900;color:var(--white);margin-bottom:8px;text-align:center;">בחר את החבילה שלך</h2>
-        <p style="text-align:center;color:var(--grey);font-size:14px;margin-bottom:32px;">ללא ריבית · ללא התחייבות · 100% החזר כספי</p>
+        <p style="text-align:center;color:var(--grey);font-size:14px;margin-bottom:32px;">ללא ריבית · ביטול בכל עת · 100% החזר כספי</p>
 
         <div style="display:flex;flex-direction:column;gap:16px;">
 
@@ -2226,7 +2237,7 @@
     <div class="section reveal">
       <p class="section-label">המחירים</p>
       <h2 class="section-title">בחר את החבילה<br><em>שמתאימה לך.</em></h2>
-      <p class="section-body">ללא ריבית. ללא התחייבות. 100% החזר כספי תוך 14 יום לפי חוק.</p>
+      <p class="section-body">ללא ריבית. 100% החזר כספי תוך 14 יום - גם אם כבר פתחת. בלי קנסות, בלי דרמה.</p>
 
       <!-- ── SUBSCRIPTION BAND (positioned above the 3-card one-time grid) ── -->
       <div class="sub-band reveal">
@@ -2238,24 +2249,31 @@
             <em>(כמו של החדר הכושר, רק כזה שמגיע אליך עד הבית)</em>
           </h3>
           <p class="sub-tagline">
-            בלי לעקוב. בלי לשכוח. <strong>פשוט מגיע אליך הביתה כל חודש</strong> - עם הנחה קבועה.
+            שינוי אמיתי בגוף לא קורה ב-3 שבועות - הוא קורה ב-90 יום.
+            לכן ה-VIP בנוי כמסע של 90 יום, <strong>שבו אנחנו צמודים אליך עד שרואים תוצאות</strong> - ובמחיר הכי טוב שיש.
           </p>
 
           <ul class="sub-benefits">
-            <li>משלוח חינם</li>
-            <li>הנחה קבועה</li>
+            <li>משלוח חינם כל חודש</li>
+            <li>הנחה קבועה לכל החיים (21%)</li>
             <li>אספקה חודשית אוטומטית</li>
+            <li>ליווי אישי צמוד לכל 90 הימים</li>
+            <li>תפריט תזונה מותאם אישית</li>
+            <li>אפליקציה ייעודית ל-NOGYMFORME</li>
             <li>גישה לקהילת הגברים שלנו</li>
             <li>14 יום החזר כספי מלא</li>
-            <li>אפליקצייה ייעודית ל-NOGYMFORME</li>
-            <li>תפריט תזונה מותאם אישית</li>
-            <li>לווי אישי צמוד</li>
           </ul>
+
+          <p class="sub-reassure">
+            🛡️ <strong>אפס סיכון להתחיל:</strong> 14 יום החזר כספי מלא - גם על בקבוק פתוח, בלי שאלות. מתחרט? מקבל הכל בחזרה.<br>
+            💪 <strong>מחיר של מסע שלם:</strong> ₪155 לחודש זה המחיר של 90 יום. אתה חופשי לעצור מתי שתרצה - ואם תעצור באמצע, פשוט תשלים את ההפרש למחיר הרגיל (₪198) על מה שכבר קיבלת. משלם בדיוק על מה שלקחת, לא יותר. בלי קנסות.
+          </p>
 
           <div class="sub-cta-row">
             <a href="order.html?plan=subscription"
                class="btn-sub"
-               onclick="handlePurchase('subscription',event)">אני בפנים ←</a>
+               onclick="handlePurchase('subscription',event)">אני בפנים ל-90 יום ←</a>
+            <span class="sub-cancel-note">משלים 90 יום? ההנחה נשארת איתך לכל החיים</span>
           </div>
         </div>
 
@@ -2358,7 +2376,7 @@
             <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
           </div>
           <div class="trust-title">100% החזר כספי</div>
-          <div class="trust-desc">14 יום לביטול לפי חוק הצרכנות הישראלי - ללא שאלות</div>
+          <div class="trust-desc">14 יום החזר כספי מלא - גם על בקבוק פתוח. ללא שאלות</div>
         </div>
       </div>
 
@@ -2393,7 +2411,23 @@
           <span class="faq-toggle">+</span>
         </button>
         <div class="faq-answer">
-          ניתן לבטל את העסקה תוך 14 יום מרגע קבלת המוצר, ובתנאי שהמוצר סגור באריזתו המקורית ולא נעשה בו כל שימוש. בהתאם לחוק, לא ניתן לבטל עסקה או להחזיר תוספי תזונה במידה ואריזתם נפתחה.
+          על פי חוק הגנת הצרכן, ניתן לבטל עסקה ולהחזיר מוצר תוך 14 יום בתנאי שאריזתו סגורה ולא נעשה בו שימוש (תוספי תזונה שנפתחו אינם ניתנים להחזרה על פי חוק).<br><br>
+          מעבר לחוק, אנחנו נותנים לך <strong>אחריות שביעות רצון מלאה</strong>: אם ניסית את NOGYMFORME ולא היית מרוצה - תקבל החזר כספי מלא תוך 14 יום, גם אם פתחת והתחלת להשתמש. בלי שאלות.<br><br>
+          לגבי מנוי ה-VIP: אין חוזה ואין נעילה - אפשר לבטל בכל עת בלחיצה אחת מאזור החברים. המחיר המוזל של ₪155 הוא מחיר המסע המלא של 90 יום. אם תבחר לעצור לפני שהשלמת את 3 החודשים, ההנחה על החודשים שכבר קיבלת מתעדכנת למחיר הרגיל (₪198 לבקבוק) ותחויב בהפרש - כך שאתה משלם בדיוק על מה שקיבלת, לא יותר. בלי קנסות. השלמת את 90 הימים? ההנחה נשארת איתך לכל החיים.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>איך עובד "מחיר המסע" של מנוי ה-VIP?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          פשוט מאוד: המחיר המוזל של ₪155 לחודש הוא המחיר של מסע שלם בן 90 יום. כל עוד אתה במסע - אתה נהנה מ-21% הנחה על כל בקבוק.<br><br>
+          בחרת לעצור לפני שהשלמת את 3 החודשים? אתה פשוט משלם את המחיר הרגיל (₪198 לבקבוק) על מה שכבר קיבלת - בדיוק כמו בקנייה חד-פעמית. ההפרש הוא ₪43 על כל בקבוק שקיבלת. בלי קנסות, בלי דמי ביטול.<br><br>
+          <strong>דוגמה:</strong> ביטלת אחרי חודשיים? קיבלת 2 בקבוקים ושילמת ₪310 (פעמיים ₪155). המחיר מתעדכן ל-₪396 (פעמיים ₪198), כך שתחויב בהפרש של ₪86 בלבד. וזהו.<br><br>
+          השלמת את 90 הימים? סיימת את המסע - וההנחה של 21% נשארת איתך לכל החיים, חודש אחרי חודש.<br><br>
+          <strong>חשוב:</strong> 14 הימים הראשונים מכוסים תמיד באחריות החזר כספי מלא. אם תבטל תוך שבועיים - תקבל את כל כספך בחזרה, בלי שום חיוב הפרש.
         </div>
       </div>
 

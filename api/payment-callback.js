@@ -68,6 +68,8 @@ module.exports = async (req, res) => {
   const companyIdRaw = process.env.SUMIT_COMPANY_ID;
   const apiKey       = process.env.SUMIT_API_KEY;
   let valid = false;
+  let verifiedPayment = null;   // SUMIT Data.Payment — source of the VIP customer/method ids
+  let verifiedData = null;      // SUMIT Data — fallback field paths
   if (companyIdRaw && apiKey) {
     const CompanyID = /^\d+$/.test(companyIdRaw) ? Number(companyIdRaw) : companyIdRaw;
     try {
@@ -78,6 +80,8 @@ module.exports = async (req, res) => {
       });
       const data = await r.json().catch(() => null);
       const payment = data && data.Data && data.Data.Payment;
+      verifiedData = data && data.Data;
+      verifiedPayment = payment;
       valid = !!(payment && payment.ValidPayment === true);
       if (!valid) console.error('[payment-callback] payment not valid:', JSON.stringify(payment));
     } catch (err) {
@@ -102,6 +106,42 @@ module.exports = async (req, res) => {
   }
 
   if (!valid) return redirect(res, thankYou('0'));
+
+  // ── VIP subscription → register it for the 90-day-journey settle-up logic ──
+  // Recurring plan only, on a CONFIRMED payment. Captures the SUMIT customer +
+  // saved payment-method ids that apps-script.gs needs to charge an early-
+  // cancellation settle-up. Best-effort: a failure here must NEVER block the
+  // customer's redirect to thank-you.
+  if (planKey === 'subscription') {
+    try {
+      const p = verifiedPayment || {};
+      const cust = p.Customer || (verifiedData && verifiedData.Customer) || {};
+      const method = p.PaymentMethod || (verifiedData && verifiedData.PaymentMethod) || {};
+      const summitCustomerId = cust.ID || p.CustomerID || '';
+      const summitPaymentId  = method.ID || p.PaymentMethodID || (verifiedData && verifiedData.PaymentMethodID) || '';
+      await fetch(TRACKING_WEBAPP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          type: 'vipSubscribe',
+          subId: `vip-${String(paymentId)}`,
+          name:  cust.Name || '',
+          email: email || cust.EmailAddress || '',
+          phone: cust.Phone || '',
+          summitCustomerId: String(summitCustomerId),
+          summitPaymentId:  String(summitPaymentId),
+          firstChargeDate:  new Date().toISOString().slice(0, 10),
+        }),
+      });
+      // One-time visibility: dump the SUMIT payment shape (Vercel logs) so the
+      // exact Customer / PaymentMethod field paths can be confirmed for THIS
+      // account — same "show me the real payload" approach as summitWebhook.
+      console.error('[payment-callback] vipSubscribe sent; SUMIT Data shape:',
+        JSON.stringify(verifiedData || {}).slice(0, 1500));
+    } catch (err) {
+      console.error('[payment-callback] vipSubscribe failed:', err);
+    }
+  }
 
   // ── Server-side Meta CAPI Purchase (primary, most reliable signal) ─────────
   // Fire from here — the verified-payment point — so the conversion reaches Meta

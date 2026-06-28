@@ -91,6 +91,46 @@ const PLAN_NAMES = {
   subscription: 'מנוי חודשי'
 };
 
+// ─── VIP SUBSCRIPTION — 90-day journey pricing ───────────────────────────────
+// See VIP-BILLING-SPEC.md. The ₪155 VIP price is the "full-journey" price;
+// cancelling before 3 monthly charges clear re-prices the bottles already
+// shipped to the regular one-time price (₪198) and charges the ₪43/bottle
+// difference. The 14-day money-back guarantee always wins (one per customer,
+// for life). All money math is integer NIS.
+const VIP = {
+  MONTHLY: 155,             // discounted monthly price (1 bottle)
+  REGULAR: 198,             // regular one-time per-bottle price
+  JOURNEY_CYCLES: 3,        // successful monthly charges = journey complete (90d)
+  GUARANTEE_DAYS: 14,       // money-back window, day 14 inclusive
+  SHIPPING_FALLBACK_DAYS: 5 // if delivery date unknown: anchor = first charge + 5d
+};
+// Per-bottle clawback = REGULAR - MONTHLY. Computed, never hardcoded, so a
+// price/promo change can't silently break the settle-up math (spec E9).
+function vipDiff() { return VIP.REGULAR - VIP.MONTHLY; }   // ₪43
+
+const VIP_TABS = { subs: 'VIP Subscriptions', cancels: 'VIP Cancellations' };
+const VIP_HEADERS = {
+  // One row per VIP subscriber. `Cycles` = successful monthly charges = bottles
+  // shipped. `Guarantee Used` enforces one-per-customer (spec E11). The Summit
+  // Customer ID + Payment ID are the saved-method references used to charge the
+  // early-cancellation settle-up. `Cycle Refs` dedupes recurring webhooks.
+  subs: ['Sub ID', 'Created', 'Name', 'Email', 'Phone', 'National ID',
+         'Dedup Key', 'Summit Customer ID', 'Summit Payment ID', 'First Charge',
+         'First Delivery', 'Cycles', 'Last Cycle Charge', 'Status',
+         'Guarantee Used', 'Cycle Refs'],
+  // Audit log: one row per cancellation outcome (also the idempotency ledger).
+  cancels: ['Timestamp', 'Sub ID', 'Email', 'Dedup Key', 'Cycles',
+            'Branch', 'Guarantee Applied', 'Refund', 'Clawback',
+            'Charge Status', 'Summit Txn', 'Cancel Txn ID']
+};
+// 1-based column indices for VIP_HEADERS.subs — keep in sync with the array.
+const VIP_COL = {
+  subId: 1, created: 2, name: 3, email: 4, phone: 5, nationalId: 6,
+  dedupKey: 7, summitCustomerId: 8, summitPaymentId: 9, firstCharge: 10,
+  firstDelivery: 11, cycles: 12, lastCharge: 13, status: 14,
+  guaranteeUsed: 15, cycleRefs: 16
+};
+
 // ─── ENTRY POINTS ────────────────────────────────────────────────────────────
 function doGet() {
   var id = getSheetId();
@@ -161,6 +201,23 @@ function doPost(e) {
       }
       return jsonOut({ ok: true, used: true, alreadyUsed: rec.used });
     }
+
+    // ── VIP: store a subscription + recurring token at signup (idempotent on
+    // subId). Wire from your VIP checkout once Summit returns customer/payment ids. ─
+    if (type === 'vipSubscribe') return handleVipSubscribe(data);
+
+    // ── VIP: record a successful monthly charge (from the recurring-billing
+    // webhook). Increments Cycles; sets First Charge / First Delivery. ─────────
+    if (type === 'vipCycle') return handleVipCycle(data);
+
+    // ── VIP: cancellation handler — 90-day-journey settle-up (spec §3).
+    // Idempotent on cancelTxnId. Safe mode until Summit props are set. ─────────
+    if (type === 'vipCancel') return handleVipCancel(data);
+
+    // ── VIP: Summit recurring-payment webhook → records a monthly cycle.
+    // Matches the subscriber by Summit customer id / email; dedupes on the
+    // Summit payment ref so retried webhooks don't double-count. ──────────────
+    if (type === 'summitWebhook') return handleSummitWebhook_(data);
 
     if (!TABS[type]) return jsonOut({ ok: false, error: 'unknown type' });
 
@@ -585,4 +642,434 @@ function escapeHtml(s) {
 function jsonOut(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   VIP SUBSCRIPTION — 90-DAY JOURNEY PRICING & EARLY-CANCELLATION SETTLE-UP
+   Implements VIP-BILLING-SPEC.md. Additive: touches no existing function.
+
+   ⚠️ SAFE MODE BY DEFAULT. This script is otherwise tracking-only and has no
+   existing payment integration. The actual money charge is isolated in
+   chargeSettleUpViaSummit_(). Until Script Properties SUMIT_COMPANY_ID +
+   SUMIT_API_KEY are set (and the Summit customer/payment id is stored on the
+   subscription), the handler records the exact owed amount and emails the
+   operator to charge manually. It NEVER fakes or guesses a charge.
+
+   All billing runs through Summit (UPAY is only Summit's underlying clearing
+   gateway; we never call UPAY directly). Prerequisite plumbing (also here):
+   vipSubscribe (store Summit customer/payment id at signup), vipCycle (record a
+   successful monthly charge), and summitWebhook (Summit's recurring-payment
+   webhook → vipCycle). See spec §9.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+function ensureVipSheet_(which) {
+  var ss = SpreadsheetApp.openById(getSheetId());
+  var name = VIP_TABS[which];
+  var headers = VIP_HEADERS[which];
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers])
+         .setFontWeight('bold').setBackground(HEADER_BG);
+    sheet.setFrozenRows(1);
+  } else if (sheet.getLastColumn() < headers.length) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers])
+         .setFontWeight('bold').setBackground(HEADER_BG);
+  }
+  return sheet;
+}
+
+// Normalized one-per-customer key: email | phone(digits) | nationalId(digits).
+function vipDedupKey_(email, phone, nationalId) {
+  var e = String(email || '').toLowerCase().trim();
+  var p = String(phone || '').replace(/\D/g, '');
+  var n = String(nationalId || '').replace(/\D/g, '');
+  return [e, p, n].join('|');
+}
+
+// Look up a subscription by subId (preferred), dedupKey, or email → parsed | null.
+function findVipSub_(sheet, q) {
+  var last = sheet.getLastRow();
+  if (last < 2) return null;
+  var width = VIP_HEADERS.subs.length;
+  var values = sheet.getRange(2, 1, last - 1, width).getValues();
+  var wantId    = q.subId    ? String(q.subId).trim() : '';
+  var wantKey   = q.dedupKey ? String(q.dedupKey).trim() : '';
+  var wantEmail = q.email    ? String(q.email).toLowerCase().trim() : '';
+  for (var i = 0; i < values.length; i++) {
+    var r = values[i];
+    var match =
+      (wantId    && String(r[VIP_COL.subId - 1]).trim() === wantId) ||
+      (wantKey   && String(r[VIP_COL.dedupKey - 1]).trim() === wantKey) ||
+      (wantEmail && String(r[VIP_COL.email - 1]).toLowerCase().trim() === wantEmail);
+    if (match) return parseVipSubRow_(r, i + 2);
+  }
+  return null;
+}
+
+function parseVipSubRow_(r, rowIndex) {
+  return {
+    rowIndex:      rowIndex,
+    subId:         String(r[VIP_COL.subId - 1] || '').trim(),
+    name:          String(r[VIP_COL.name - 1] || ''),
+    email:         String(r[VIP_COL.email - 1] || '').toLowerCase().trim(),
+    phone:         String(r[VIP_COL.phone - 1] || ''),
+    nationalId:    String(r[VIP_COL.nationalId - 1] || ''),
+    dedupKey:      String(r[VIP_COL.dedupKey - 1] || '').trim(),
+    summitCustomerId: String(r[VIP_COL.summitCustomerId - 1] || '').trim(),
+    summitPaymentId:  String(r[VIP_COL.summitPaymentId - 1] || '').trim(),
+    firstCharge:   asDate_(r[VIP_COL.firstCharge - 1]),
+    firstDelivery: asDate_(r[VIP_COL.firstDelivery - 1]),
+    cycles:        Number(r[VIP_COL.cycles - 1]) || 0,
+    status:        String(r[VIP_COL.status - 1] || '').trim(),
+    // startsWith "yes" so "Yes (prior sub)" / "Yes 2026-..." all count as used.
+    guaranteeUsed: /^yes/i.test(String(r[VIP_COL.guaranteeUsed - 1] || '').trim()),
+    cycleRefs:     String(r[VIP_COL.cycleRefs - 1] || '')
+  };
+}
+
+/* ── vipSubscribe: store a new VIP subscriber + recurring token (idempotent) ── */
+function handleVipSubscribe(d) {
+  if (!getSheetId()) return jsonOut({ ok: false, error: 'not configured' });
+  if (!d.subId)      return jsonOut({ ok: false, error: 'subId required' });
+  var sheet = ensureVipSheet_('subs');
+  var dedup = vipDedupKey_(d.email, d.phone, d.nationalId);
+
+  var existing = findVipSub_(sheet, { subId: d.subId });
+  if (existing) {
+    if (d.summitCustomerId) sheet.getRange(existing.rowIndex, VIP_COL.summitCustomerId).setValue(d.summitCustomerId);
+    if (d.summitPaymentId)  sheet.getRange(existing.rowIndex, VIP_COL.summitPaymentId).setValue(d.summitPaymentId);
+    return jsonOut({ ok: true, alreadyExists: true, subId: d.subId });
+  }
+
+  // Inherit "guarantee already used" from any prior sub by the same customer
+  // (E11: one money-back guarantee per customer, for life).
+  var prior = findVipSub_(sheet, { dedupKey: dedup });
+  var now = new Date();
+  var row = new Array(VIP_HEADERS.subs.length).fill('');
+  row[VIP_COL.subId - 1]         = d.subId;
+  row[VIP_COL.created - 1]       = Utilities.formatDate(now, TIMEZONE, 'yyyy-MM-dd HH:mm:ss');
+  row[VIP_COL.name - 1]          = d.name || '';
+  row[VIP_COL.email - 1]         = String(d.email || '').toLowerCase().trim();
+  row[VIP_COL.phone - 1]         = d.phone || '';
+  row[VIP_COL.nationalId - 1]    = d.nationalId || '';
+  row[VIP_COL.dedupKey - 1]      = dedup;
+  row[VIP_COL.summitCustomerId - 1] = d.summitCustomerId || '';
+  row[VIP_COL.summitPaymentId - 1]  = d.summitPaymentId || '';
+  row[VIP_COL.firstCharge - 1]   = d.firstChargeDate ? new Date(d.firstChargeDate) : now;
+  row[VIP_COL.firstDelivery - 1] = d.firstDeliveryDate ? new Date(d.firstDeliveryDate) : '';
+  row[VIP_COL.cycles - 1]        = Number(d.cycles) || 0;
+  row[VIP_COL.status - 1]        = 'active';
+  row[VIP_COL.guaranteeUsed - 1] = prior ? 'Yes (prior sub)' : '';
+  sheet.appendRow(row);
+  return jsonOut({ ok: true, alreadyExists: false, subId: d.subId });
+}
+
+/* ── vipCycle: record a successful monthly charge (from billing webhook) ────── */
+function handleVipCycle(d) {
+  if (!getSheetId()) return jsonOut({ ok: false, error: 'not configured' });
+  if (!d.subId)      return jsonOut({ ok: false, error: 'subId required' });
+  var sheet = ensureVipSheet_('subs');
+  var sub = findVipSub_(sheet, { subId: d.subId });
+  if (!sub) return jsonOut({ ok: false, error: 'subscription not found' });
+
+  // Idempotency: a retried/redelivered Summit webhook for the same payment must
+  // not double-count a cycle (which would over-charge the clawback later).
+  var ref = String(d.chargeRef || '').trim();
+  if (ref && sub.cycleRefs.split('|').indexOf(ref) !== -1) {
+    return jsonOut({ ok: true, idempotent: true, subId: d.subId, cycles: sub.cycles });
+  }
+
+  var now = new Date();
+  var newCycles = sub.cycles + 1;            // one successful charge = one bottle
+  sheet.getRange(sub.rowIndex, VIP_COL.cycles).setValue(newCycles);
+  if (ref) {
+    sheet.getRange(sub.rowIndex, VIP_COL.cycleRefs)
+         .setValue(sub.cycleRefs ? (sub.cycleRefs + '|' + ref) : ref);
+  }
+  sheet.getRange(sub.rowIndex, VIP_COL.lastCharge)
+       .setValue(Utilities.formatDate(now, TIMEZONE, 'yyyy-MM-dd HH:mm:ss'));
+  if (!sub.firstCharge) sheet.getRange(sub.rowIndex, VIP_COL.firstCharge).setValue(now);
+  if (d.deliveryDate && !sub.firstDelivery) {
+    sheet.getRange(sub.rowIndex, VIP_COL.firstDelivery).setValue(new Date(d.deliveryDate));
+  }
+  // "Journey complete" = the moment the 3rd charge clears (spec E2).
+  if (newCycles >= VIP.JOURNEY_CYCLES && sub.status === 'active') {
+    sheet.getRange(sub.rowIndex, VIP_COL.status).setValue('journey_complete');
+  }
+  return jsonOut({ ok: true, subId: d.subId, cycles: newCycles });
+}
+
+/* ── vipCancel: THE cancellation handler. Idempotent on cancelTxnId (spec §3) ── */
+function handleVipCancel(d) {
+  if (!getSheetId()) return jsonOut({ ok: false, error: 'not configured' });
+  var subsSheet = ensureVipSheet_('subs');
+  var logSheet  = ensureVipSheet_('cancels');
+
+  var sub = findVipSub_(subsSheet, {
+    subId: d.subId,
+    dedupKey: (d.email || d.phone || d.nationalId)
+      ? vipDedupKey_(d.email, d.phone, d.nationalId) : '',
+    email: d.email
+  });
+  if (!sub) return jsonOut({ ok: false, error: 'subscription not found' });
+
+  // Idempotency (spec E12): one settle-up per cancelTxnId. A retry returns the
+  // recorded outcome instead of charging again. Caller SHOULD pass cancelTxnId.
+  var cancelTxnId = String(d.cancelTxnId || (sub.subId + '-' + new Date().getTime()));
+  var prior = findCancelByTxn_(logSheet, cancelTxnId);
+  if (prior) return jsonOut({ ok: true, idempotent: true, result: prior });
+
+  var now = new Date();
+  var decision = computeVipCancellation_(sub, now);
+
+  // Money movement. Refund (Step 1) is NOT auto-issued — the original charge
+  // runs through Summit, so refunds are issued there; we record + alert.
+  var charge = { mode: 'none', charged: false, txnId: '' };
+  if (decision.clawback > 0) charge = chargeSettleUpViaSummit_(sub, decision.clawback);
+
+  // Persist status + guarantee-used ledger.
+  subsSheet.getRange(sub.rowIndex, VIP_COL.status)
+           .setValue(decision.branch === 'journey_complete' ? 'completed_canceled' : 'canceled');
+  if (decision.guaranteeApplied) {
+    subsSheet.getRange(sub.rowIndex, VIP_COL.guaranteeUsed)
+             .setValue('Yes ' + Utilities.formatDate(now, TIMEZONE, 'yyyy-MM-dd'));
+  }
+
+  var chargeStatus = decision.clawback === 0 ? '—'
+    : (charge.charged ? 'charged'
+       : (charge.mode === 'manual' ? 'PENDING (manual)' : 'FAILED'));
+  logSheet.appendRow([
+    Utilities.formatDate(now, TIMEZONE, 'yyyy-MM-dd HH:mm:ss'),
+    sub.subId, sub.email, sub.dedupKey, decision.cycles,
+    decision.branch, decision.guaranteeApplied ? 'Yes' : 'No',
+    decision.refund, decision.clawback,
+    chargeStatus, charge.txnId || '', cancelTxnId
+  ]);
+
+  notifyVipCancellation_(sub, decision, charge, chargeStatus);
+  sendVipCancelCustomerEmail_(sub, decision);
+
+  return jsonOut({ ok: true, idempotent: false, result: {
+    branch: decision.branch, refund: decision.refund, clawback: decision.clawback,
+    chargeStatus: chargeStatus, cancelTxnId: cancelTxnId
+  }});
+}
+
+/* ── Pure decision logic (spec §3). No side effects — directly unit-testable. ── */
+function computeVipCancellation_(sub, now) {
+  var diff = vipDiff();                          // ₪43
+  var cycles = sub.cycles;                       // successful charges = bottles shipped
+  var totalCharged = cycles * VIP.MONTHLY;
+
+  // Step 0: guarantee anchor = delivery date, else first charge + 5d fallback.
+  var anchor = sub.firstDelivery ? sub.firstDelivery
+             : (sub.firstCharge ? addDays_(sub.firstCharge, VIP.SHIPPING_FALLBACK_DAYS) : null);
+  // Day 14 inclusive → compare against the END of the deadline day.
+  var withinGuarantee = !!anchor &&
+      now.getTime() <= endOfDay_(addDays_(anchor, VIP.GUARANTEE_DAYS)).getTime();
+
+  // Step 1: guarantee wins — but only once per customer (E11).
+  if (withinGuarantee && !sub.guaranteeUsed) {
+    return { branch: 'guarantee_refund', guaranteeApplied: true, refund: totalCharged, clawback: 0, cycles: cycles };
+  }
+  // Step 3: journey complete → discount earned, clean ₪0 exit.
+  if (cycles >= VIP.JOURNEY_CYCLES) {
+    return { branch: 'journey_complete', guaranteeApplied: false, refund: 0, clawback: 0, cycles: cycles };
+  }
+  // Step 2: early cancel → settle up at regular price for bottles shipped.
+  return { branch: 'early_settle_up', guaranteeApplied: false, refund: 0, clawback: cycles * diff, cycles: cycles };
+}
+
+/* ── Summit (SUMIT/OfficeGuy) saved-method charge for the early-cancellation
+   settle-up. All billing runs through Summit; UPAY is only Summit's underlying
+   clearing gateway and is never called directly.
+   Endpoint: POST https://api.sumit.co.il/billing/payments/charge/
+   Auth: Credentials { CompanyID, APIKey } from Script Properties
+   (SUMIT_COMPANY_ID, SUMIT_API_KEY). Charges the customer's stored Summit
+   payment method (captured at signup) for `amount` ILS. OfficeGuy response
+   envelope: Status === 0 means success; UserErrorMessage holds the failure.
+
+   SAFE MODE: if creds or the saved Summit ids are missing, it returns mode
+   'manual' (charged:false) so the caller records the owed amount and emails you
+   to charge manually — it never fabricates a transaction.
+
+   ⚠️ CONFIRM the exact body field names (Items / PaymentMethodID) against your
+   Summit account (app.sumit.co.il → developers) before enabling live charges.
+   Field names here follow the documented OfficeGuy charge shape. ───────────── */
+function chargeSettleUpViaSummit_(sub, amount) {
+  var props = PropertiesService.getScriptProperties();
+  var companyId = props.getProperty('SUMIT_COMPANY_ID');
+  var apiKey    = props.getProperty('SUMIT_API_KEY');
+
+  if (!companyId || !apiKey || !sub.summitCustomerId) {
+    return { ok: true, charged: false, mode: 'manual',
+             reason: (!companyId || !apiKey) ? 'Summit not configured (safe mode)'
+                                             : 'missing Summit customer/payment id on subscription' };
+  }
+  var body = {
+    Credentials: { CompanyID: companyId, APIKey: apiKey },
+    Customer: { ID: sub.summitCustomerId },
+    // Charge the saved payment method captured at signup. If you instead rely on
+    // the customer's DEFAULT method in Summit, you can drop PaymentMethodID.
+    PaymentMethodID: sub.summitPaymentId || null,
+    Items: [{
+      Quantity: 1,
+      UnitPrice: amount,
+      Description: 'השלמת מחיר VIP — מעבר למחיר רגיל (' + sub.cycles + ' בקבוקים)'
+    }],
+    VATIncluded: true,
+    SendDocumentByEmail: true
+  };
+  try {
+    var resp = UrlFetchApp.fetch('https://api.sumit.co.il/billing/payments/charge/', {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(body),
+      muteHttpExceptions: true
+    });
+    var r = JSON.parse(resp.getContentText() || '{}');
+    var ok = (r.Status === 0);   // OfficeGuy: 0 = success
+    var pay = (r.Data && (r.Data.Payment || r.Data.payment)) || {};
+    return { ok: ok, charged: ok, mode: 'summit',
+             txnId: pay.ID || (r.Data && r.Data.DocumentID) || '',
+             code: String(r.Status), error: r.UserErrorMessage || '', raw: r };
+  } catch (err) {
+    return { ok: false, charged: false, mode: 'summit', error: String(err) };
+  }
+}
+
+/* ── small utilities ───────────────────────────────────────────────────────── */
+function findCancelByTxn_(sheet, cancelTxnId) {
+  var last = sheet.getLastRow();
+  if (last < 2) return null;
+  var width = VIP_HEADERS.cancels.length;
+  var values = sheet.getRange(2, 1, last - 1, width).getValues();
+  var want = String(cancelTxnId).trim();
+  for (var i = 0; i < values.length; i++) {
+    if (String(values[i][width - 1]).trim() === want) {
+      return { branch: values[i][5], refund: values[i][7], clawback: values[i][8],
+               chargeStatus: values[i][9], cancelTxnId: want };
+    }
+  }
+  return null;
+}
+function addDays_(date, n) { var x = new Date(date.getTime()); x.setDate(x.getDate() + n); return x; }
+function endOfDay_(date) { var x = new Date(date.getTime()); x.setHours(23, 59, 59, 999); return x; }
+function asDate_(v) { return (v instanceof Date) ? v : (v ? new Date(v) : null); }
+
+/* ── notifications ─────────────────────────────────────────────────────────── */
+function notifyVipCancellation_(sub, decision, charge, chargeStatus) {
+  var lines = [
+    'VIP cancellation processed.',
+    'Sub: ' + sub.subId + '  |  ' + sub.name + '  |  ' + sub.email,
+    'Bottles shipped (cycles): ' + decision.cycles,
+    'Branch: ' + decision.branch,
+    'Refund owed: ₪' + decision.refund,
+    'Clawback: ₪' + decision.clawback + '  (' + chargeStatus + ')'
+  ];
+  if (decision.branch === 'guarantee_refund') {
+    lines.push('', '➡️ ACTION: issue a FULL REFUND of ₪' + decision.refund + ' via Summit.');
+  } else if (decision.clawback > 0 && charge.mode === 'manual') {
+    lines.push('', '➡️ ACTION: charge ₪' + decision.clawback +
+               ' manually (' + (charge.reason || 'safe mode') + ').');
+  } else if (decision.clawback > 0 && !charge.charged) {
+    lines.push('', '🚨 ACTION: clawback charge FAILED (code ' +
+               (charge.code || charge.error || '?') + '). Retry ₪' + decision.clawback + ' manually.');
+  }
+  try {
+    MailApp.sendEmail({ to: NOTIFY_EMAIL, cc: ORDER_ALERT_CC || '',
+      subject: '♻️ NGFM VIP cancel — ' + decision.branch + ' — ' + (sub.email || sub.subId),
+      body: lines.join('\n') });
+  } catch (e) {}
+}
+
+function sendVipCancelCustomerEmail_(sub, decision) {
+  if (!sub.email) return;
+  var diff = vipDiff();
+  var subject, intro, detail;
+  if (decision.branch === 'guarantee_refund') {
+    subject = 'ביטול מנוי ה-VIP — החזר כספי מלא בדרך אליך';
+    intro   = 'ביטלת בתוך 14 הימים הראשונים, אז אתה מכוסה באחריות החזר כספי מלא.';
+    detail  = 'נחזיר לך את מלוא הסכום ששילמת (₪' + decision.refund + '). אין שום חיוב הפרש.';
+  } else if (decision.branch === 'journey_complete') {
+    subject = 'סיימת את מסע ה-90 יום 💪';
+    intro   = 'כל הכבוד — השלמת את המסע המלא.';
+    detail  = 'אין שום חיוב נוסף, וההנחה של 21% שלך נשמרת. תודה שהיית חלק מ-NOGYMFORME.';
+  } else { // early_settle_up
+    subject = 'ביטול מנוי ה-VIP — עדכון חיוב';
+    intro   = 'עצרת לפני שהשלמת את 90 הימים, אז המחיר על מה שכבר קיבלת מתעדכן למחיר הרגיל.';
+    detail  = 'קיבלת ' + decision.cycles + ' בקבוקים. ההפרש למחיר הרגיל (₪' + diff +
+              ' לבקבוק) מסתכם ב-₪' + decision.clawback + '. זה הכל — בלי קנסות.';
+  }
+  var html =
+    '<div dir="rtl" style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:auto;' +
+      'background:#0A0A0A;color:#fff;padding:32px 24px;border-radius:12px;text-align:center;">' +
+      '<div style="font-size:22px;font-weight:900;color:#E8D900;">NOGYM<span style="color:#fff;">FORME</span></div>' +
+      '<h1 style="font-size:19px;margin:16px 0 10px;">' + escapeHtml(subject) + '</h1>' +
+      '<p style="color:#cfccc6;font-size:15px;line-height:1.6;margin:0 0 14px;">' + escapeHtml(intro) + '</p>' +
+      '<p style="color:#cfccc6;font-size:15px;line-height:1.6;margin:0;">' + escapeHtml(detail) + '</p>' +
+    '</div>';
+  try {
+    MailApp.sendEmail({ to: sub.email, subject: subject, htmlBody: html, name: 'NOGYMFORME' });
+  } catch (e) {}
+}
+
+/* ── Summit recurring-payment webhook → record a monthly cycle ───────────────
+   Summit posts here on each successful recurring charge. The field names below
+   are the common OfficeGuy shape; because webhook payloads vary by account, any
+   payload we CAN'T match to a subscriber is emailed to you raw (notifyOps_) so
+   you can confirm the exact keys for YOUR account and tighten the mapping.
+   This handler only RECORDS cycles — it never charges. vipCycle is idempotent
+   on the Summit payment ref, so redelivered webhooks won't double-count. ───── */
+function handleSummitWebhook_(data) {
+  if (!getSheetId()) return jsonOut({ ok: false, error: 'not configured' });
+
+  // Defensive extraction — CONFIRM against a real Summit webhook payload.
+  var customerId = data.CustomerID || (data.Customer && data.Customer.ID) || '';
+  var email      = data.EmailAddress || (data.Customer && data.Customer.EmailAddress) || data.email || '';
+  var chargeRef  = String(data.PaymentID || data.ID || data.TransactionID || '').trim();
+  var deliveryDate = data.DeliveryDate || '';   // usually absent; set by courier feed
+  var paymentOk  = (data.ValidPayment === true) || (data.Status === 0) ||
+                   /paid|success|charged|approved/i.test(String(data.PaymentStatus || data.EventType || data.Type || ''));
+
+  var subsSheet = ensureVipSheet_('subs');
+  var sub = findVipSubBySummit_(subsSheet, customerId, email);
+
+  if (!sub) {
+    // Unknown subscriber — don't guess. Alert with the raw payload so it can be
+    // reconciled (and so you can see the real Summit field names once).
+    notifyOps_('Summit webhook — unmatched VIP subscriber',
+               'customerId=' + customerId + '  email=' + email + '\n\n' + JSON.stringify(data));
+    return jsonOut({ ok: true, matched: false });
+  }
+  if (!paymentOk) {
+    return jsonOut({ ok: true, matched: true, counted: false, reason: 'not a successful payment event' });
+  }
+  // Count one cycle (idempotent on chargeRef).
+  return handleVipCycle({ subId: sub.subId, deliveryDate: deliveryDate, chargeRef: chargeRef });
+}
+
+// Find a VIP subscription by Summit customer id (preferred) or email.
+function findVipSubBySummit_(sheet, customerId, email) {
+  var last = sheet.getLastRow();
+  if (last < 2) return null;
+  var values = sheet.getRange(2, 1, last - 1, VIP_HEADERS.subs.length).getValues();
+  var wantCust  = String(customerId || '').trim();
+  var wantEmail = String(email || '').toLowerCase().trim();
+  for (var i = 0; i < values.length; i++) {
+    var r = values[i];
+    if ((wantCust  && String(r[VIP_COL.summitCustomerId - 1]).trim() === wantCust) ||
+        (wantEmail && String(r[VIP_COL.email - 1]).toLowerCase().trim() === wantEmail)) {
+      return parseVipSubRow_(r, i + 2);
+    }
+  }
+  return null;
+}
+
+// Best-effort operator alert (never throws).
+function notifyOps_(subject, body) {
+  try {
+    MailApp.sendEmail({ to: NOTIFY_EMAIL, subject: '⚠️ NGFM — ' + subject, body: body });
+  } catch (e) {}
 }
