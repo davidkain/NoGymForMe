@@ -407,6 +407,22 @@
     }
     .vip-cancel-confirm:hover { background: #ff6b6b; color: #111; }
     #vipCancelMsg { font-size: 13px; line-height: 1.6; margin-top: 12px; }
+    .vip-otp-step { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+    #vipOtpInput {
+      background: var(--black);
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 18px;
+      letter-spacing: 4px;
+      text-align: center;
+      direction: ltr;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color .2s;
+    }
+    #vipOtpInput:focus { border-color: var(--gold); }
   </style>
 </head>
 <body>
@@ -486,6 +502,11 @@
             ביטול מנוי ה-VIP. אם תבטל לפני שהשלמת 90 יום, תשלים את ההפרש למחיר הרגיל (₪43 לבקבוק) על הבקבוקים שכבר קיבלת - בלי קנסות. 14 הימים הראשונים מכוסים בהחזר כספי מלא.
           </p>
           <button type="button" class="vip-cancel-confirm" id="vipCancelConfirm">כן, בטל את המנוי שלי</button>
+          <div class="vip-otp-step" id="vipOtpStep" hidden>
+            <input id="vipOtpInput" type="text" inputmode="numeric" autocomplete="one-time-code"
+                   maxlength="6" placeholder="קוד בן 6 ספרות">
+            <button type="button" class="vip-cancel-confirm" id="vipOtpConfirm">אשר ביטול</button>
+          </div>
           <p id="vipCancelMsg" role="status"></p>
         </div>
       </div>
@@ -735,59 +756,88 @@
       var openBtn = document.getElementById('vipCancelOpen');
       var panel   = document.getElementById('vipCancelPanel');
       var confirmBtn = document.getElementById('vipCancelConfirm');
+      var otpStep = document.getElementById('vipOtpStep');
+      var otpInput = document.getElementById('vipOtpInput');
+      var otpConfirm = document.getElementById('vipOtpConfirm');
       var msg     = document.getElementById('vipCancelMsg');
       if (!openBtn) return;
 
-      openBtn.addEventListener('click', function () {
-        panel.hidden = !panel.hidden;
-      });
+      function setMsg(text, ok) {
+        msg.style.color = ok ? '#25d366' : '#ff6b6b';
+        msg.textContent = text;
+      }
+      function busy(btn, on, busyLabel) {
+        if (on) {
+          btn.dataset.label = btn.textContent;
+          btn.textContent = busyLabel;
+          btn.disabled = true;
+          btn.style.opacity = '0.7';
+        } else {
+          btn.textContent = btn.dataset.label || btn.textContent;
+          btn.disabled = false;
+          btn.style.opacity = '';
+        }
+      }
 
+      openBtn.addEventListener('click', function () { panel.hidden = !panel.hidden; });
+
+      // Step 1: request a one-time code emailed to the verified address.
       confirmBtn.addEventListener('click', function () {
         var email = verifiedEmail();
-        msg.style.color = '';
-        if (!email) {
-          msg.style.color = '#ff6b6b';
-          msg.textContent = 'התחבר מחדש כדי לנהל את המנוי.';
-          return;
-        }
-
-        confirmBtn.disabled = true;
-        var label = confirmBtn.textContent;
-        confirmBtn.textContent = 'מבטל…';
-        confirmBtn.style.opacity = '0.7';
-
-        function reset() {
-          confirmBtn.disabled = false;
-          confirmBtn.textContent = label;
-          confirmBtn.style.opacity = '';
-        }
-
+        if (!email) { setMsg('התחבר מחדש כדי לנהל את המנוי.', false); return; }
+        msg.textContent = '';
+        busy(confirmBtn, true, 'שולח קוד…');
         fetch('/api/cancel-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email })
         })
-          .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
-          .then(function (o) {
-            if (o.j && o.j.ok) {
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            busy(confirmBtn, false);
+            if (j && j.ok && j.otpSent) {
               confirmBtn.style.display = 'none';
-              msg.style.color = '#25d366';
-              msg.textContent = 'בקשת הביטול התקבלה. שלחנו לך מייל עם כל הפרטים.';
-            } else if (o.j && o.j.notFound) {
-              reset();
-              msg.style.color = '#ff6b6b';
-              msg.textContent = 'לא נמצא מנוי VIP פעיל למייל הזה.';
+              otpStep.hidden = false;
+              otpInput.focus();
+              setMsg('שלחנו קוד אימות למייל שלך. הזן אותו כאן כדי לאשר.', true);
+            } else if (j && j.ok && !j.otpSent) {
+              setMsg('לא נמצא מנוי VIP פעיל למייל הזה.', false);
             } else {
-              reset();
-              msg.style.color = '#ff6b6b';
-              msg.textContent = 'תקלה זמנית. נסה שוב בעוד רגע.';
+              setMsg('תקלה זמנית. נסה שוב בעוד רגע.', false);
             }
           })
-          .catch(function () {
-            reset();
-            msg.style.color = '#ff6b6b';
-            msg.textContent = 'תקלה בחיבור. נסה שוב.';
-          });
+          .catch(function () { busy(confirmBtn, false); setMsg('תקלה בחיבור. נסה שוב.', false); });
+      });
+
+      // Step 2: confirm the cancellation with the emailed code.
+      otpConfirm.addEventListener('click', function () {
+        var email = verifiedEmail();
+        var otp = (otpInput.value || '').trim();
+        if (!/^\d{6}$/.test(otp)) { setMsg('הזן קוד בן 6 ספרות.', false); return; }
+        msg.textContent = '';
+        busy(otpConfirm, true, 'מאשר…');
+        fetch('/api/cancel-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, otp: otp })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (j && j.ok) {
+              otpStep.style.display = 'none';
+              setMsg('בקשת הביטול אושרה. שלחנו לך מייל עם כל הפרטים.', true);
+            } else if (j && j.otpBad) {
+              busy(otpConfirm, false);
+              setMsg('הקוד שגוי או שפג תוקפו. נסה שוב.', false);
+            } else if (j && j.notFound) {
+              busy(otpConfirm, false);
+              setMsg('לא נמצא מנוי VIP פעיל למייל הזה.', false);
+            } else {
+              busy(otpConfirm, false);
+              setMsg('תקלה זמנית. נסה שוב בעוד רגע.', false);
+            }
+          })
+          .catch(function () { busy(otpConfirm, false); setMsg('תקלה בחיבור. נסה שוב.', false); });
       });
     })();
   </script>

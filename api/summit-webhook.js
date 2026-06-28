@@ -11,8 +11,11 @@
  * Setup: point your SUMIT webhook / payment-notification URL at
  *   https://<your-site>/api/summit-webhook
  *
- * ⚠️ Before going live, verify a shared secret / signature from SUMIT here so
- * only SUMIT can post cycles (a forged cycle would inflate the clawback later).
+ * SECURITY: a shared secret gates this endpoint, but ONLY once you set the
+ * SUMIT_WEBHOOK_SECRET env var (so it can't break the initial capture test).
+ * After you set it, the SUMIT webhook URL must carry a matching `?key=<secret>`
+ * (or an `X-Webhook-Secret` header) or the POST is rejected 401 — this stops a
+ * forged cycle from inflating a future clawback.
  */
 
 'use strict';
@@ -24,6 +27,18 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  }
+
+  // Shared-secret gate — env-gated so it never breaks the initial capture test.
+  // Once SUMIT_WEBHOOK_SECRET is set, the SUMIT webhook URL must carry a matching
+  // ?key=<secret> (or an X-Webhook-Secret header). Until then, POSTs are accepted.
+  const secret = process.env.SUMIT_WEBHOOK_SECRET;
+  if (secret) {
+    const provided = (req.query && req.query.key) || req.headers['x-webhook-secret'] || '';
+    if (provided !== secret) {
+      console.error('[summit-webhook] rejected: bad/missing secret');
+      return res.status(401).json({ ok: false, error: 'unauthorized' });
+    }
   }
 
   const payload = req.body || {};

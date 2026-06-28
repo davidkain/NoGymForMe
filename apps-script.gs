@@ -210,8 +210,12 @@ function doPost(e) {
     // webhook). Increments Cycles; sets First Charge / First Delivery. ─────────
     if (type === 'vipCycle') return handleVipCycle(data);
 
+    // ── VIP: cancel step 1 — email a one-time code to prove email ownership. ──
+    if (type === 'vipCancelRequestOtp') return handleVipCancelRequestOtp(data);
+
     // ── VIP: cancellation handler — 90-day-journey settle-up (spec §3).
-    // Idempotent on cancelTxnId. Safe mode until Summit props are set. ─────────
+    // Requires a valid OTP (step 2). Idempotent on cancelTxnId. Safe mode until
+    // Summit props are set. ───────────────────────────────────────────────────
     if (type === 'vipCancel') return handleVipCancel(data);
 
     // ── VIP: Summit recurring-payment webhook → records a monthly cycle.
@@ -820,6 +824,18 @@ function handleVipCancel(d) {
   var prior = findCancelByTxn_(logSheet, cancelTxnId);
   if (prior) return jsonOut({ ok: true, idempotent: true, result: prior });
 
+  // Ownership proof: require the one-time code emailed by vipCancelRequestOtp,
+  // consumed on success so it can't be replayed. Placed AFTER the idempotency
+  // check so a retried (already-processed) cancel still returns its recorded
+  // result without needing a fresh code.
+  var otpKey = vipOtpKey_(sub.email);
+  var cache = CacheService.getScriptCache();
+  var expectedOtp = cache.get(otpKey);
+  var providedOtp = String(d.otp || '').trim();
+  if (!providedOtp) return jsonOut({ ok: false, error: 'otp_required' });
+  if (!expectedOtp || providedOtp !== expectedOtp) return jsonOut({ ok: false, error: 'otp_invalid' });
+  cache.remove(otpKey);
+
   var now = new Date();
   var decision = computeVipCancellation_(sub, now);
 
@@ -854,6 +870,40 @@ function handleVipCancel(d) {
     branch: decision.branch, refund: decision.refund, clawback: decision.clawback,
     chargeStatus: chargeStatus, cancelTxnId: cancelTxnId
   }});
+}
+
+/* ── vipCancelRequestOtp: email a one-time code (step 1 of cancel) ──────────── */
+function handleVipCancelRequestOtp(d) {
+  if (!getSheetId()) return jsonOut({ ok: false, error: 'not configured' });
+  var email = String(d.email || '').toLowerCase().trim();
+  if (!email) return jsonOut({ ok: false, error: 'email required' });
+  // Only mint a code for an email that actually has a VIP subscription.
+  var sub = findVipSub_(ensureVipSheet_('subs'), { email: email });
+  if (!sub) return jsonOut({ ok: true, sent: false });
+  var code = String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+  CacheService.getScriptCache().put(vipOtpKey_(email), code, 600); // 10-min TTL
+  sendVipOtpEmail_(email, code);
+  return jsonOut({ ok: true, sent: true });
+}
+
+function vipOtpKey_(email) { return 'vipotp_' + String(email || '').toLowerCase().trim(); }
+
+function sendVipOtpEmail_(email, code) {
+  var html =
+    '<div dir="rtl" style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:auto;' +
+      'background:#0A0A0A;color:#fff;padding:32px 24px;border-radius:12px;text-align:center;">' +
+      '<div style="font-size:22px;font-weight:900;color:#E8D900;">NOGYM<span style="color:#fff;">FORME</span></div>' +
+      '<h1 style="font-size:19px;margin:16px 0 8px;">קוד אימות לביטול מנוי</h1>' +
+      '<p style="color:#cfccc6;font-size:15px;line-height:1.6;margin:0 0 18px;">' +
+        'הזן את הקוד כדי לאשר את ביטול מנוי ה-VIP. הקוד תקף ל-10 דקות. ' +
+        'אם לא ביקשת לבטל - אפשר להתעלם מהמייל הזה.</p>' +
+      '<div style="display:inline-block;background:#E8D900;color:#0A0A0A;font-family:monospace;' +
+        'font-size:30px;font-weight:900;letter-spacing:6px;padding:14px 28px;border-radius:10px;">' +
+        code + '</div>' +
+    '</div>';
+  try {
+    MailApp.sendEmail({ to: email, subject: 'קוד אימות לביטול מנוי NOGYMFORME', htmlBody: html, name: 'NOGYMFORME' });
+  } catch (e) {}
 }
 
 /* ── Pure decision logic (spec §3). No side effects — directly unit-testable. ── */
