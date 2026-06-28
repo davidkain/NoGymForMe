@@ -1903,21 +1903,9 @@
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:40px 32px;position:relative;">
         <button onclick="closePlanModal()" style="position:absolute;top:16px;left:20px;background:none;border:none;color:var(--grey);font-size:28px;cursor:pointer;line-height:1;">×</button>
         <h2 style="font-family:var(--font-display);font-size:clamp(22px,3vw,32px);font-weight:900;color:var(--white);margin-bottom:8px;text-align:center;">בחר את החבילה שלך</h2>
-        <p style="text-align:center;color:var(--grey);font-size:14px;margin-bottom:32px;">ללא ריבית · ביטול בכל עת · 100% החזר כספי</p>
+        <p style="text-align:center;color:var(--grey);font-size:14px;margin-bottom:32px;">ללא ריבית · ללא התחייבות · 100% החזר כספי</p>
 
         <div style="display:flex;flex-direction:column;gap:16px;">
-
-          <a href="order.html?plan=subscription" onclick="handlePurchase('subscription',event)" style="display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,var(--card) 0%,var(--deep) 100%);border:1.5px solid var(--gold);border-radius:var(--radius-md);padding:22px 24px;text-decoration:none;position:relative;box-shadow:0 12px 30px -12px rgba(232,217,0,0.18);">
-            <div style="position:absolute;top:-12px;right:20px;background:var(--gold);color:var(--black);font-size:11px;font-weight:900;padding:3px 14px;border-radius:var(--radius-pill);letter-spacing:1px;">המשתלם ביותר</div>
-            <div>
-              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">מנוי חודשי</div>
-              <div style="font-size:13px;color:var(--grey-light);margin-top:4px;">בקבוק כל חודש · משלוח חינם · ביטול בכל עת</div>
-            </div>
-            <div style="text-align:left;">
-              <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--gold);">₪155<span style="font-size:14px;font-weight:600;color:var(--white);">/חודש</span></div>
-              <div style="font-size:12px;color:var(--grey);">חיסכון ₪43/חודש</div>
-            </div>
-          </a>
 
           <a href="order.html?plan=single" onclick="handlePurchase('single',event)" class="plan-card-hover" style="display:flex;justify-content:space-between;align-items:center;background:var(--black);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;">
             <div>
@@ -2237,56 +2225,7 @@
     <div class="section reveal">
       <p class="section-label">המחירים</p>
       <h2 class="section-title">בחר את החבילה<br><em>שמתאימה לך.</em></h2>
-      <p class="section-body">ללא ריבית. 100% החזר כספי תוך 14 יום - גם אם כבר פתחת. בלי קנסות, בלי דרמה.</p>
-
-      <!-- ── SUBSCRIPTION BAND (positioned above the 3-card one-time grid) ── -->
-      <div class="sub-band reveal">
-        <span class="sub-badge-top">המשתלם ביותר</span>
-
-        <div class="sub-left">
-          <h3 class="sub-headline">
-            מנוי VIP<br>
-            <em>(כמו של החדר הכושר, רק כזה שמגיע אליך עד הבית)</em>
-          </h3>
-          <p class="sub-tagline">
-            שינוי אמיתי בגוף לא קורה ב-3 שבועות - הוא קורה ב-90 יום.
-            לכן ה-VIP בנוי כמסע של 90 יום, <strong>שבו אנחנו צמודים אליך עד שרואים תוצאות</strong> - ובמחיר הכי טוב שיש.
-          </p>
-
-          <ul class="sub-benefits">
-            <li>משלוח חינם כל חודש</li>
-            <li>הנחה קבועה לכל החיים (21%)</li>
-            <li>אספקה חודשית אוטומטית</li>
-            <li>ליווי אישי צמוד לכל 90 הימים</li>
-            <li>תפריט תזונה מותאם אישית</li>
-            <li>אפליקציה ייעודית ל-NOGYMFORME</li>
-            <li>גישה לקהילת הגברים שלנו</li>
-            <li>14 יום החזר כספי מלא</li>
-          </ul>
-
-          <p class="sub-reassure">
-            🛡️ <strong>אפס סיכון להתחיל:</strong> 14 יום החזר כספי מלא - גם על בקבוק פתוח, בלי שאלות. מתחרט? מקבל הכל בחזרה.<br>
-            💪 <strong>מחיר של מסע שלם:</strong> ₪155 לחודש זה המחיר של 90 יום. אתה חופשי לעצור מתי שתרצה - ואם תעצור באמצע, פשוט תשלים את ההפרש למחיר הרגיל (₪198) על מה שכבר קיבלת. משלם בדיוק על מה שלקחת, לא יותר. בלי קנסות.
-          </p>
-
-          <div class="sub-cta-row">
-            <a href="order.html?plan=subscription"
-               class="btn-sub"
-               onclick="handlePurchase('subscription',event)">אני בפנים ל-90 יום ←</a>
-            <span class="sub-cancel-note">משלים 90 יום? ההנחה נשארת איתך לכל החיים</span>
-          </div>
-        </div>
-
-        <div class="sub-right">
-          <div class="sub-compare-line">פעם אחת: <span class="strike">₪198</span></div>
-          <div class="sub-main-price">₪155<span class="unit">/חודש</span></div>
-          <div class="sub-compare-line">21% הנחה לכל החיים</div>
-          <div class="sub-savings">
-            חיסכון של <strong>₪43 בחודש</strong><br>
-            = <strong>₪516 בשנה</strong>
-          </div>
-        </div>
-      </div>
+      <p class="section-body">ללא ריבית. ללא התחייבות. 100% החזר כספי תוך 14 יום, גם אם כבר פתחת.</p>
 
       <div class="pricing-grid">
         <div class="pricing-card reveal">
@@ -2412,22 +2351,7 @@
         </button>
         <div class="faq-answer">
           על פי חוק הגנת הצרכן, ניתן לבטל עסקה ולהחזיר מוצר תוך 14 יום בתנאי שאריזתו סגורה ולא נעשה בו שימוש (תוספי תזונה שנפתחו אינם ניתנים להחזרה על פי חוק).<br><br>
-          מעבר לחוק, אנחנו נותנים לך <strong>אחריות שביעות רצון מלאה</strong>: אם ניסית את NOGYMFORME ולא היית מרוצה - תקבל החזר כספי מלא תוך 14 יום, גם אם פתחת והתחלת להשתמש. בלי שאלות.<br><br>
-          לגבי מנוי ה-VIP: אין חוזה ואין נעילה - אפשר לבטל בכל עת בלחיצה אחת מאזור החברים. המחיר המוזל של ₪155 הוא מחיר המסע המלא של 90 יום. אם תבחר לעצור לפני שהשלמת את 3 החודשים, ההנחה על החודשים שכבר קיבלת מתעדכנת למחיר הרגיל (₪198 לבקבוק) ותחויב בהפרש - כך שאתה משלם בדיוק על מה שקיבלת, לא יותר. בלי קנסות. השלמת את 90 הימים? ההנחה נשארת איתך לכל החיים.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          <span>איך עובד "מחיר המסע" של מנוי ה-VIP?</span>
-          <span class="faq-toggle">+</span>
-        </button>
-        <div class="faq-answer">
-          פשוט מאוד: המחיר המוזל של ₪155 לחודש הוא המחיר של מסע שלם בן 90 יום. כל עוד אתה במסע - אתה נהנה מ-21% הנחה על כל בקבוק.<br><br>
-          בחרת לעצור לפני שהשלמת את 3 החודשים? אתה פשוט משלם את המחיר הרגיל (₪198 לבקבוק) על מה שכבר קיבלת - בדיוק כמו בקנייה חד-פעמית. ההפרש הוא ₪43 על כל בקבוק שקיבלת. בלי קנסות, בלי דמי ביטול.<br><br>
-          <strong>דוגמה:</strong> ביטלת אחרי חודשיים? קיבלת 2 בקבוקים ושילמת ₪310 (פעמיים ₪155). המחיר מתעדכן ל-₪396 (פעמיים ₪198), כך שתחויב בהפרש של ₪86 בלבד. וזהו.<br><br>
-          השלמת את 90 הימים? סיימת את המסע - וההנחה של 21% נשארת איתך לכל החיים, חודש אחרי חודש.<br><br>
-          <strong>חשוב:</strong> 14 הימים הראשונים מכוסים תמיד באחריות החזר כספי מלא. אם תבטל תוך שבועיים - תקבל את כל כספך בחזרה, בלי שום חיוב הפרש.
+          מעבר לחוק, אנחנו נותנים לך <strong>אחריות שביעות רצון מלאה</strong>: אם ניסית את NOGYMFORME ולא היית מרוצה - תקבל החזר כספי מלא תוך 14 יום, גם אם פתחת והתחלת להשתמש. בלי שאלות.
         </div>
       </div>
 
@@ -2537,8 +2461,7 @@
     var PLANS = {
       single:       { name: 'חבילת הביישן',         price: 198, currency: 'ILS', quantity: 1 },
       starter:      { name: 'חבילת יאללה, בוא ננסה', price: 396, currency: 'ILS', quantity: 2 },
-      results:      { name: 'חבילת אול-אין',         price: 496, currency: 'ILS', quantity: 3 },
-      subscription: { name: 'מנוי חודשי',            price: 155, currency: 'ILS', quantity: 1, recurring: 'monthly' }
+      results:      { name: 'חבילת אול-אין',         price: 496, currency: 'ILS', quantity: 3 }
     };
 
     /**
