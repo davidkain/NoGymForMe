@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NOGYMFORME | תוסף הרזיה לגברים</title>
-  <meta name="description" content="NOGYMFORME - תוסף הרזיה לגברים שפותח על ידי ד״ר דייויד קיין. הרזיה ללא חדר כושר וללא דיאטות קיצוניות.">
+  <meta name="description" content="NOGYMFORME - תוסף הרזיה לגברים שפותח על ידי ד״ר דייויד קין. הרזיה ללא חדר כושר וללא דיאטות קיצוניות.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://www.nogymforme.com/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.nogymforme.com/">
   <meta property="og:title" content="NOGYMFORME | תוסף הרזיה לגברים">
-  <meta property="og:description" content="תוסף הרזיה לגברים שפותח על ידי ד״ר דייויד קיין. הרזיה ללא חדר כושר וללא דיאטות קיצוניות.">
+  <meta property="og:description" content="תוסף הרזיה לגברים שפותח על ידי ד״ר דייויד קין. הרזיה ללא חדר כושר וללא דיאטות קיצוניות.">
   <meta property="og:image" content="https://www.nogymforme.com/hero.png">
   <meta name="google-site-verification" content="crI23yKnAXDF4a3_awui4XvqwZAOAIp81blowAqSWHk" />
   <link rel="icon" type="image/svg+xml" href="/app-icon.svg">
@@ -795,9 +795,9 @@
       <a href="#science">המדע</a>
       <a href="#reviews">ביקורות</a>
       <a href="#faq">שאלות נפוצות</a>
-      <a href="/app">אזור חברים</a>
+      <a href="/app" style="color:var(--gold);font-weight:700">אזור חברים</a>
     </nav>
-    <a href="#packages" class="btn btn-gold nav-cta">הזמן עכשיו</a>
+    <a href="#" onclick="openPlanModal(event)" class="btn btn-gold nav-cta">הזמן עכשיו</a>
     <button class="nav-toggle" aria-label="תפריט" onclick="document.querySelector('.nav-links').style.display='flex'">☰</button>
   </div>
 </header>
@@ -902,7 +902,7 @@
       <p class="hero-sub">מדע שתוכנן לגברים.</p>
       <p class="lead">הפתרון הטבעי הראשון בישראל שמיועד לגברים. תומך בחילוף החומרים ותורם לתחושת שובע — גם בלי ללכת לחדר כושר.</p>
       <div class="hero-actions">
-        <a href="#packages" class="btn btn-gold">רוצה שינוי? הזמן עכשיו <span class="arrow">←</span></a>
+        <a href="#" onclick="openPlanModal(event)" class="btn btn-gold">רוצה שינוי? הזמן עכשיו <span class="arrow">←</span></a>
         <a href="#science" class="btn btn-ghost">המדע מאחורי המוצר</a>
       </div>
       <div class="hero-trust">
@@ -964,11 +964,11 @@
   <div class="wrap">
     <div class="sci-grid reveal">
       <div class="sci-img">
-        <img src="assets/redesign/scientist.png" alt="ד״ר דייויד קיין, מפתח NOGYMFORME">
+        <img src="assets/redesign/scientist.png" alt="ד״ר דייויד קין, מפתח NOGYMFORME">
       </div>
       <div class="sci-copy">
         <p class="eyebrow">מי עומד מאחורי המוצר</p>
-        <h2 class="display">הפורמולה שפיתח <em>ד״ר דייויד קיין</em></h2>
+        <h2 class="display">הפורמולה שפיתח <em>ד״ר דייויד קין</em></h2>
         <p class="lead">בלי קסמים ובלי הבטחות ריקות. פורמולה אחת, רכיבים טבעיים — שעובדים על שלושה דברים שמפילים כל דיאטה: <strong style="color:var(--ink)">רעב, חשק למתוק, ונפילות אנרגיה.</strong></p>
         <div><a href="https://www.nogymforme.com/about.html" class="btn btn-ghost">קראו עוד על הסיפור שלנו <span class="arrow">←</span></a></div>
       </div>
@@ -1086,7 +1086,7 @@
         <p class="eyebrow">בחר את החבילה שלך</p>
         <h2 class="display">שלוט ברעב.<br>שנה את החיים.</h2>
         <p class="lead">3 כמוסות ביום זה כל מה שצריך כדי להתחיל להרגיש את ההבדל. בחר את החבילה שמתאימה לך.</p>
-        <p class="lead" style="color:var(--gold-soft)">ללא ריבית · ללא התחייבות · 100% החזר כספי תוך 14 יום, גם אם כבר פתחת.</p>
+        <p class="lead" style="color:var(--gold-soft)">ללא ריבית · ללא התחייבות · 100% החזר כספי תוך 14 יום.</p>
       </div>
     </div>
 
@@ -1165,7 +1165,7 @@
       </div>
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this)"><span>מה מדיניות ביטול ההזמנה?</span><span class="faq-toggle">+</span></button>
-        <div class="faq-answer">על פי חוק הגנת הצרכן, ניתן לבטל עסקה ולהחזיר מוצר תוך 14 יום בתנאי שאריזתו סגורה ולא נעשה בו שימוש (תוספי תזונה שנפתחו אינם ניתנים להחזרה על פי חוק).<br><br>מעבר לחוק, אנחנו נותנים לך <strong>אחריות שביעות רצון מלאה</strong>: אם ניסית ולא היית מרוצה - תקבל החזר כספי מלא תוך 14 יום, גם אם פתחת. בלי שאלות.</div>
+        <div class="faq-answer">על פי חוק הגנת הצרכן, ניתן לבטל עסקה ולהחזיר מוצר תוך 14 יום בתנאי שאריזתו סגורה ולא נעשה בו שימוש (תוספי תזונה שנפתחו אינם ניתנים להחזרה על פי חוק).<br><br>מעבר לחוק, אנחנו נותנים לך <strong>אחריות שביעות רצון מלאה</strong>: אם ניסית ולא היית מרוצה - תקבל החזר כספי מלא תוך 14 יום. בלי שאלות.</div>
       </div>
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this)"><span>האם המוצר מתאים לאנשים עם אלרגיות?</span><span class="faq-toggle">+</span></button>
@@ -1193,14 +1193,23 @@
     <p class="eyebrow reveal">הצעד הראשון הכי קשה</p>
     <h2 class="display reveal" style="margin-top:14px">הגיע הזמן לעשות משהו בשבילך.</h2>
     <p class="fp reveal">₪33 לחודש. ב-12 תשלומים. 100% החזר כספי. מה יש להפסיד?</p>
-    <div class="reveal"><a href="#packages" class="btn btn-gold">הזמן עכשיו <span class="arrow">←</span></a></div>
+    <div class="reveal"><a href="#" onclick="openPlanModal(event)" class="btn btn-gold">הזמן עכשיו <span class="arrow">←</span></a></div>
   </div>
 </section>
 
 <footer>
   <div class="wrap foot">
     <div class="logo" style="font-size:18px">NO<b>GYM</b>FORME</div>
-    <div>© 2026 NOGYMFORME · ארניה 6, רמת גן · <a href="#faq">שאלות נפוצות</a> · <a href="privacy.html">פרטיות</a> · <a href="terms.html">תקנון</a></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+      <div class="footlinks" style="display:flex;gap:18px;flex-wrap:wrap;justify-content:flex-end">
+        <a href="/app">אזור חברים</a>
+        <a href="terms.html">מדיניות החזרות</a>
+        <a href="privacy.html">פרטיות</a>
+        <a href="terms.html">תנאי שימוש</a>
+        <a href="https://wa.me/972559190077" target="_blank" rel="noopener noreferrer">צור קשר</a>
+      </div>
+      <div style="color:var(--muted-2);font-size:13px">© 2026 NOGYMFORME · ארניה 6, רמת גן</div>
+    </div>
   </div>
 </footer>
 
