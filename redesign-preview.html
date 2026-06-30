@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOGYMFORME — Stop Fighting Hunger | Redesign Preview</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="NOGYMFORME — Hunger management for men. Clinically backed natural ingredients that help control hunger, reduce cravings and support your goals. No gym required.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#08080a;
+    --bg-2:#0d0d10;
+    --panel:#131317;
+    --panel-2:#17171c;
+    --ink:#f5f4f0;
+    --muted:#9a9893;
+    --muted-2:#6f6d68;
+    --gold:#f2cb1b;
+    --gold-soft:#fde585;
+    --gold-deep:#b8860b;
+    --line:rgba(255,255,255,0.08);
+    --line-2:rgba(255,255,255,0.04);
+    --maxw:1200px;
+    --r:14px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Hanken Grotesk',system-ui,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+
+  /* ── Typographic system ─────────────────────────── */
+  .display{font-family:'Archivo',sans-serif;font-weight:800;line-height:0.98;letter-spacing:-0.02em}
+  .eyebrow{
+    font-family:'Archivo',sans-serif;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.2em;font-size:14px;
+    color:var(--gold);
+  }
+  .lead{color:var(--muted);font-size:16px;max-width:46ch}
+
+  /* ── Buttons ───────────────────────────────────── */
+  .btn{
+    display:inline-flex;align-items:center;gap:12px;
+    font-family:'Archivo',sans-serif;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.08em;font-size:14px;
+    padding:16px 26px;border-radius:10px;cursor:pointer;border:1px solid transparent;
+    transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s,background .25s,color .25s;
+  }
+  .btn .arrow{transition:transform .25s}
+  .btn:hover .arrow{transform:translateX(5px)}
+  .btn-gold{
+    background:linear-gradient(180deg,var(--gold-soft),var(--gold));
+    color:#1a1206;box-shadow:0 10px 30px -10px rgba(242,203,27,.6);
+  }
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(242,203,27,.7)}
+  .btn-ghost{
+    background:transparent;color:var(--ink);border-color:var(--line);
+    letter-spacing:0.12em;
+  }
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px)}
+
+  /* ── Header ────────────────────────────────────── */
+  header{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:blur(14px);
+    background:rgba(8,8,10,.72);
+    border-bottom:1px solid var(--line-2);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .logo{font-family:'Archivo',sans-serif;font-weight:900;font-size:22px;letter-spacing:-0.01em;color:var(--ink)}
+  .logo b{color:var(--gold)}
+  .nav-links{display:flex;gap:34px;align-items:center}
+  .nav-links a{font-size:14px;color:var(--muted);font-weight:600;transition:color .2s}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-cta{padding:11px 20px;font-size:12px}
+  .nav-toggle{display:none;background:none;border:0;color:var(--ink);font-size:24px;cursor:pointer}
+
+  /* ── Hero ──────────────────────────────────────── */
+  .hero{position:relative;overflow:hidden;padding:78px 0 64px;
+    background:
+      radial-gradient(90% 70% at 22% 6%, rgba(34,66,74,.32), rgba(8,8,10,0) 60%),
+      radial-gradient(70% 70% at 88% 94%, rgba(24,46,54,.24), rgba(8,8,10,0) 62%);
+  }
+  .hero-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
+  .hero-bg .glow{
+    position:absolute;width:780px;height:780px;border-radius:50%;
+    right:-180px;top:-220px;
+    background:radial-gradient(circle,rgba(242,203,27,.22),rgba(242,203,27,0) 62%);
+    filter:blur(8px);
+  }
+  .hero-bg .glow2{
+    position:absolute;width:520px;height:520px;border-radius:50%;
+    left:-160px;bottom:-200px;
+    background:radial-gradient(circle,rgba(242,203,27,.10),rgba(242,203,27,0) 65%);
+  }
+  .molecule{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+  .molecule .node{animation:twinkle 4s ease-in-out infinite}
+  .molecule .node:nth-child(3n){animation-delay:1.2s}
+  .molecule .node:nth-child(3n+1){animation-delay:2.4s}
+  @keyframes twinkle{0%,100%{opacity:.35}50%{opacity:1}}
+  .mol-float{animation:floatY 16s ease-in-out infinite}
+  @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+  .hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center}
+  .hero-copy h1{font-size:clamp(44px,6vw,82px)}
+  .hero-copy h1 .muted-line{color:var(--ink)}
+  .hero-sub{
+    font-family:'Archivo',sans-serif;font-weight:700;color:var(--gold);
+    font-size:clamp(19px,2.4vw,26px);margin:18px 0 22px;letter-spacing:-0.01em;
+  }
+  .hero-copy .lead{font-size:17px;margin-bottom:30px}
+  .hero-actions{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  .hero-trust{display:flex;gap:26px;flex-wrap:wrap;margin-top:34px}
+  .hero-trust .t{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);font-weight:600}
+  .hero-trust .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px 1px rgba(242,203,27,.7)}
+
+  /* Bottle + ingredient cut-out */
+  .bottle-stage{position:relative;display:flex;justify-content:center;align-items:center;min-height:460px}
+  .bottle-stage .pedestal{
+    position:absolute;bottom:34px;width:74%;height:90px;border-radius:50%;
+    background:radial-gradient(ellipse at center,rgba(242,203,27,.18),rgba(0,0,0,0) 70%);
+    filter:blur(6px);
+  }
+  .bottle-img{
+    position:relative;z-index:2;width:min(78%,360px);
+    filter:drop-shadow(0 40px 60px rgba(0,0,0,.7));
+    border-radius:18px;
+  }
+  /* translucent "viewing window" revealing the four ingredients inside */
+  .cutout{
+    position:absolute;z-index:3;width:min(54%,210px);aspect-ratio:1/1;
+    top:50%;left:50%;transform:translate(-50%,-46%);
+    border-radius:16px;overflow:hidden;
+    border:1px solid rgba(242,203,27,.5);
+    box-shadow:0 0 0 1px rgba(0,0,0,.5) inset, 0 18px 40px -12px rgba(0,0,0,.8), 0 0 30px -4px rgba(242,203,27,.35);
+    background:rgba(8,8,10,.35);
+    backdrop-filter:blur(1px);
+  }
+  .cutout .mosaic{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;width:100%;height:100%}
+  .cutout .mosaic img{width:100%;height:100%;object-fit:cover;opacity:.92}
+  .cutout::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(8,8,10,.12),rgba(8,8,10,.55));
+    box-shadow:0 0 50px 10px rgba(8,8,10,.6) inset;
+  }
+  .cutout .tag{
+    position:absolute;z-index:2;left:0;right:0;bottom:0;
+    font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;letter-spacing:0.16em;
+    text-transform:uppercase;text-align:center;color:var(--gold-soft);
+    padding:8px 4px;background:linear-gradient(180deg,rgba(8,8,10,0),rgba(8,8,10,.85));
+  }
+
+  /* ── Stats strip ───────────────────────────────── */
+  .stats{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg-2)}
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr)}
+  .stat{padding:46px 20px;text-align:center;border-left:1px solid var(--line)}
+  .stat:first-child{border-left:0}
+  .stat .num{font-family:'Archivo',sans-serif;font-weight:900;font-size:clamp(56px,8vw,96px);color:var(--gold);line-height:1}
+  .stat .lab{font-family:'Archivo',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;font-size:13px;color:var(--muted);margin-top:10px}
+
+  /* ── Section scaffolding ───────────────────────── */
+  section{position:relative}
+  .pad{padding:90px 0}
+  .center{text-align:center}
+  .h2{font-size:clamp(34px,4.6vw,56px)}
+
+  /* ── Scientist ─────────────────────────────────── */
+  .sci{background:linear-gradient(180deg,var(--bg),var(--bg-2))}
+  .sci-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:stretch}
+  .sci-img{position:relative;overflow:hidden;min-height:520px;border:1px solid var(--line)}
+  .sci-img img{width:100%;height:100%;object-fit:cover;object-position:center top;filter:grayscale(.18) contrast(1.03)}
+  .sci-img::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,8,10,0) 55%,var(--bg-2))}
+  .sci-copy{padding:54px clamp(24px,4vw,64px);display:flex;flex-direction:column;justify-content:center;background:var(--bg-2);border:1px solid var(--line);border-left:0}
+  .sci-copy h2{font-size:clamp(34px,4.4vw,52px);margin:14px 0 18px}
+  .sci-copy .lead{margin-bottom:30px;font-size:16px}
+
+  /* ── Ingredients ───────────────────────────────── */
+  .ing{background:var(--bg)}
+  .ing-grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:48px;align-items:start;margin-top:54px}
+  .ing-imgs{display:flex;flex-direction:column;gap:14px}
+  .ing-thumb{
+    position:relative;display:block;width:100%;height:120px;overflow:hidden;border-radius:12px;
+    border:1px solid var(--line);cursor:pointer;background:var(--panel);
+    transition:border-color .3s,transform .3s;
+  }
+  .ing-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .5s,filter .3s;filter:saturate(.92) brightness(.86)}
+  .ing-thumb:hover img,.ing-thumb.active img{transform:scale(1.06);filter:saturate(1.05) brightness(1)}
+  .ing-thumb.active{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 14px 30px -16px rgba(242,203,27,.6)}
+  .ing-thumb .label{
+    position:absolute;left:14px;bottom:11px;z-index:2;
+    font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;letter-spacing:.01em;color:#fff;
+    text-shadow:0 2px 10px rgba(0,0,0,.8);
+  }
+  .ing-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.55))}
+
+  .ing-list{position:relative;padding-left:34px}
+  .ing-list::before{content:"";position:absolute;left:11px;top:8px;bottom:8px;width:1px;background:linear-gradient(180deg,var(--gold),rgba(242,203,27,.15))}
+  .ing-row{position:relative;padding:0 0 30px}
+  .ing-row:last-child{padding-bottom:0}
+  .ing-row .node-dot{
+    position:absolute;left:-29px;top:5px;width:23px;height:23px;border-radius:50%;
+    background:var(--bg);border:1px solid var(--gold);display:grid;place-items:center;
+    transition:background .3s,box-shadow .3s;
+  }
+  .ing-row.active .node-dot{background:var(--gold);box-shadow:0 0 16px 2px rgba(242,203,27,.55)}
+  .ing-row .node-dot svg{width:12px;height:12px;stroke:var(--gold);fill:none;stroke-width:1.8;transition:stroke .3s}
+  .ing-row.active .node-dot svg{stroke:#1a1206}
+  .ing-row h3{font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;margin-bottom:5px;transition:color .3s}
+  .ing-row.active h3{color:var(--gold)}
+  .ing-row p{color:var(--muted);font-size:15px;max-width:48ch}
+
+  /* ── Outcomes ──────────────────────────────────── */
+  .out{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .out-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px}
+  .out-card{text-align:center;padding:8px}
+  .out-ico{width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;margin:0 auto 18px;color:var(--gold)}
+  .out-ico svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .out-card h4{font-family:'Archivo',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:14px;margin-bottom:8px}
+  .out-card p{color:var(--muted);font-size:14px}
+
+  /* ── Reviews ───────────────────────────────────── */
+  .rev{background:var(--bg)}
+  .rev-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:48px}
+  .rev-tile{
+    position:relative;aspect-ratio:9/13;border-radius:12px;overflow:hidden;cursor:pointer;
+    border:1px solid var(--line);
+    background:
+      radial-gradient(120% 80% at 50% 0%,rgba(242,203,27,.10),rgba(0,0,0,0) 60%),
+      linear-gradient(180deg,#1c1c20,#0c0c0f);
+    transition:transform .3s,border-color .3s;
+  }
+  .rev-tile:hover{transform:translateY(-4px);border-color:rgba(242,203,27,.5)}
+  .rev-tile .person{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.10)}
+  .rev-tile .person svg{width:60%;height:60%}
+  .rev-tile .play{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:46px;height:46px;border-radius:50%;background:rgba(8,8,10,.55);
+    border:1.5px solid rgba(255,255,255,.85);display:grid;place-items:center;backdrop-filter:blur(2px);
+    transition:background .25s,border-color .25s;
+  }
+  .rev-tile:hover .play{background:var(--gold);border-color:var(--gold)}
+  .rev-tile .play svg{width:16px;height:16px;fill:#fff;margin-left:3px}
+  .rev-tile:hover .play svg{fill:#1a1206}
+  .rev-note{text-align:center;color:var(--muted-2);font-size:12px;margin-top:18px;font-style:italic}
+
+  /* ── Packages / pricing ────────────────────────── */
+  .pack{background:linear-gradient(180deg,var(--bg-2),var(--bg));border-top:1px solid var(--line)}
+  .pack-head{display:grid;grid-template-columns:0.85fr 1.15fr;gap:48px;align-items:center}
+  .pack-hero-img{position:relative}
+  .pack-hero-img img{margin:0 auto;width:min(100%,420px);filter:drop-shadow(0 40px 60px rgba(0,0,0,.7))}
+  .pack-hero-img .glow{position:absolute;inset:auto 0 6% 0;height:120px;background:radial-gradient(ellipse at center,rgba(242,203,27,.2),rgba(0,0,0,0) 70%);filter:blur(8px)}
+  .pack-head h2{font-size:clamp(36px,5vw,62px);margin-bottom:18px}
+  .pack-head .lead{font-size:17px;margin-bottom:8px}
+
+  .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:64px}
+  .price-card{
+    position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+    padding:28px 24px 30px;display:flex;flex-direction:column;
+    transition:transform .3s,border-color .3s,box-shadow .3s;
+  }
+  .price-card:hover{transform:translateY(-6px);border-color:rgba(242,203,27,.45)}
+  .price-card.featured{
+    border-color:var(--gold);background:linear-gradient(180deg,#1a1610,var(--panel));
+    box-shadow:0 30px 60px -30px rgba(242,203,27,.45);transform:scale(1.03);
+  }
+  .price-card.featured:hover{transform:scale(1.03) translateY(-6px)}
+  .ribbon{
+    position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(180deg,var(--gold-soft),var(--gold));color:#1a1206;
+    font-family:'Archivo',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
+    font-size:11px;padding:6px 16px;border-radius:20px;white-space:nowrap;
+  }
+  .ribbon.save{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+  .price-img{height:244px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .price-img img{height:100%;width:auto;max-width:100%;object-fit:contain;filter:drop-shadow(0 18px 24px rgba(0,0,0,.55))}
+  .tier{font-family:'Archivo',sans-serif;font-weight:800;font-size:20px;text-align:center}
+  .tier-desc{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 14px}
+  .price{text-align:center;margin-bottom:4px}
+  .price .amt{font-family:'Archivo',sans-serif;font-weight:900;font-size:42px;color:var(--ink)}
+  .price .per{color:var(--muted-2);font-size:13px}
+  .install{text-align:center;color:var(--gold);font-size:13px;font-weight:600;margin-bottom:18px}
+  .feat{list-style:none;display:flex;flex-direction:column;gap:10px;margin:6px 0 22px;flex:1}
+  .feat li{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--muted)}
+  .feat li svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2;flex:0 0 auto;margin-top:3px}
+  .feat li.strong{color:var(--ink);font-weight:600}
+  .price-card .btn{width:100%;justify-content:center}
+
+  .pack-badges{display:flex;gap:34px;justify-content:center;flex-wrap:wrap;margin-top:48px;padding-top:32px;border-top:1px solid var(--line)}
+  .pack-badges .b{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;font-weight:600}
+  .pack-badges .b svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.7}
+
+  /* ── Footer ────────────────────────────────────── */
+  footer{background:var(--bg);border-top:1px solid var(--line);padding:46px 0;color:var(--muted-2);font-size:13px}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .foot a{color:var(--muted)}
+  .foot a:hover{color:var(--gold)}
+
+  /* ── Reveal animation ──────────────────────────── */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ── Responsive ────────────────────────────────── */
+  @media(max-width:980px){
+    .nav-links{display:none}
+    .nav-toggle{display:block}
+    .hero-grid{grid-template-columns:1fr;gap:24px}
+    .bottle-stage{min-height:380px;order:-1}
+    .sci-grid{grid-template-columns:1fr}
+    .sci-img{min-height:360px}
+    .sci-copy{border-left:1px solid var(--line);border-top:0}
+    .ing-grid{grid-template-columns:1fr;gap:34px}
+    .out-grid{grid-template-columns:repeat(2,1fr);gap:30px}
+    .rev-grid{grid-template-columns:repeat(3,1fr)}
+    .pack-head{grid-template-columns:1fr;text-align:center}
+    .pack-head .lead{margin-left:auto;margin-right:auto}
+    .price-grid{grid-template-columns:1fr;max-width:420px;margin-left:auto;margin-right:auto}
+    .price-card.featured{transform:none;order:-1}
+    .price-card.featured:hover{transform:translateY(-6px)}
+  }
+  @media(max-width:560px){
+    .wrap{padding:0 18px}
+    .pad{padding:64px 0}
+    .stat{padding:32px 10px}
+    .out-grid{grid-template-columns:1fr 1fr}
+    .rev-grid{grid-template-columns:repeat(2,1fr)}
+    .hero-trust{gap:16px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important}
+    .reveal{opacity:1;transform:none;transition:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header>
+  <div class="wrap nav">
+    <a href="#top" class="logo">NO<b>GYM</b>FORME</a>
+    <nav class="nav-links">
+      <a href="#ingredients">Ingredients</a>
+      <a href="#science">Science</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a href="#packages" class="btn btn-gold nav-cta">Order Now</a>
+    <button class="nav-toggle" aria-label="menu" onclick="document.querySelector('.nav-links').style.display='flex'">☰</button>
+  </div>
+</header>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero" id="top">
+  <div class="hero-bg">
+    <div class="glow"></div>
+    <div class="glow2"></div>
+    <svg class="molecule mol-float" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <filter id="mglow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- bonds -->
+      <g stroke="rgba(242,203,27,0.16)" stroke-width="1.1" fill="none">
+        <path d="M950 250 L1050 190 M950 250 L1040 360 M950 250 L820 300 M950 250 L870 150"/>
+        <path d="M220 470 L120 410 M220 470 L300 560 M220 470 L110 560 M220 470 L300 380"/>
+        <path d="M820 300 L600 380 L380 330"/>
+        <path d="M1040 360 L1080 520"/>
+      </g>
+      <!-- depth nodes (soft teal, blurred) -->
+      <g fill="rgba(150,200,210,0.55)" filter="url(#mglow)" opacity="0.5">
+        <circle cx="600" cy="380" r="5"/>
+        <circle cx="380" cy="330" r="4"/>
+        <circle cx="500" cy="170" r="3"/>
+        <circle cx="700" cy="600" r="3"/>
+        <circle cx="80" cy="240" r="3"/>
+        <circle cx="1080" cy="520" r="3"/>
+      </g>
+      <!-- gold focal nodes (glowing) -->
+      <g fill="var(--gold)" filter="url(#mglow)">
+        <circle class="node" cx="950" cy="250" r="6"/>
+        <circle class="node" cx="870" cy="150" r="4"/>
+        <circle class="node" cx="1040" cy="360" r="4"/>
+        <circle class="node" cx="820" cy="300" r="3"/>
+        <circle class="node" cx="220" cy="470" r="6"/>
+        <circle class="node" cx="120" cy="410" r="4"/>
+        <circle class="node" cx="300" cy="560" r="4"/>
+        <circle class="node" cx="300" cy="380" r="3"/>
+        <circle class="node" cx="110" cy="560" r="3"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">Hunger Management · For Men</p>
+      <h1 class="display" style="margin-top:14px">Stop<br><span class="muted-line">Fighting Hunger.</span></h1>
+      <p class="hero-sub">Science Designed For Men.</p>
+      <p class="lead">Clinically backed natural ingredients that help control hunger, reduce cravings and support your goals — no gym required.</p>
+      <div class="hero-actions">
+        <a href="#packages" class="btn btn-gold">Start Today <span class="arrow">→</span></a>
+        <a href="#science" class="btn btn-ghost">The Science</a>
+      </div>
+      <div class="hero-trust">
+        <span class="t"><span class="dot"></span>4 Natural Ingredients</span>
+        <span class="t"><span class="dot"></span>1 Capsule Per Day</span>
+        <span class="t"><span class="dot"></span>0 Gym Required</span>
+      </div>
+    </div>
+
+    <div class="bottle-stage">
+      <div class="pedestal"></div>
+      <img class="bottle-img" src="assets/redesign/bottle-1.png" alt="NOGYMFORME bottle">
+      <!-- translucent cut-out: a window into the four ingredients inside -->
+      <div class="cutout" title="The four ingredients inside every capsule">
+        <div class="mosaic">
+          <img src="assets/redesign/konjac.jpg" alt="Konjac root">
+          <img src="assets/redesign/psyllium.jpg" alt="Psyllium husk">
+          <img src="assets/redesign/green-tea.jpg" alt="Green tea extract">
+          <img src="assets/redesign/chromium.jpg" alt="Chromium picolinate">
+        </div>
+        <span class="tag">4 Ingredients Inside</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ STATS ════════ -->
+<div class="stats">
+  <div class="wrap stats-grid">
+    <div class="stat reveal"><div class="num">4</div><div class="lab">Natural Ingredients</div></div>
+    <div class="stat reveal"><div class="num">1</div><div class="lab">Capsule Per Day</div></div>
+    <div class="stat reveal"><div class="num">0</div><div class="lab">Gym Required</div></div>
+  </div>
+</div>
+
+<!-- ════════ SCIENCE / SCIENTIST ════════ -->
+<section class="sci pad" id="science">
+  <div class="wrap">
+    <div class="sci-grid reveal">
+      <div class="sci-img">
+        <img src="assets/redesign/scientist.png" alt="NOGYMFORME researcher in a lab coat">
+      </div>
+      <div class="sci-copy">
+        <p class="eyebrow">Science. Not hype.</p>
+        <h2 class="display">Created by scientists.<br>Not influencers.</h2>
+        <p class="lead">NOGYMFORME was developed by a team of researchers with one goal: to help men control hunger and cravings using real science and natural ingredients.</p>
+        <div><a href="#ingredients" class="btn btn-ghost">The Science Behind It <span class="arrow">→</span></a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ INGREDIENTS ════════ -->
+<section class="ing pad" id="ingredients">
+  <div class="wrap center">
+    <p class="eyebrow reveal">Powered by 4 key ingredients</p>
+    <h2 class="h2 display reveal" style="margin-top:14px">Backed by nature.<br>Proven by science.</h2>
+  </div>
+  <div class="wrap ing-grid">
+    <div class="ing-imgs reveal">
+      <a class="ing-thumb" data-ing="0" href="#ing-0"><img src="assets/redesign/konjac.jpg" alt="Konjac root"><span class="label">Konjac Root</span></a>
+      <a class="ing-thumb" data-ing="1" href="#ing-1"><img src="assets/redesign/psyllium.jpg" alt="Psyllium husk"><span class="label">Psyllium Husk</span></a>
+      <a class="ing-thumb" data-ing="2" href="#ing-2"><img src="assets/redesign/green-tea.jpg" alt="Green tea extract"><span class="label">Green Tea Extract</span></a>
+      <a class="ing-thumb" data-ing="3" href="#ing-3"><img src="assets/redesign/chromium.jpg" alt="Chromium picolinate"><span class="label">Chromium Picolinate</span></a>
+    </div>
+
+    <div class="ing-list reveal">
+      <div class="ing-row" id="ing-0" data-ing="0">
+        <span class="node-dot"><svg viewBox="0 0 24 24"><path d="M12 3c3 4 3 7 0 10s-3 6 0 8"/><path d="M12 13c-2-1-4-1-6 1"/></svg></span>
+        <h3>Konjac Root</h3>
+        <p>High in glucomannan fiber that expands in the stomach and promotes a feeling of fullness.</p>
+      </div>
+      <div class="ing-row" id="ing-1" data-ing="1">
+        <span class="node-dot"><svg viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M12 8c-3 0-5-2-5-4 3 0 5 2 5 4z"/><path d="M12 12c3 0 5-2 5-4-3 0-5 2-5 4z"/></svg></span>
+        <h3>Psyllium Husk</h3>
+        <p>Soluble fiber that supports satiety and helps reduce appetite naturally.</p>
+      </div>
+      <div class="ing-row" id="ing-2" data-ing="2">
+        <span class="node-dot"><svg viewBox="0 0 24 24"><path d="M5 13c0-5 5-8 9-8-1 7-5 9-9 8z"/><path d="M5 13c4 1 7-1 9-4"/></svg></span>
+        <h3>Green Tea Extract</h3>
+        <p>Rich in antioxidants and compounds that support metabolism and fat oxidation.</p>
+      </div>
+      <div class="ing-row" id="ing-3" data-ing="3">
+        <span class="node-dot"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span>
+        <h3>Chromium Picolinate</h3>
+        <p>Helps regulate blood sugar levels and reduces cravings and emotional eating.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ OUTCOMES ════════ -->
+<section class="out pad">
+  <div class="wrap center">
+    <p class="eyebrow reveal">What to expect</p>
+    <h2 class="h2 display reveal" style="margin-top:14px">Real control. Real results.</h2>
+    <div class="out-grid">
+      <div class="out-card reveal">
+        <div class="out-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+        <h4>Reduced Hunger</h4><p>Feel full for longer and eat less.</p>
+      </div>
+      <div class="out-card reveal">
+        <div class="out-ico"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+        <h4>Increased Satiety</h4><p>Stay satisfied throughout the day.</p>
+      </div>
+      <div class="out-card reveal">
+        <div class="out-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></svg></div>
+        <h4>More Control</h4><p>Take back control of your eating habits.</p>
+      </div>
+      <div class="out-card reveal">
+        <div class="out-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+        <h4>Fewer Cravings</h4><p>Reduce cravings and emotional eating.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ REVIEWS ════════ -->
+<section class="rev pad" id="reviews">
+  <div class="wrap center">
+    <p class="eyebrow reveal">Real men. Real results.</p>
+    <h2 class="h2 display reveal" style="margin-top:14px">Don't take our word for it.</h2>
+    <div class="rev-grid">
+      <!-- placeholder video tiles (swap for real testimonial posters) -->
+      <div class="rev-tile reveal"><div class="person"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+      <div class="rev-tile reveal"><div class="person"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+      <div class="rev-tile reveal"><div class="person"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+      <div class="rev-tile reveal"><div class="person"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+      <div class="rev-tile reveal"><div class="person"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+    </div>
+    <p class="rev-note">Testimonial videos are placeholders in this preview — drop in your real review thumbnails/posters.</p>
+    <div style="margin-top:30px"><a href="#reviews" class="btn btn-ghost">More Reviews <span class="arrow">→</span></a></div>
+  </div>
+</section>
+
+<!-- ════════ PACKAGES / FINAL CTA ════════ -->
+<section class="pack pad" id="packages">
+  <div class="wrap">
+    <div class="pack-head reveal">
+      <div class="pack-hero-img">
+        <div class="glow"></div>
+        <img src="assets/redesign/bottle-3-crop.png" alt="NOGYMFORME 3-bottle pack">
+      </div>
+      <div>
+        <p class="eyebrow">One capsule a day</p>
+        <h2 class="display">Control hunger.<br>Transform your life.</h2>
+        <p class="lead">One capsule a day is all it takes to start feeling the difference. Choose the pack that fits your goals.</p>
+        <p class="lead" style="color:var(--gold-soft)">Free shipping · 14-day money-back guarantee — even on opened bottles.</p>
+      </div>
+    </div>
+
+    <div class="price-grid">
+      <!-- Starter -->
+      <div class="price-card reveal">
+        <div class="price-img"><img src="assets/redesign/bottle-1-crop.png" alt="1 bottle"></div>
+        <div class="tier">Starter Pack</div>
+        <div class="tier-desc">1 bottle · 90 capsules · 1-month supply</div>
+        <div class="price"><span class="amt">₪198</span></div>
+        <div class="install">or ₪16.5 × 12 interest-free</div>
+        <ul class="feat">
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>One NOGYMFORME bottle</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Free shipping (7 business days)</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Access to our men's community</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>14-day full money-back guarantee</li>
+        </ul>
+        <a href="order.html?plan=single" class="btn btn-ghost">Start Today <span class="arrow">→</span></a>
+      </div>
+
+      <!-- Most Popular -->
+      <div class="price-card featured reveal">
+        <span class="ribbon">Most Popular</span>
+        <div class="price-img"><img src="assets/redesign/bottle-2-crop.png" alt="2 bottles"></div>
+        <div class="tier">Double Pack</div>
+        <div class="tier-desc">2 bottles · 180 capsules · 2-month supply</div>
+        <div class="price"><span class="amt">₪396</span></div>
+        <div class="install">or ₪33 × 12 interest-free</div>
+        <ul class="feat">
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>2 NOGYMFORME bottles</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Free shipping (7 business days)</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Access to our men's community</li>
+          <li class="strong"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Dedicated NOGYMFORME app</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>14-day full money-back guarantee</li>
+        </ul>
+        <a href="order.html?plan=starter" class="btn btn-gold">Start Today <span class="arrow">→</span></a>
+      </div>
+
+      <!-- Best Value -->
+      <div class="price-card reveal">
+        <span class="ribbon save">Best Value · Save ₪92</span>
+        <div class="price-img"><img src="assets/redesign/bottle-3-crop.png" alt="3 bottles"></div>
+        <div class="tier">All-In Pack</div>
+        <div class="tier-desc">3 bottles · 270 capsules · 3-month supply</div>
+        <div class="price"><span class="amt">₪496</span></div>
+        <div class="install">or ₪41.3 × 12 interest-free</div>
+        <ul class="feat">
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>3 NOGYMFORME bottles</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Free shipping (7 business days)</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Dedicated NOGYMFORME app</li>
+          <li class="strong"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Personalized nutrition plan</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>14-day full money-back guarantee</li>
+        </ul>
+        <a href="order.html?plan=results" class="btn btn-ghost">Start Today <span class="arrow">→</span></a>
+      </div>
+    </div>
+
+    <div class="pack-badges reveal">
+      <span class="b"><svg viewBox="0 0 24 24"><path d="M3 13h13V6H3zM16 9h3l2 3v3h-5z"/><circle cx="7" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg>Fast &amp; Discreet Shipping</span>
+      <span class="b"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>Secure Checkout</span>
+      <span class="b"><svg viewBox="0 0 24 24"><path d="M3 4v6h6"/><path d="M3.5 10a8 8 0 113 8"/></svg>14-Day Money-Back Guarantee</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="logo" style="font-size:18px">NO<b>GYM</b>FORME</div>
+    <div>© 2026 NOGYMFORME · <a href="#faq">FAQ</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></div>
+  </div>
+</footer>
+
+<script>
+  /* Reveal on scroll */
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  /* Two-way link between ingredient images and their descriptions */
+  const thumbs = [...document.querySelectorAll('.ing-thumb')];
+  const rows   = [...document.querySelectorAll('.ing-row')];
+  function setActive(i){
+    thumbs.forEach(t=>t.classList.toggle('active', +t.dataset.ing===i));
+    rows.forEach(r=>r.classList.toggle('active', +r.dataset.ing===i));
+  }
+  thumbs.forEach(t=>{
+    t.addEventListener('mouseenter',()=>setActive(+t.dataset.ing));
+    t.addEventListener('click',e=>{ setActive(+t.dataset.ing); });
+  });
+  rows.forEach(r=> r.addEventListener('mouseenter',()=>setActive(+r.dataset.ing)) );
+  setActive(0); /* highlight first by default */
+</script>
+</body>
+</html>
