@@ -27,7 +27,7 @@ const SUMIT_BEGIN_REDIRECT = 'https://api.sumit.co.il/billing/payments/beginredi
 const TRACKING_WEBAPP_URL = process.env.TRACKING_WEBAPP_URL ||
   'https://script.google.com/macros/s/AKfycbwBmCaPLs3cFn2zvJw4vuMoFypgigvDIJbPuLxnLTebWOISz5o892F_H0gLtBtFvfn5/exec';
 
-const DISCOUNT_PERCENT = 10;
+const { discountPercentFor } = require('../lib/discount-codes');
 
 // POST a JSON payload to the Apps Script web app and return its parsed JSON.
 // text/plain avoids a CORS preflight (matches the browser tracking client).
@@ -113,7 +113,13 @@ module.exports = async (req, res) => {
       const reason = (check && check.reason) || 'invalid';
       return res.status(400).json({ error: discountMessage(reason), reason });
     }
-    unitPrice = Math.round(plan.price * (1 - DISCOUNT_PERCENT / 100));
+    // Only ONE `code` string is ever accepted per request (never a list), so
+    // two discount codes can never stack here — a new code always REPLACES
+    // any other. The percent is looked up from our own trusted map (never
+    // taken from client input or from Apps Script's response), matching the
+    // "price decided server-side" rule above.
+    const percent = discountPercentFor(code);
+    unitPrice = Math.round(plan.price * (1 - percent / 100));
     discountCode = code;
   }
 

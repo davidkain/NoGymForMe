@@ -754,7 +754,7 @@
                      style="direction:ltr;text-align:left;text-transform:uppercase;">
               <button class="coupon-apply-btn" type="button" id="couponApplyBtn" onclick="couponBtnClick()">החל</button>
             </div>
-            <span class="coupon-success" id="couponSuccess">✓ קוד הנחה הוחל - 10% הנחה</span>
+            <span class="coupon-success" id="couponSuccess">✓ קוד הנחה הוחל</span>
             <span class="field-error" id="couponError">קוד לא תקין</span>
           </div>
 
@@ -829,7 +829,7 @@
           <span class="totals-value" id="subtotalVal">₪396</span>
         </div>
         <div class="totals-row" id="discountRow" style="display:none;">
-          <span class="totals-label">הנחה (10%)</span>
+          <span class="totals-label" id="discountLabel">הנחה</span>
           <span class="totals-value discount" id="discountVal">-₪40</span>
         </div>
         <div class="totals-row">
@@ -906,7 +906,17 @@
 
   var couponApplied = false;
   var couponCode    = '';     // server-validated code, forwarded to checkout
+  var couponPercent = 0;      // server-validated percent for the applied code
   var currentTotal  = plan.price;
+
+  // Static, non-personalized promo codes (e.g. shared over WhatsApp) aren't
+  // tied to a specific customer email, so they can be applied before the
+  // email field is filled in — unlike the popup-issued codes below, which
+  // ARE bound to the email they were sent to and need it up front to check
+  // ownership. Keep IN SYNC with STATIC_DISCOUNT_CODES in lib/discount-codes.js
+  // and apps-script.gs. The server still requires an email to complete
+  // checkout regardless (see the payment form submit handler).
+  var STATIC_DISCOUNT_CODES = ['FRIENDS15'];
 
   function formatPrice(n) { return '₪' + n.toLocaleString('he-IL'); }
   function formatPlanPrice(p) {
@@ -945,8 +955,11 @@
   }
 
   function updateTotal() {
-    var base     = plan.price;
-    var discount = couponApplied ? Math.round(base * 0.1) : 0;
+    var base = plan.price;
+    // couponPercent comes from the server-validated response for whichever
+    // ONE code is currently applied (see applyCoupon) — there is never more
+    // than one active code, so discounts can never stack here.
+    var discount = couponApplied ? Math.round(base * (couponPercent / 100)) : 0;
     currentTotal = base - discount;
 
     var suffix = plan.isSubscription ? '/חודש' : '';
@@ -956,6 +969,7 @@
     var discRow = document.getElementById('discountRow');
     if (couponApplied) {
       discRow.style.display = 'flex';
+      document.getElementById('discountLabel').textContent = 'הנחה (' + couponPercent + '%)';
       document.getElementById('discountVal').textContent = '-' + formatPrice(discount);
     } else {
       discRow.style.display = 'none';
@@ -1002,11 +1016,17 @@
     var btn   = document.getElementById('couponApplyBtn');
     var code  = input.value.trim().toUpperCase();
     var email = document.getElementById('custEmail').value.trim();
+    var isStaticCode = STATIC_DISCOUNT_CODES.indexOf(code) !== -1;
 
     document.getElementById('couponError').classList.remove('visible');
     if (!code) return;
 
-    if (!isValidEmail(email)) {
+    // Popup-issued codes are bound to the email they were sent to, so we need
+    // it before validating. Static, share-anywhere codes (e.g. FRIENDS15)
+    // aren't email-bound — skip this check for them so a user can apply the
+    // code the moment they paste it in, before filling in the rest of the
+    // form. The email is still required to actually complete checkout.
+    if (!isStaticCode && !isValidEmail(email)) {
       showCouponError('הזן קודם את האימייל שאיתו קיבלת את הקוד.');
       document.getElementById('custEmail').focus();
       return;
@@ -1015,6 +1035,15 @@
       showCouponError('לא ניתן לאמת קוד כרגע. נסה שוב מאוחר יותר.');
       return;
     }
+
+    // Only one discount can ever be active: applying a new code always
+    // REPLACES whatever was previously applied rather than adding to it, so
+    // e.g. FRIENDS15 (15%) cleanly overrides an already-applied 10% popup
+    // code instead of stacking with it. Clear local state up front so a
+    // failed validation below can't leave a stale coupon "half applied".
+    couponApplied = false;
+    couponCode    = '';
+    couponPercent = 0;
 
     var prev = btn.textContent;
     btn.disabled = true;
@@ -1025,14 +1054,17 @@
       if (resp && resp.valid) {
         couponApplied = true;
         couponCode    = code;
+        couponPercent = Number(resp.percent) || 0;
         input.disabled = true;
         btn.textContent = 'הסר';
+        document.getElementById('couponSuccess').textContent = '✓ קוד הנחה הוחל - ' + couponPercent + '% הנחה';
         document.getElementById('couponSuccess').classList.add('visible');
         document.getElementById('couponError').classList.remove('visible');
         updateTotal();
       } else {
         couponApplied = false;
         couponCode    = '';
+        couponPercent = 0;
         btn.textContent = prev;
         updateTotal();
         showCouponError(couponReason(resp && resp.reason));
@@ -1043,6 +1075,7 @@
   function removeCoupon() {
     couponApplied = false;
     couponCode    = '';
+    couponPercent = 0;
     var input = document.getElementById('couponInput');
     input.disabled = false;
     input.value = '';

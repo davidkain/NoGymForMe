@@ -26,7 +26,7 @@ const { sendPurchaseEvent } = require('../lib/meta-capi');
 // Plan → VAT-inclusive price (ILS) for the CAPI Purchase value. KEEP IN SYNC
 // with PLANS in create-payment.js and PLAN_LABELS in thank-you.html.
 const PLAN_PRICES = { single: 198, starter: 396, results: 496, subscription: 155 };
-const DISCOUNT_PERCENT = 10;
+const { discountPercentFor } = require('../lib/discount-codes');
 
 // Parse a Cookie header into a plain object so we can read the first-party
 // _fbp / _fbc cookies the Meta Pixel set on this domain (better match quality).
@@ -154,7 +154,9 @@ module.exports = async (req, res) => {
   let capiSent = false;
   const base = PLAN_PRICES[planKey];
   if (base) {
-    const value = code ? Math.round(base * (1 - DISCOUNT_PERCENT / 100)) : base;
+    // A single `code` value (never a list) was forwarded from create-payment.js,
+    // so at most one discount was ever applied — this can't reflect stacked codes.
+    const value = code ? Math.round(base * (1 - discountPercentFor(code) / 100)) : base;
     const cookies = parseCookies(req.headers.cookie);
     const xff = req.headers['x-forwarded-for'];
     const result = await sendPurchaseEvent({

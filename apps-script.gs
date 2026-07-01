@@ -66,7 +66,16 @@ const HEADERS = {
 const HEADER_BG = '#E8D900';   // brand gold
 const HIGHLIGHT_BG = '#FFF59D'; // soft yellow for newly added rows
 
-const DISCOUNT_PERCENT = 10;    // first-order discount the codes grant
+const DISCOUNT_PERCENT = 10;    // first-order discount the popup-issued, per-email codes grant
+
+// Static, non-personalized promo codes: fixed percent, NOT tied to a specific
+// customer email, and NOT single-use (never marked "used"). Add new codes
+// here — keep IN SYNC with STATIC_DISCOUNT_CODES in api/create-payment.js and
+// api/payment-callback.js (three separate deploys, no shared import between
+// this Apps Script project and the Vercel repo).
+const STATIC_DISCOUNT_CODES = {
+  'FRIENDS15': 15
+};
 
 // Human-readable label for each `source` value the site sends.
 // Used in email subject + body so a glance at the inbox tells you
@@ -170,7 +179,18 @@ function doPost(e) {
     // The code must exist, belong to the given email (anti-sharing), and be
     // unused. Does NOT mark it used — that happens only after SUMIT confirms
     // payment (see the markUsed branch + the payment-callback function).
+    //
+    // A checkout ever sends exactly ONE `code` string (never a list), so two
+    // discount codes can never be validated — let alone applied — together.
     if (type === 'redeemCheck') {
+      const upperCode = String(data.code || '').toUpperCase().trim();
+
+      // Static promo codes (e.g. FRIENDS15): no email binding, not single-use,
+      // always valid while listed in STATIC_DISCOUNT_CODES above.
+      if (STATIC_DISCOUNT_CODES.hasOwnProperty(upperCode)) {
+        return jsonOut({ ok: true, valid: true, percent: STATIC_DISCOUNT_CODES[upperCode] });
+      }
+
       const sheetId = getSheetId();
       if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
       const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(TABS.discount);
@@ -185,6 +205,13 @@ function doPost(e) {
     // ── WRITE: mark a code used (called by the server AFTER SUMIT confirms a
     // valid payment). Idempotent: re-marking an already-used code is a no-op. ─
     if (type === 'markUsed') {
+      const upperCode = String(data.code || '').toUpperCase().trim();
+
+      // Static promo codes are reusable across customers — nothing to mark.
+      if (STATIC_DISCOUNT_CODES.hasOwnProperty(upperCode)) {
+        return jsonOut({ ok: true, used: true, alreadyUsed: false });
+      }
+
       const sheetId = getSheetId();
       if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
       const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(TABS.discount);
