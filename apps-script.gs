@@ -132,9 +132,47 @@ const VIP_COL = {
 };
 
 // ─── ENTRY POINTS ────────────────────────────────────────────────────────────
-function doGet() {
+function doGet(e) {
+  var params = (e && e.parameter) || {};
+  // READ-ONLY: daily completed-order stats for the private traffic dashboard.
+  if (params.type === 'orderStats') return orderStats_(params);
   var id = getSheetId();
   return jsonOut({ ok: !!id, ping: 'NoGymForMe tracker alive', configured: !!id });
+}
+
+/**
+ * READ-ONLY: per-day completed-order count + revenue for the traffic dashboard.
+ * Auth: ?key= must equal Script Property ORDERS_STATS_KEY (no PII is ever returned).
+ * Optional ?since=YYYY-MM-DD & ?until=YYYY-MM-DD (inclusive, by row Timestamp).
+ * Response: { ok:true, orders:[ {date:'YYYY-MM-DD', count:N, revenue:N}, ... ] }.
+ */
+function orderStats_(params) {
+  var expected = PropertiesService.getScriptProperties().getProperty('ORDERS_STATS_KEY');
+  if (!expected || String(params.key || '') !== String(expected)) {
+    return jsonOut({ ok: false, error: 'unauthorized' });
+  }
+  var sheetId = getSheetId();
+  if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
+  var sheet = SpreadsheetApp.openById(sheetId).getSheetByName(TABS.completed);
+  if (!sheet || sheet.getLastRow() < 2) return jsonOut({ ok: true, orders: [] });
+
+  var since = String(params.since || '');
+  var until = String(params.until || '');
+  // Completed Orders columns: 1 = Timestamp ('yyyy-MM-dd HH:mm:ss'), 9 = Total.
+  var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 9).getValues();
+  var byDate = {};
+  for (var i = 0; i < values.length; i++) {
+    var date = String(values[i][0] || '').slice(0, 10);
+    if (date.length !== 10) continue;
+    if (since && date < since) continue;
+    if (until && date > until) continue;
+    var total = parseFloat(String(values[i][8]).replace(/[^0-9.\-]/g, '')) || 0;
+    if (!byDate[date]) byDate[date] = { date: date, count: 0, revenue: 0 };
+    byDate[date].count += 1;
+    byDate[date].revenue += total;
+  }
+  var out = Object.keys(byDate).sort().map(function (k) { return byDate[k]; });
+  return jsonOut({ ok: true, orders: out });
 }
 
 function doPost(e) {
