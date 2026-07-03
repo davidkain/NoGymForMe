@@ -162,8 +162,12 @@ function orderStats_(params) {
   var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 9).getValues();
   var byDate = {};
   for (var i = 0; i < values.length; i++) {
-    var date = String(values[i][0] || '').slice(0, 10);
-    if (date.length !== 10) continue;
+    // Timestamp cell may be a real Date (Sheets auto-converts) or a string.
+    var raw = values[i][0];
+    var date = (raw instanceof Date)
+      ? Utilities.formatDate(raw, TIMEZONE, 'yyyy-MM-dd')
+      : String(raw || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
     if (since && date < since) continue;
     if (until && date > until) continue;
     var total = parseFloat(String(values[i][8]).replace(/[^0-9.\-]/g, '')) || 0;
