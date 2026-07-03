@@ -136,8 +136,88 @@ function doGet(e) {
   var params = (e && e.parameter) || {};
   // READ-ONLY: daily completed-order stats for the private traffic dashboard.
   if (params.type === 'orderStats') return orderStats_(params);
+  // READ-ONLY: funnel counts + orders-by-plan for the private traffic dashboard.
+  if (params.type === 'bizStats') return bizStats_(params);
   var id = getSheetId();
   return jsonOut({ ok: !!id, ping: 'NoGymForMe tracker alive', configured: !!id });
+}
+
+/**
+ * READ-ONLY: funnel + orders-by-plan for the traffic dashboard (no PII returned).
+ * Auth: ?key= must equal Script Property ORDERS_STATS_KEY.
+ * Optional ?since=YYYY-MM-DD & ?until=YYYY-MM-DD (inclusive, by row Timestamp).
+ * Response: { ok:true,
+ *   funnel: { popupSignups, checkoutsStarted, orders },
+ *   byPlan: [ {plan, count, revenue}, ... ] }.
+ * Team/test rows (owner emails + order-alert CC) are excluded everywhere.
+ */
+function bizStats_(params) {
+  var expected = PropertiesService.getScriptProperties().getProperty('ORDERS_STATS_KEY');
+  if (!expected || String(params.key || '') !== String(expected)) {
+    return jsonOut({ ok: false, error: 'unauthorized' });
+  }
+  var sheetId = getSheetId();
+  if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
+  var ss = SpreadsheetApp.openById(sheetId);
+  var since = String(params.since || '');
+  var until = String(params.until || '');
+
+  var excluded = {};
+  for (var k = 0; k < OWNER_EMAILS.length; k++) excluded[String(OWNER_EMAILS[k]).toLowerCase().trim()] = true;
+  if (ORDER_ALERT_CC) excluded[String(ORDER_ALERT_CC).toLowerCase().trim()] = true;
+
+  function toDate(raw) {
+    return (raw instanceof Date)
+      ? Utilities.formatDate(raw, TIMEZONE, 'yyyy-MM-dd')
+      : String(raw || '').slice(0, 10);
+  }
+  function inRange(date) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+    if (since && date < since) return false;
+    if (until && date > until) return false;
+    return true;
+  }
+  // Count in-range, non-team rows of a tab. emailCol is 0-based.
+  function countTab(tabName, emailCol) {
+    var sheet = ss.getSheetByName(tabName);
+    if (!sheet || sheet.getLastRow() < 2) return 0;
+    var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
+    var n = 0;
+    for (var i = 0; i < values.length; i++) {
+      if (!inRange(toDate(values[i][0]))) continue;
+      if (excluded[String(values[i][emailCol] || '').toLowerCase().trim()]) continue;
+      n++;
+    }
+    return n;
+  }
+
+  var popupSignups = countTab(TABS.discount, 1);    // Discount Signups: Email = col 2 (index 1)
+  var checkoutsStarted = countTab(TABS.started, 2); // Abandoned Checkouts: Email = col 3 (index 2)
+
+  // Completed Orders → orders count + revenue grouped by Plan.
+  var byPlanMap = {};
+  var ordersCount = 0;
+  var cs = ss.getSheetByName(TABS.completed);
+  if (cs && cs.getLastRow() >= 2) {
+    var cv = cs.getRange(2, 1, cs.getLastRow() - 1, 9).getValues();
+    for (var j = 0; j < cv.length; j++) {
+      if (!inRange(toDate(cv[j][0]))) continue;
+      if (excluded[String(cv[j][3] || '').toLowerCase().trim()]) continue; // Email = index 3
+      ordersCount++;
+      var plan = String(cv[j][7] || '').trim() || '(unknown)';             // Plan = index 7
+      var total = parseFloat(String(cv[j][8]).replace(/[^0-9.\-]/g, '')) || 0; // Total = index 8
+      if (!byPlanMap[plan]) byPlanMap[plan] = { plan: plan, count: 0, revenue: 0 };
+      byPlanMap[plan].count += 1;
+      byPlanMap[plan].revenue += total;
+    }
+  }
+  var byPlan = Object.keys(byPlanMap)
+    .map(function (key) { return byPlanMap[key]; })
+    .sort(function (a, b) { return b.revenue - a.revenue; });
+
+  return jsonOut({ ok: true,
+    funnel: { popupSignups: popupSignups, checkoutsStarted: checkoutsStarted, orders: ordersCount },
+    byPlan: byPlan });
 }
 
 /**
