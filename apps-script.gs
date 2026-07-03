@@ -160,8 +160,17 @@ function orderStats_(params) {
   var until = String(params.until || '');
   // Completed Orders columns: 1 = Timestamp ('yyyy-MM-dd HH:mm:ss'), 9 = Total.
   var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 9).getValues();
+  // Exclude team/test orders (owner emails + the order-alert CC) so the
+  // dashboard reflects real customers only.
+  var excluded = {};
+  for (var k = 0; k < OWNER_EMAILS.length; k++) excluded[String(OWNER_EMAILS[k]).toLowerCase().trim()] = true;
+  if (ORDER_ALERT_CC) excluded[String(ORDER_ALERT_CC).toLowerCase().trim()] = true;
+
   var byDate = {};
   for (var i = 0; i < values.length; i++) {
+    // Skip team/test orders by email (col 4 = Email).
+    var email = String(values[i][3] || '').toLowerCase().trim();
+    if (excluded[email]) continue;
     // Timestamp cell may be a real Date (Sheets auto-converts) or a string.
     var raw = values[i][0];
     var date = (raw instanceof Date)
