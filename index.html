@@ -393,11 +393,19 @@
   @media(max-width:560px){
     .wrap{padding:0 18px}
     .pad{padding:64px 0}
-    .stat{padding:32px 10px}
+    /* Declutter the mobile header: the sticky bottom bar already carries the
+       order CTA, so drop the header button — leaves a clean logo + ☰ menu. */
+    .nav-cta{display:none}
+    /* Even 2×2 trust badges instead of an uneven 3+1 wrap. */
+    .hero-trust{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+    /* Stack the stats so the long first label no longer skews the columns. */
+    .stats-grid{grid-template-columns:1fr}
+    .stat{padding:26px 16px;border-inline-start:0;border-top:1px solid var(--line)}
+    .stat:first-child{border-top:0}
+    .stat .num{font-size:52px}
     .out-grid{grid-template-columns:1fr 1fr}
     .problem-grid{grid-template-columns:1fr}
     .rev-grid{grid-template-columns:repeat(2,1fr)}
-    .hero-trust{gap:14px}
   }
   @media(prefers-reduced-motion:reduce){
     *{animation:none!important}
