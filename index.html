@@ -373,7 +373,16 @@
 
   /* ── Responsive ────────────────────────────────── */
   @media(max-width:980px){
+    /* Hamburger opens a vertical dropdown, not the desktop horizontal row
+       (which overflowed the viewport and shoved the page sideways). */
     .nav-links{display:none}
+    .nav-links.open{
+      display:flex;flex-direction:column;align-items:stretch;gap:2px;
+      position:absolute;top:72px;left:0;right:0;z-index:60;
+      background:rgba(8,8,10,.98);border-bottom:1px solid var(--line-2);
+      padding:12px 24px 18px;
+    }
+    .nav-links.open a{font-size:17px;padding:12px 0;width:100%}
     .nav-toggle{display:block}
     .hero-grid{grid-template-columns:1fr;gap:24px}
     .bottle-stage{min-height:380px;order:-1}
@@ -798,7 +807,7 @@
 <header>
   <div class="wrap nav">
     <a href="#top" class="logo">NO<b>GYM</b>FORME</a>
-    <nav class="nav-links">
+    <nav class="nav-links" onclick="this.classList.remove('open');document.querySelector('.nav-toggle').setAttribute('aria-expanded','false')">
       <a href="#ingredients">הרכיבים</a>
       <a href="#science">המדע</a>
       <a href="#reviews">ביקורות</a>
@@ -806,7 +815,7 @@
       <a href="/app" style="color:var(--gold);font-weight:700">אזור חברים</a>
     </nav>
     <a href="#" onclick="openPlanModal(event)" class="btn btn-gold nav-cta">הזמן עכשיו</a>
-    <button class="nav-toggle" aria-label="תפריט" onclick="document.querySelector('.nav-links').style.display='flex'">☰</button>
+    <button class="nav-toggle" aria-label="תפריט" aria-expanded="false" onclick="var n=document.querySelector('.nav-links'),o=n.classList.toggle('open');this.setAttribute('aria-expanded',o)">☰</button>
   </div>
 </header>
 
