@@ -5,9 +5,10 @@
  * on the server — the SUMIT CompanyID + APIKey live in environment variables
  * and are never sent to the browser.
  *
- * SECURITY: the browser sends only a `plan` key. The PRICE is decided here,
- * server-side, from the PLANS table below. The client can never set its own
- * amount. Keep prices in sync with the display-only PLANS object in order.html.
+ * SECURITY: the browser sends only plan KEYS (single item `plan`, or a multi-
+ * item `items:[{plan,qty}]`). The PRICE is decided here, server-side, from the
+ * PLANS table below. The client can never set its own amount. Keep prices in
+ * sync with the display-only PLANS object in order.html / index.html.
  *
  * SUMIT contract (confirmed from SUMIT's WooCommerce gateway source):
  *   Endpoint : POST https://api.sumit.co.il/billing/payments/beginredirect/
@@ -15,6 +16,8 @@
  *   Success  : response.Status === 0 and response.Data.RedirectURL holds the
  *              hosted payment-page URL to send the customer to.
  *   Recurring: item-level Duration_Months + Recurrence (subscriptions).
+ *   Multiple : Items is an array — one entry per distinct package (Quantity
+ *              carries how many of that package the customer bought).
  */
 
 'use strict';
@@ -61,10 +64,37 @@ function discountMessage(reason) {
 
 // SOURCE OF TRUTH for what each plan costs. Prices are VAT-inclusive (ILS).
 const PLANS = {
-  single:       { name: 'חבילת הביישן',                      price: 198, qty: 1, recurring: false },
-  starter:      { name: 'חבילת יאללה, בוא ננסה',             price: 396, qty: 1, recurring: false },
-  results:      { name: 'חבילת אול-אין (כי הקיץ כבר פה...)', price: 496, qty: 1, recurring: false },
+  single:       { name: 'חבילת הביישן',                      price: 198, recurring: false },
+  starter:      { name: 'חבילת יאללה, בוא ננסה',             price: 396, recurring: false },
+  results:      { name: 'חבילת אול-אין (כי הקיץ כבר פה...)', price: 496, recurring: false },
 };
+
+// Max quantity of any single package in one order — a defensive cap so a
+// tampered request can't create an absurd line item.
+const MAX_QTY = 20;
+
+// Normalize the request body into a list of { planKey, plan, qty }.
+// Backward compatible: a single `plan` key (used by direct / ad links) still
+// works and yields a one-line order. Returns { error } on any unknown plan.
+function parseOrder(body) {
+  if (Array.isArray(body.items) && body.items.length) {
+    const out = [];
+    for (const raw of body.items) {
+      const key = String((raw && raw.plan) || '');
+      const plan = PLANS[key];
+      if (!plan) return { error: 'Unknown plan' };
+      let qty = parseInt(raw && raw.qty, 10);
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      if (qty > MAX_QTY) qty = MAX_QTY;
+      out.push({ planKey: key, plan, qty });
+    }
+    return { order: out };
+  }
+  const key = String(body.plan || '');
+  const plan = PLANS[key];
+  if (!plan) return { error: 'Unknown plan' };
+  return { order: [{ planKey: key, plan, qty: 1 }] };
+}
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -74,9 +104,10 @@ module.exports = async (req, res) => {
 
   // Vercel auto-parses a JSON body into req.body for application/json requests.
   const body = req.body || {};
-  const planKey = String(body.plan || '');
-  const plan = PLANS[planKey];
-  if (!plan) return res.status(400).json({ error: 'Unknown plan' });
+  const parsed = parseOrder(body);
+  if (parsed.error) return res.status(400).json({ error: parsed.error });
+  const order = parsed.order;
+  const anyRecurring = order.some((o) => o.plan.recurring);
 
   const companyIdRaw = process.env.SUMIT_COMPANY_ID;
   const apiKey       = process.env.SUMIT_API_KEY;
@@ -97,10 +128,16 @@ module.exports = async (req, res) => {
   // We do NOT mark it used here — that happens only after SUMIT confirms the
   // payment (api/payment-callback.js). On ANY failure we BLOCK with an error
   // so a customer is never charged full price while expecting a discount.
+  //
+  // Only ONE `code` string is ever accepted per request (never a list), so two
+  // codes can never stack. The percent is looked up from our own trusted map
+  // (discount-codes.js) — never from client input or Apps Script — and applied
+  // order-wide: it reduces EACH one-time line's unit price (rounded per unit),
+  // matching the original single-item behavior exactly.
   const code = clean(body.code, 40).toUpperCase();
-  let unitPrice = plan.price;
+  let discountFactor = 1;
   let discountCode = '';
-  if (code && !plan.recurring) {
+  if (code && !anyRecurring) {
     if (!email) return res.status(400).json({ error: discountMessage('noemail'), reason: 'noemail' });
     let check;
     try {
@@ -113,21 +150,40 @@ module.exports = async (req, res) => {
       const reason = (check && check.reason) || 'invalid';
       return res.status(400).json({ error: discountMessage(reason), reason });
     }
-    // Only ONE `code` string is ever accepted per request (never a list), so
-    // two discount codes can never stack here — a new code always REPLACES
-    // any other. The percent is looked up from our own trusted map (never
-    // taken from client input or from Apps Script's response), matching the
-    // "price decided server-side" rule above.
     const percent = discountPercentFor(code);
-    unitPrice = Math.round(plan.price * (1 - percent / 100));
+    discountFactor = 1 - percent / 100;
     discountCode = code;
   }
+
+  // Build the SUMIT line items (server prices; discount already applied per
+  // unit) and compute the order total the callback reports to Meta CAPI.
+  let orderTotal = 0;
+  const items = order.map(({ plan, qty }) => {
+    const unitPrice = Math.round(plan.price * discountFactor);
+    orderTotal += unitPrice * qty;
+    const item = {
+      Item: { Name: plan.name, SearchMode: 'Automatic' },
+      Quantity: qty,
+      UnitPrice: unitPrice,
+      Currency: 'ILS',
+    };
+    // Recurring subscription (kept for safety; not currently sellable via cart).
+    if (plan.recurring) {
+      item.Duration_Months = 1;
+      item.Recurrence = 1;
+    }
+    return item;
+  });
 
   // Where SUMIT returns the customer after payment → our callback, which
   // verifies the payment with SUMIT and then marks any code used. Falls back to
   // the request host so it works on Vercel preview + production alike.
+  // `plan` is the single plan key for one-line orders (keeps thank-you labels
+  // working) or 'multi' for a mixed cart; `amt` is the server-computed total so
+  // the callback reports the exact discounted value to Meta CAPI.
   const origin = process.env.SITE_URL || `https://${req.headers.host}`;
-  let redirectURL = `${origin}/api/payment-callback?plan=${encodeURIComponent(planKey)}`;
+  const planParam = order.length === 1 ? order[0].planKey : 'multi';
+  let redirectURL = `${origin}/api/payment-callback?plan=${encodeURIComponent(planParam)}&amt=${orderTotal}`;
   // Pass the customer email to the callback for ALL orders (not only discounted
   // ones) so the server-side Meta CAPI Purchase can match on a hashed email —
   // materially better attribution than cookies/IP alone. The callback hashes it
@@ -135,27 +191,8 @@ module.exports = async (req, res) => {
   if (email) redirectURL += `&email=${encodeURIComponent(email)}`;
   if (discountCode) redirectURL += `&code=${encodeURIComponent(discountCode)}`;
 
-  // Build the single line item (UnitPrice already reflects any discount).
-  const item = {
-    Item: { Name: plan.name, SearchMode: 'Automatic' },
-    Quantity: plan.qty,
-    UnitPrice: unitPrice,
-    Currency: 'ILS',
-  };
-
-  // Recurring subscription: bill every month, open-ended ("ביטול בכל עת").
-  // Duration_Months = charge interval (1 = monthly); Recurrence flags it as a
-  // standing order. We intentionally omit a payments cap so it continues until
-  // cancelled in the SUMIT dashboard. VERIFY these two fields against your
-  // account's Swagger if a subscription doesn't register as recurring.
-  if (plan.recurring) {
-    item.Duration_Months = 1;
-    item.Recurrence = 1;
-  }
-
-  // Shipping address (collected on the order page for subscriptions). Forwarded
-  // to SUMIT's customer record when present; unknown/empty fields are simply
-  // omitted so non-subscription orders are unaffected.
+  // Shipping address (collected on the order page). Forwarded to SUMIT's
+  // customer record when present; empty fields are simply omitted.
   const customer = {
     Name:         clean(body.name, 100),
     EmailAddress: email,
@@ -167,18 +204,18 @@ module.exports = async (req, res) => {
   if (address) customer.Address = address;
   if (city)    customer.City = city;
 
+  const idSummary = order.map((o) => `${o.planKey}x${o.qty}`).join('_');
   const sumitRequest = {
     Credentials: { CompanyID, APIKey: apiKey },
     Customer: customer,
-    Items: [item],
+    Items: items,
     // Tell SUMIT our UnitPrice already INCLUDES VAT, so it splits the tax out
-    // of ₪155 instead of adding it on top. Field name + string value match
-    // SUMIT's own WooCommerce gateway ($Request['VATIncluded'] = 'true';).
-    // No VATRate sent on purpose — SUMIT uses the company's configured rate,
-    // so the charged total stays exactly ₪155 even if the rate changes.
+    // instead of adding it on top. Field name + string value match SUMIT's own
+    // WooCommerce gateway ($Request['VATIncluded'] = 'true';). No VATRate sent
+    // on purpose — SUMIT uses the company's configured rate.
     VATIncluded: 'true',
     RedirectURL: redirectURL,
-    ExternalIdentifier: `ngfm-${planKey}-${discountCode || 'nocode'}-${Date.now()}`,
+    ExternalIdentifier: `ngfm-${idSummary}-${discountCode || 'nocode'}-${Date.now()}`,
   };
 
   try {

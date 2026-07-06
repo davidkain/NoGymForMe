@@ -794,18 +794,21 @@
 
       <div class="summary-inner" id="summaryInner">
 
-        <!-- product line -->
-        <div class="product-line">
-          <div class="product-thumb">
-            <img src="hero.png" alt="NOGYMFORME" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
-            <span class="product-qty-badge" id="productQty">2</span>
+        <!-- product lines — one per package in the cart, filled by JS -->
+        <div id="productLines"></div>
+        <template id="coLineTpl">
+          <div class="product-line">
+            <div class="product-thumb">
+              <img src="hero.png" alt="NOGYMFORME" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+              <span class="product-qty-badge" data-qty>1</span>
+            </div>
+            <div class="product-info">
+              <div class="product-name" data-name></div>
+              <div class="product-variant" data-variant></div>
+            </div>
+            <div class="product-price-right" data-price></div>
           </div>
-          <div class="product-info">
-            <div class="product-name" id="productName">חבילת התנסות</div>
-            <div class="product-variant" id="productVariant">2 בקבוקים · 2 חודשי אספקה</div>
-          </div>
-          <div class="product-price-right" id="productPriceRight">₪396</div>
-        </div>
+        </template>
 
         <!-- Trust badge: formulated by a doctor / scientist -->
         <div style="display:flex;align-items:center;gap:8px;background:var(--gold-muted);border:1px solid var(--border);border-right:3px solid var(--gold);border-radius:var(--radius-sm);padding:10px 12px;margin-top:12px;font-size:12.5px;color:var(--grey-light);line-height:1.5;">
@@ -893,81 +896,99 @@
 ══════════════════════════════ -->
 <script src="tracking.js"></script>
 <script>
-  /* ── Plan data (still drives the summary column) ── */
+  /* ── Plan data (drives the summary column; the server re-prices
+        authoritatively in api/create-payment.js — this is display only) ── */
   var PLANS = {
-    single:       { name: 'חבילת הביישן',                       variant: 'בקבוק אחד - 90 קפסולות',         price: 198, installment: 16.5, qty: 1 },
-    starter:      { name: 'חבילת יאללה, בוא ננסה',              variant: 'שני בקבוקים - 180 קפסולות',      price: 396, installment: 33,   qty: 2 },
-    results:      { name: 'חבילת אול-אין (כי הקיץ כבר פה...)',  variant: 'שלושה בקבוקים - 270 קפסולות',    price: 496, installment: 41.3, qty: 3 }
+    single:  { name: 'חבילת הביישן',                      variant: 'בקבוק אחד - 90 קפסולות',      price: 198, qty: 1 },
+    starter: { name: 'חבילת יאללה, בוא ננסה',             variant: 'שני בקבוקים - 180 קפסולות',   price: 396, qty: 2 },
+    results: { name: 'חבילת אול-אין (כי הקיץ כבר פה...)', variant: 'שלושה בקבוקים - 270 קפסולות', price: 496, qty: 3 }
   };
 
-  var params  = new URLSearchParams(window.location.search);
-  var planKey = params.get('plan') || 'results';
-  var plan    = PLANS[planKey] || PLANS.results;
+  var params = new URLSearchParams(window.location.search);
 
+  /* Build the order from the cart (localStorage ngfm_cart, set by the shop
+     drawer). Fallback for direct / ad links: a single ?plan= key. Each entry is
+     { key, qty }; unknown keys are dropped, qty clamped to 1..20. */
+  function loadOrder() {
+    var items = [];
+    try {
+      var raw = JSON.parse(localStorage.getItem('ngfm_cart') || 'null');
+      if (Array.isArray(raw)) {
+        raw.forEach(function (it) {
+          var key = it && it.plan;
+          if (!PLANS[key]) return;
+          var qty = parseInt(it.qty, 10); if (!(qty >= 1)) qty = 1; if (qty > 20) qty = 20;
+          items.push({ key: key, qty: qty });
+        });
+      }
+    } catch (e) { /* malformed cart — fall through to ?plan= */ }
+    if (!items.length) {
+      var pk = params.get('plan');
+      items.push({ key: PLANS[pk] ? pk : 'results', qty: 1 });
+    }
+    return items;
+  }
+
+  var orderItems    = loadOrder();
   var couponApplied = false;
   var couponCode    = '';     // server-validated code, forwarded to checkout
   var couponPercent = 0;      // server-validated percent for the applied code
-  var currentTotal  = plan.price;
+  var currentTotal  = 0;
 
   // Static, non-personalized promo codes (e.g. shared over WhatsApp) aren't
-  // tied to a specific customer email, so they can be applied before the
-  // email field is filled in — unlike the popup-issued codes below, which
-  // ARE bound to the email they were sent to and need it up front to check
-  // ownership. Keep IN SYNC with STATIC_DISCOUNT_CODES in lib/discount-codes.js
-  // and apps-script.gs. The server still requires an email to complete
-  // checkout regardless (see the payment form submit handler).
+  // tied to a specific customer email, so they can be applied before the email
+  // field is filled. Keep IN SYNC with STATIC_DISCOUNT_CODES in
+  // lib/discount-codes.js and apps-script.gs.
   var STATIC_DISCOUNT_CODES = ['FRIENDS15'];
 
-  function formatPrice(n) { return '₪' + n.toLocaleString('he-IL'); }
-  function formatPlanPrice(p) {
-    return p.isSubscription ? formatPrice(p.price) + '/חודש' : formatPrice(p.price);
+  function formatPrice(n) { return '₪' + Math.round(n).toLocaleString('he-IL'); }
+  /* Compact key for tracking (Sheet / abandoned-cart email): "single x1, results x2" */
+  function orderSummary() { return orderItems.map(function (o) { return o.key + 'x' + o.qty; }).join(', '); }
+  /* Human label for pixels / confirmation: "חבילת הביישן, חבילת אול-אין ×2" */
+  function orderName()    { return orderItems.map(function (o) { return PLANS[o.key].name + (o.qty > 1 ? ' ×' + o.qty : ''); }).join(', '); }
+  /* Value for the tracking `plan` field: a single package's KEY (so the Google
+     Apps Script's per-plan labels, analytics + buyer confirmation behave EXACTLY
+     as before) or a readable Hebrew summary for a genuine mixed / multi-qty cart. */
+  function orderPlanField() { return (orderItems.length === 1 && orderItems[0].qty === 1) ? orderItems[0].key : orderName(); }
+  function subtotal()     { return orderItems.reduce(function (s, o) { return s + PLANS[o.key].price * o.qty; }, 0); }
+  /* Per-unit rounding mirrors api/create-payment.js EXACTLY (same couponPercent),
+     so the total shown here equals the amount SUMIT will charge. */
+  function discountedTotal() {
+    var f = couponApplied ? (1 - couponPercent / 100) : 1;
+    return orderItems.reduce(function (s, o) { return s + Math.round(PLANS[o.key].price * f) * o.qty; }, 0);
   }
 
   function renderSummary() {
-    document.getElementById('productName').textContent       = plan.name;
-    document.getElementById('productVariant').textContent    = plan.variant;
-    document.getElementById('productPriceRight').textContent = formatPlanPrice(plan);
-    document.getElementById('productQty').textContent        = plan.qty;
-    document.getElementById('subtotalVal').textContent       = formatPlanPrice(plan);
-    document.getElementById('installmentNote').textContent   = plan.isSubscription
-      ? 'מחויב מדי חודש · משלוח חינם תמיד · ביטול בכל עת'
-      : 'או ₪' + plan.installment + ' x ב-12 תשלומים ללא ריבית';
-
-    // Subscriptions already include a permanent 21% discount, so stacking a
-    // 10% promo coupon on top breaks the pricing narrative AND the unit
-    // economics. Hide the coupon row and show a friendly explanatory note.
-    var couponRow      = document.getElementById('couponRow');
-    var couponSuccess  = document.getElementById('couponSuccess');
-    var subNote        = document.getElementById('subDiscountNote');
-    var shipping       = document.getElementById('shippingFields');
-    // Shipping address is collected on every plan (all ship physical product).
-    if (shipping) shipping.style.display = 'block';
-    if (plan.isSubscription) {
-      if (couponRow)     couponRow.style.display     = 'none';
-      if (couponSuccess) couponSuccess.style.display = 'none';
-      if (subNote)       subNote.style.display       = 'block';
-    } else {
-      if (couponRow)     couponRow.style.display     = '';
-      if (subNote)       subNote.style.display       = 'none';
-    }
-
+    var box = document.getElementById('productLines');
+    var tpl = document.getElementById('coLineTpl');
+    box.replaceChildren();
+    orderItems.forEach(function (o) {
+      var p = PLANS[o.key];
+      var node = tpl.content.cloneNode(true);
+      var badge = node.querySelector('[data-qty]');
+      badge.textContent = o.qty;
+      badge.style.display = o.qty > 1 ? '' : 'none';   // hide the "1" bubble
+      node.querySelector('[data-name]').textContent    = p.name;
+      node.querySelector('[data-variant]').textContent = p.variant;
+      node.querySelector('[data-price]').textContent   = formatPrice(p.price * o.qty);
+      box.appendChild(node);
+    });
+    document.getElementById('subtotalVal').textContent = formatPrice(subtotal());
     updateTotal();
   }
 
   function updateTotal() {
-    var base = plan.price;
-    // couponPercent comes from the server-validated response for whichever
-    // ONE code is currently applied (see applyCoupon) — there is never more
-    // than one active code, so discounts can never stack here.
-    var discount = couponApplied ? Math.round(base * (couponPercent / 100)) : 0;
-    currentTotal = base - discount;
+    var sub      = subtotal();
+    currentTotal = discountedTotal();
+    var discount = sub - currentTotal;
 
-    var suffix = plan.isSubscription ? '/חודש' : '';
-    document.getElementById('grandTotal').textContent  = formatPrice(currentTotal) + suffix;
-    document.getElementById('toggleTotal').textContent = formatPrice(currentTotal) + suffix;
+    document.getElementById('grandTotal').textContent  = formatPrice(currentTotal);
+    document.getElementById('toggleTotal').textContent = formatPrice(currentTotal);
+    document.getElementById('installmentNote').textContent =
+      'או ₪' + Math.round(currentTotal / 12) + ' x ב-12 תשלומים ללא ריבית';
 
     var discRow = document.getElementById('discountRow');
-    if (couponApplied) {
+    if (couponApplied && discount > 0) {
       discRow.style.display = 'flex';
       document.getElementById('discountLabel').textContent = 'הנחה (' + couponPercent + '%)';
       document.getElementById('discountVal').textContent = '-' + formatPrice(discount);
@@ -1142,7 +1163,7 @@
     /* Record the lead in the Google Sheet now, so a drop-off on SUMIT's page
        is still captured as a "started" checkout. */
     if (window.NGFMTrack && typeof NGFMTrack.started === 'function') {
-      NGFMTrack.started({ name: name, email: email, phone: phone, plan: planKey,
+      NGFMTrack.started({ name: name, email: email, phone: phone, plan: orderPlanField(),
                           address: address, city: city, comments: comments });
     }
 
@@ -1153,7 +1174,9 @@
        leaking PII into URLs. Consumed + cleared once on the thank-you page. */
     try {
       localStorage.setItem('ngfm_order', JSON.stringify({
-        name: name, email: email, phone: phone, plan: planKey,
+        name: name, email: email, phone: phone,
+        items: orderItems.map(function (o) { return { plan: o.key, qty: o.qty }; }),
+        total: currentTotal,
         address: address, city: city, comments: comments
       }));
     } catch (e) { /* private mode / storage full - non-fatal */ }
@@ -1161,18 +1184,19 @@
     /* Meta Pixel: standard funnel step once the user commits to pay. */
     if (typeof fbq === 'function') {
       fbq('track', 'AddPaymentInfo', {
-        content_name: plan.name,
+        content_name: orderName(),
         value:        currentTotal,   // reflects an applied discount
         currency:     'ILS'
       });
     }
 
-    /* Ask OUR backend to create the SUMIT payment page. We send only the plan
-       key + contact details - never an amount. The server decides the price. */
+    /* Ask OUR backend to create the SUMIT payment page. We send only plan KEYS +
+       quantities + contact details - never an amount. The server decides prices. */
     fetch('/api/create-payment', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ plan: planKey, name: name, email: email, phone: phone, code: couponCode,
+      body:    JSON.stringify({ items: orderItems.map(function (o) { return { plan: o.key, qty: o.qty }; }),
+                                name: name, email: email, phone: phone, code: couponCode,
                                 address: address, city: city, comments: comments })
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
@@ -1216,9 +1240,7 @@
   /* ── Init ── */
   renderSummary();
 
-  /* Plan-aware payment button label. */
-  document.getElementById('payBtn').textContent =
-    plan.isSubscription ? 'התחל מנוי חודשי מאובטח' : 'המשך לתשלום מאובטח';
+  document.getElementById('payBtn').textContent = 'המשך לתשלום מאובטח';
 
   /* Meta Pixel: standard "InitiateCheckout" - fires once when the visitor
      reaches this order page with a plan selected. Lets Meta optimize ad
@@ -1233,9 +1255,9 @@
            content_name: plan.name }); */
   if (typeof fbq === 'function') {
     fbq('track', 'InitiateCheckout', {
-      content_name:     plan.name,
-      content_category: plan.isSubscription ? 'subscription' : 'one_time',
-      value:            plan.price,
+      content_name:     orderName(),
+      content_category: 'one_time',
+      value:            subtotal(),
       currency:         'ILS'
     });
   }
