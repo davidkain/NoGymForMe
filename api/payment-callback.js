@@ -53,12 +53,18 @@ module.exports = async (req, res) => {
   const planKey   = String(q.plan || '');
   const code      = String(q.code || '');
   const email     = String(q.email || '');
+  // Server-computed order total (already reflects any discount). Set by
+  // create-payment.js for every order — the authoritative value for the
+  // Meta CAPI Purchase, so a multi-item cart reports its real total.
+  const amtRaw    = parseInt(q.amt, 10);
+  const orderAmt  = Number.isFinite(amtRaw) && amtRaw > 0 ? amtRaw : null;
   // SUMIT appends these to our RedirectURL after payment.
   const paymentId = q['OG-PaymentID'] || q['og-paymentid'] || q.OGPaymentID || '';
 
   const origin = process.env.SITE_URL || `https://${req.headers.host}`;
   const thankYou = (paid) =>
-    `${origin}/thank-you.html?plan=${encodeURIComponent(planKey)}&paid=${paid}`;
+    `${origin}/thank-you.html?plan=${encodeURIComponent(planKey)}&paid=${paid}` +
+    (orderAmt != null ? `&amt=${orderAmt}` : '');
 
   // No payment id → nothing to verify (direct hit or cancelled). Send to the
   // thank-you page marked unpaid so it does NOT fire a Purchase event.
@@ -152,11 +158,15 @@ module.exports = async (req, res) => {
   // request before the event is sent.
   const eventId = `purchase_${String(paymentId)}`;
   let capiSent = false;
+  // Prefer the server-computed order total (multi-item aware, discount already
+  // applied). Fall back to the single-plan price table for older/direct links
+  // that predate the &amt param. A single `code` value (never a list) was
+  // forwarded from create-payment.js, so at most one discount was ever applied.
   const base = PLAN_PRICES[planKey];
-  if (base) {
-    // A single `code` value (never a list) was forwarded from create-payment.js,
-    // so at most one discount was ever applied — this can't reflect stacked codes.
-    const value = code ? Math.round(base * (1 - discountPercentFor(code) / 100)) : base;
+  const value = orderAmt != null
+    ? orderAmt
+    : (base ? (code ? Math.round(base * (1 - discountPercentFor(code) / 100)) : base) : null);
+  if (value != null) {
     const cookies = parseCookies(req.headers.cookie);
     const xff = req.headers['x-forwarded-for'];
     const result = await sendPurchaseEvent({
@@ -173,7 +183,7 @@ module.exports = async (req, res) => {
     });
     capiSent = !!(result && result.ok);
   } else {
-    console.error('[payment-callback] No price for plan — CAPI Purchase skipped:', planKey);
+    console.error('[payment-callback] No order amount/price — CAPI Purchase skipped. plan:', planKey, 'amt:', q.amt);
   }
 
   // disc=1 lets the thank-you page report the discounted value to the pixel.

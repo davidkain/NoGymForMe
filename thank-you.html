@@ -88,42 +88,65 @@
       results:      { label: 'חבילת אול-אין', value: 496 },
       subscription: { label: 'מנוי חודשי',     value: 155 }
     };
-    var params  = new URLSearchParams(location.search);
-    var planKey = params.get('plan');
-    var paid    = params.get('paid');        // '1' = server-verified payment
-    var disc    = params.get('disc') === '1'; // a 10% code was applied
-    var info    = PLAN_LABELS[planKey];
+    var params   = new URLSearchParams(location.search);
+    var planKey  = params.get('plan');
+    var paid     = params.get('paid');        // '1' = server-verified payment
+    var disc     = params.get('disc') === '1'; // a 10% code was applied
+    var amtParam = parseInt(params.get('amt'), 10);
+    if (!(amtParam > 0)) amtParam = 0;         // server-computed order total (ILS)
+
+    // The full order (incl. items[] for a multi-item cart + shipping address)
+    // was stashed in localStorage at checkout. The SUMIT redirect strips it from
+    // the URL, so this is the only place with the complete data.
+    var pending = null;
+    try { pending = JSON.parse(localStorage.getItem('ngfm_order') || 'null'); } catch (e) { pending = null; }
+
+    // Resolve the order into a display label + value + tracking summary, from
+    // either the multi-item cart (pending.items) or the single-plan ?plan= link.
+    function resolveOrder() {
+      if (pending && Array.isArray(pending.items) && pending.items.length) {
+        var label = pending.items.map(function (it) {
+          var l = (PLAN_LABELS[it.plan] && PLAN_LABELS[it.plan].label) || it.plan;
+          return it.qty > 1 ? (l + ' ×' + it.qty) : l;
+        }).join(', ');
+        var summary = pending.items.map(function (it) { return it.plan + 'x' + it.qty; }).join(', ');
+        var value = amtParam > 0 ? amtParam : (parseInt(pending.total, 10) || 0);
+        return { label: label, value: value, summary: summary, ok: value > 0 };
+      }
+      var info = PLAN_LABELS[planKey];
+      if (!info) return { ok: false };
+      var v = amtParam > 0 ? amtParam : (disc ? Math.round(info.value * 0.9) : info.value);
+      return { label: info.label, value: v, summary: planKey, ok: true };
+    }
 
     // Purchase fires ONLY on a payment our server verified with SUMIT (paid=1),
     // so it can't be triggered by someone opening this URL directly. We report it
     // BOTH ways - browser Pixel + server CAPI - sharing ONE event_id so Meta
     // deduplicates them into a single conversion instead of double-counting.
-    if (paid === '1' && info) {
-      document.getElementById('planLine').textContent = 'ההזמנה שלך: ' + info.label;
+    var order = paid === '1' ? resolveOrder() : { ok: false };
+    if (paid === '1' && order.ok) {
+      document.getElementById('planLine').textContent = 'ההזמנה שלך: ' + order.label;
 
-      var value   = disc ? Math.round(info.value * 0.9) : info.value;
+      var value = order.value;
       // Prefer the event_id our server minted (passed as ?eid=) so the browser
       // Pixel and the server CAPI event share one id and Meta dedupes them. Fall
       // back to a local id only if the server didn't provide one.
-      var eventId = params.get('eid') || ('purchase_' + planKey + '_' + Date.now());
+      var eventId = params.get('eid') || ('purchase_' + (planKey || 'order') + '_' + Date.now());
       var capiAlreadySent = params.get('capi') === '1';
 
       // 1) Browser Pixel - pass eventID so Meta can match it to the server event.
       if (typeof fbq === 'function') {
         fbq('track', 'Purchase', {
-          content_name: info.label,
+          content_name: order.label,
           value: value,
           currency: 'ILS'
         }, { eventID: eventId });
       }
 
       // 1b) Record the COMPLETED order in the Google Sheet + trigger the buyer's
-      // confirmation email. The full order (incl. shipping address) was stashed
-      // in localStorage at checkout - the SUMIT redirect strips it from the URL,
-      // so this is the only place with the complete data. Clear it right after
-      // so a page refresh can't record the order or email the buyer twice.
+      // confirmation email. Clear the stash right after so a page refresh can't
+      // record the order or email the buyer twice.
       try {
-        var pending = JSON.parse(localStorage.getItem('ngfm_order') || 'null');
         if (pending && window.NGFMTrack && typeof NGFMTrack.completed === 'function') {
           var orderNum = (params.get('eid') || '').replace(/^purchase_/, '');
           NGFMTrack.completed({
@@ -134,10 +157,11 @@
             address:  pending.address,
             city:     pending.city,
             comments: pending.comments,
-            plan:     planKey,
+            plan:     order.summary,   // e.g. "single x1, results x2" for a cart
             total:    '₪' + value + (planKey === 'subscription' ? '/חודש' : '')
           });
           localStorage.removeItem('ngfm_order');
+          localStorage.removeItem('ngfm_cart');   // empty the cart after a completed order
         }
       } catch (e) { /* tracking must never break the thank-you page */ }
 
