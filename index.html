@@ -1791,6 +1791,7 @@
       results: { name: 'חבילת אול-אין',   variant: '3 בקבוקים · 270 קפסולות',  price: 496 }
     };
     var cart = [];
+    var proceedingToCheckout = false;   // true once heading to checkout — suppresses the abandon beacon
     var lastFocus = null;
     var $ = function (id) { return document.getElementById(id); };
     function fmt(n) { return '₪' + Math.round(n).toLocaleString('he-IL'); }
@@ -1887,7 +1888,35 @@
       }
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({ event: 'InitiateCheckout', value: subtotal(), currency: 'ILS', quantity: count() });
+      proceedingToCheckout = true;   // going to checkout, not abandoning
       window.location.href = 'order.html';
+    }
+
+    /* ── Cart-stage abandonment ────────────────────────────────────────────
+       Fire a "started" (abandoned cart) event when a visitor has items in the
+       cart and LEAVES the page without heading to checkout. Deduped to once per
+       tab session. Carries the popup email if we captured one; else anonymous. */
+    function cartPlanField() {
+      if (cart.length === 1 && cart[0].qty === 1) return cart[0].plan;   // single package → key (matches order.html)
+      return cart.map(function (r) { return CART_PLANS[r.plan].name + (r.qty > 1 ? ' ×' + r.qty : ''); }).join(', ');
+    }
+    function lastKnownEmail() {
+      try {
+        var arr = JSON.parse(localStorage.getItem('ngfm_discount_emails') || '[]');
+        if (Array.isArray(arr) && arr.length) return arr[arr.length - 1];
+      } catch (e) {}
+      return '';
+    }
+    function sendCartAbandon() {
+      if (proceedingToCheckout || !cart.length) return;
+      try {
+        if (sessionStorage.getItem('ngfm_cart_abandon_sent')) return;
+        sessionStorage.setItem('ngfm_cart_abandon_sent', '1');
+      } catch (e) {}
+      if (!window.NGFMTrack) return;
+      var payload = { plan: cartPlanField(), email: lastKnownEmail() };
+      if (typeof NGFMTrack._startedBeacon === 'function') NGFMTrack._startedBeacon(payload);   // sendBeacon — survives unload
+      else if (typeof NGFMTrack.started === 'function') NGFMTrack.started(payload);
     }
 
     function init() {
@@ -1895,6 +1924,8 @@
       $('ngfmCartClose').addEventListener('click', close);
       $('ngfmScrim').addEventListener('click', close);
       $('ngfmCartCheckout').addEventListener('click', checkout);
+      window.addEventListener('pagehide', sendCartAbandon);
+      document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') sendCartAbandon(); });
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && $('ngfmDrawer').classList.contains('open')) close();
       });
