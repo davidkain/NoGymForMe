@@ -209,6 +209,37 @@
     box-shadow:0 36px 80px -24px rgba(0,0,0,.85), 0 0 60px -20px rgba(242,203,27,.18);
   }
 
+  /* ── Full-bleed founder photo hero ─────────────── */
+  /* Base = mobile: founder framed up top, copy anchored to the bottom over a
+     gradient scrim that melts into the page background. */
+  .hero.hero--photo{
+    display:flex;align-items:flex-end;
+    min-height:88vh;
+    padding:96px 0 44px;
+    background:
+      linear-gradient(to top, var(--bg) 6%, rgba(8,8,10,.55) 40%, rgba(8,8,10,.05) 70%),
+      url('hero-kitchen.jpg');
+    background-repeat:no-repeat,no-repeat;
+    background-size:cover,cover;
+    background-position:center, 28% top;
+  }
+  .hero.hero--photo .hero-bg{display:none}   /* photo carries its own glow + molecule */
+  .hero.hero--photo .hero-copy .hero-sub,
+  .hero.hero--photo .hero-copy .lead{text-shadow:0 2px 18px rgba(0,0,0,.75)}
+
+  /* Desktop: founder on the left, copy vertically centred on the dark right. */
+  @media(min-width:981px){
+    .hero.hero--photo{
+      align-items:center;
+      min-height:0;height:86vh;max-height:820px;
+      padding:120px 0 56px;
+      background-image:
+        linear-gradient(to right, rgba(8,8,10,0) 40%, rgba(8,8,10,.8) 100%),
+        url('hero-kitchen.jpg');
+      background-position:center, left center;
+    }
+  }
+
   /* ── Stats strip ───────────────────────────────── */
   .stats{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg-2)}
   .stats-grid{display:grid;grid-template-columns:repeat(3,1fr)}
@@ -874,7 +905,7 @@
 
 
 <!-- ════════ HERO ════════ -->
-<section class="hero" id="top">
+<section class="hero hero--photo" id="top">
   <div class="hero-bg">
     <div class="glow"></div>
     <div class="glow2"></div>
@@ -934,9 +965,6 @@
       </div>
     </div>
 
-    <div class="hero-feature">
-      <img src="assets/redesign/hero-ingredients-he.png" alt="בקבוק NOGYMFORME וארבעת הרכיבים הטבעיים: כרומיום פיקולינאט, תמצית תה ירוק, שורש קונג'אק וקליפת פסיליום">
-    </div>
   </div>
 </section>
 
