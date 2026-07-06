@@ -946,6 +946,10 @@
   function orderSummary() { return orderItems.map(function (o) { return o.key + 'x' + o.qty; }).join(', '); }
   /* Human label for pixels / confirmation: "חבילת הביישן, חבילת אול-אין ×2" */
   function orderName()    { return orderItems.map(function (o) { return PLANS[o.key].name + (o.qty > 1 ? ' ×' + o.qty : ''); }).join(', '); }
+  /* Value for the tracking `plan` field: a single package's KEY (so the Google
+     Apps Script's per-plan labels, analytics + buyer confirmation behave EXACTLY
+     as before) or a readable Hebrew summary for a genuine mixed / multi-qty cart. */
+  function orderPlanField() { return (orderItems.length === 1 && orderItems[0].qty === 1) ? orderItems[0].key : orderName(); }
   function subtotal()     { return orderItems.reduce(function (s, o) { return s + PLANS[o.key].price * o.qty; }, 0); }
   /* Per-unit rounding mirrors api/create-payment.js EXACTLY (same couponPercent),
      so the total shown here equals the amount SUMIT will charge. */
@@ -1159,7 +1163,7 @@
     /* Record the lead in the Google Sheet now, so a drop-off on SUMIT's page
        is still captured as a "started" checkout. */
     if (window.NGFMTrack && typeof NGFMTrack.started === 'function') {
-      NGFMTrack.started({ name: name, email: email, phone: phone, plan: orderSummary(),
+      NGFMTrack.started({ name: name, email: email, phone: phone, plan: orderPlanField(),
                           address: address, city: city, comments: comments });
     }
 

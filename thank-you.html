@@ -109,7 +109,12 @@
           var l = (PLAN_LABELS[it.plan] && PLAN_LABELS[it.plan].label) || it.plan;
           return it.qty > 1 ? (l + ' ×' + it.qty) : l;
         }).join(', ');
-        var summary = pending.items.map(function (it) { return it.plan + 'x' + it.qty; }).join(', ');
+        // `summary` feeds the Apps Script `plan` field: a single package's KEY
+        // (so per-plan labels/analytics/confirmation behave exactly as before) or
+        // a readable Hebrew summary for a genuine mixed / multi-qty cart.
+        var summary = (pending.items.length === 1 && pending.items[0].qty === 1)
+          ? pending.items[0].plan
+          : label;
         var value = amtParam > 0 ? amtParam : (parseInt(pending.total, 10) || 0);
         return { label: label, value: value, summary: summary, ok: value > 0 };
       }
