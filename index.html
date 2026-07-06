@@ -224,6 +224,7 @@
     background-position:center, 28% top;
   }
   .hero.hero--photo .hero-bg{display:none}   /* photo carries its own glow + molecule */
+  .hero.hero--photo .hero-photo-m{display:none}   /* desktop uses the section background */
   .hero.hero--photo .hero-copy .hero-sub,
   .hero.hero--photo .hero-copy .lead{text-shadow:0 2px 18px rgba(0,0,0,.75)}
 
@@ -238,6 +239,27 @@
         url('hero-kitchen.jpg');
       background-position:center, left center;
     }
+  }
+
+  /* Mobile/tablet: STACK — show the founder + bottle as a clean photo on top,
+     copy below on the solid background (never overlay, so the bottle stays visible). */
+  @media(max-width:980px){
+    .hero.hero--photo{
+      display:block;
+      min-height:0;height:auto;max-height:none;
+      padding:0 0 8px;
+      background:var(--bg);
+    }
+    .hero.hero--photo .hero-photo-m{
+      display:block;width:100%;
+      aspect-ratio:1/1;
+      background:url('hero-kitchen.jpg') 30% center / cover no-repeat;
+      -webkit-mask-image:linear-gradient(to bottom,#000 84%,transparent 100%);
+      mask-image:linear-gradient(to bottom,#000 84%,transparent 100%);
+    }
+    .hero.hero--photo .hero-copy .hero-sub,
+    .hero.hero--photo .hero-copy .lead{text-shadow:none}
+    .hero.hero--photo .hero-grid{padding-top:20px}
   }
 
   /* ── Stats strip ───────────────────────────────── */
@@ -946,6 +968,10 @@
       </g>
     </svg>
   </div>
+
+  <!-- Mobile-only: founder + bottle shown as a clean photo above the copy
+       (on mobile the copy no longer overlays the photo, so the bottle stays visible). -->
+  <div class="hero-photo-m" role="img" aria-label="ד״ר דיוויד קיין מחזיק את מיכל NOGYMFORME במטבח"></div>
 
   <div class="wrap hero-grid">
     <div class="hero-copy">
