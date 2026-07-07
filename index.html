@@ -232,12 +232,14 @@
   @media(min-width:981px){
     .hero.hero--photo{
       align-items:center;
-      min-height:0;height:86vh;max-height:820px;
+      /* width-proportional height keeps the hero tall enough (relative to the
+         16:9 photo) that the founder's head AND the bottle both stay in frame */
+      min-height:0;height:clamp(560px, 46vw, 900px);
       padding:120px 0 56px;
       background-image:
         linear-gradient(to right, rgba(8,8,10,0) 40%, rgba(8,8,10,.8) 100%),
         url('hero-kitchen.jpg');
-      background-position:center, left center;
+      background-position:center, left top;
     }
   }
 
