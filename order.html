@@ -1111,6 +1111,10 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   }
 
+  /* True once the shopper clicks Pay — lets the abandonment watcher below tell
+     a genuine leave-without-buying from the intended redirect to SUMIT. */
+  var orderSubmitted = false;
+
   document.getElementById('checkoutForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -1159,6 +1163,7 @@
     var prevLabel = btn.textContent;
     btn.disabled    = true;
     btn.textContent = 'מעבירים אותך לתשלום מאובטח...';
+    orderSubmitted  = true; // suppress the abandonment leave-flush on the SUMIT redirect
 
     /* Record the lead in the Google Sheet now, so a drop-off on SUMIT's page
        is still captured as a "started" checkout. */
@@ -1224,6 +1229,33 @@
         payErr.classList.add('visible');
       });
   });
+
+  /* ── Abandoned-checkout capture ──────────────────────────────────────────
+     If a shopper types an email/phone here and then LEAVES without clicking
+     Pay, fire a "started" beacon so the operator gets their contact details to
+     follow up (→ 🟠 alert + a row on the Abandoned Checkouts tab). Leave-only:
+     no alert fires while they're still filling the form, and the flag above
+     suppresses the flush on the intended redirect to SUMIT. */
+  if (window.NGFMTrack && typeof NGFMTrack.watchAbandon === 'function') {
+    NGFMTrack.watchAbandon(
+      function () {
+        function g(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+        var address = (g('custStreet') + ' ' + g('custHouse')).trim();
+        var floor   = g('custFloor');
+        if (floor) address += ', קומה ' + floor;
+        return {
+          name:     g('custName'),
+          email:    g('custEmail'),
+          phone:    g('custPhone'),
+          plan:     orderPlanField(),
+          address:  address,
+          city:     g('custCity'),
+          comments: g('custComments')
+        };
+      },
+      function () { return orderSubmitted; }
+    );
+  }
 
   /* ── Clear error on type ── */
   document.querySelectorAll('.field-input').forEach(function (inp) {

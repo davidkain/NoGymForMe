@@ -270,10 +270,20 @@
 
     /** Wire up an order-form abandonment watcher.
      *
-     * @param getSnapshot fn returning current {name,email,phone,plan} or null
-     * @param wasCompleted fn returning true if order already submitted
+     * Fires a "started" beacon for a shopper who has entered an email/phone and
+     * then LEAVES the page (closes the tab, navigates away, or switches away)
+     * without completing — so the operator gets their contact details to follow
+     * up. Deduped by contact signature, so a person yields at most one alert.
+     *
+     * @param getSnapshot  fn returning current {name,email,phone,plan,...} or null
+     * @param wasCompleted fn returning true once the order was submitted (Pay
+     *                     clicked) — suppresses the leave-flush on the redirect
+     *                     to the payment page, which is not an abandonment.
+     * @param opts         { onBlur?: boolean } — when true, ALSO fire the instant
+     *                     an email/phone field is blurred (more eager capture,
+     *                     but noisier). Defaults to leave-only (balanced).
      */
-    watchAbandon: function (getSnapshot, wasCompleted) {
+    watchAbandon: function (getSnapshot, wasCompleted, opts) {
       var lastSentSig = '';
       function trySend(useBeacon) {
         if (wasCompleted && wasCompleted()) return;
@@ -287,16 +297,20 @@
         send('started', snap, !!useBeacon);
       }
 
-      // Send a "started" record once they've typed an email/phone
-      // (not on every keystroke — only on blur).
-      document.addEventListener('blur', function (e) {
-        if (!e.target || !e.target.matches) return;
-        if (e.target.matches('input[type=email], input[type=tel], input[name=email], input[name=phone], #email, #phone')) {
-          trySend(false);
-        }
-      }, true);
+      // Eager (opt-in) capture: fire once an email/phone field is blurred, even
+      // while still on the page. Off by default to keep the operator inbox to
+      // genuine leave-without-buying events.
+      if (opts && opts.onBlur) {
+        document.addEventListener('blur', function (e) {
+          if (!e.target || !e.target.matches) return;
+          if (e.target.matches('input[type=email], input[type=tel], input[name=email], input[name=phone], #email, #phone')) {
+            trySend(false);
+          }
+        }, true);
+      }
 
-      // Final flush on page hide — works on iOS Safari where 'beforeunload' is unreliable.
+      // Leave-flush on page hide — works on iOS Safari where 'beforeunload' is
+      // unreliable. This is the primary (balanced) trigger.
       window.addEventListener('pagehide', function () { trySend(true); });
       window.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'hidden') trySend(true);
