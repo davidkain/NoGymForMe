@@ -90,6 +90,14 @@ const SOURCE_LABELS = {
 function labelForSource(source) {
   return SOURCE_LABELS[source] || source || '(unknown source)';
 }
+// Label for the tracking `plan` field, which is either a single package KEY
+// (single/starter/results) → its emoji label, or a readable multi-item cart
+// summary (e.g. "חבילת אול-אין ×2, חבילת הביישן") → used as-is.
+function planLabelFor_(plan) {
+  if (!plan) return '(no plan)';
+  var byKey = SOURCE_LABELS['waitlist_' + plan];
+  return byKey ? byKey : String(plan);
+}
 
 // Clean plan names (no emoji prefixes) for the customer-facing confirmation
 // email. KEEP IN SYNC with PLAN_LABELS in thank-you.html.
@@ -141,9 +149,140 @@ const VIP_COL = {
 };
 
 // ─── ENTRY POINTS ────────────────────────────────────────────────────────────
-function doGet() {
+function doGet(e) {
+  var params = (e && e.parameter) || {};
+  // READ-ONLY: daily completed-order stats for the private traffic dashboard.
+  if (params.type === 'orderStats') return orderStats_(params);
+  // READ-ONLY: funnel counts + orders-by-plan for the private traffic dashboard.
+  if (params.type === 'bizStats') return bizStats_(params);
   var id = getSheetId();
   return jsonOut({ ok: !!id, ping: 'NoGymForMe tracker alive', configured: !!id });
+}
+
+/**
+ * READ-ONLY: funnel + orders-by-plan for the traffic dashboard (no PII returned).
+ * Auth: ?key= must equal Script Property ORDERS_STATS_KEY.
+ * Optional ?since=YYYY-MM-DD & ?until=YYYY-MM-DD (inclusive, by row Timestamp).
+ * Response: { ok:true,
+ *   funnel: { popupSignups, checkoutsStarted, orders },
+ *   byPlan: [ {plan, count, revenue}, ... ] }.
+ * Team/test rows (owner emails + order-alert CC) are excluded everywhere.
+ */
+function bizStats_(params) {
+  var expected = PropertiesService.getScriptProperties().getProperty('ORDERS_STATS_KEY');
+  if (!expected || String(params.key || '') !== String(expected)) {
+    return jsonOut({ ok: false, error: 'unauthorized' });
+  }
+  var sheetId = getSheetId();
+  if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
+  var ss = SpreadsheetApp.openById(sheetId);
+  var since = String(params.since || '');
+  var until = String(params.until || '');
+
+  var excluded = {};
+  for (var k = 0; k < OWNER_EMAILS.length; k++) excluded[String(OWNER_EMAILS[k]).toLowerCase().trim()] = true;
+  if (ORDER_ALERT_CC) excluded[String(ORDER_ALERT_CC).toLowerCase().trim()] = true;
+
+  function toDate(raw) {
+    return (raw instanceof Date)
+      ? Utilities.formatDate(raw, TIMEZONE, 'yyyy-MM-dd')
+      : String(raw || '').slice(0, 10);
+  }
+  function inRange(date) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+    if (since && date < since) return false;
+    if (until && date > until) return false;
+    return true;
+  }
+  // Count in-range, non-team rows of a tab. emailCol is 0-based.
+  function countTab(tabName, emailCol) {
+    var sheet = ss.getSheetByName(tabName);
+    if (!sheet || sheet.getLastRow() < 2) return 0;
+    var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
+    var n = 0;
+    for (var i = 0; i < values.length; i++) {
+      if (!inRange(toDate(values[i][0]))) continue;
+      if (excluded[String(values[i][emailCol] || '').toLowerCase().trim()]) continue;
+      n++;
+    }
+    return n;
+  }
+
+  var popupSignups = countTab(TABS.discount, 1);    // Discount Signups: Email = col 2 (index 1)
+  var checkoutsStarted = countTab(TABS.started, 2); // Abandoned Checkouts: Email = col 3 (index 2)
+
+  // Completed Orders → orders count + revenue grouped by Plan.
+  var byPlanMap = {};
+  var ordersCount = 0;
+  var cs = ss.getSheetByName(TABS.completed);
+  if (cs && cs.getLastRow() >= 2) {
+    var cv = cs.getRange(2, 1, cs.getLastRow() - 1, 9).getValues();
+    for (var j = 0; j < cv.length; j++) {
+      if (!inRange(toDate(cv[j][0]))) continue;
+      if (excluded[String(cv[j][3] || '').toLowerCase().trim()]) continue; // Email = index 3
+      ordersCount++;
+      var plan = String(cv[j][7] || '').trim() || '(unknown)';             // Plan = index 7
+      var total = parseFloat(String(cv[j][8]).replace(/[^0-9.\-]/g, '')) || 0; // Total = index 8
+      if (!byPlanMap[plan]) byPlanMap[plan] = { plan: plan, count: 0, revenue: 0 };
+      byPlanMap[plan].count += 1;
+      byPlanMap[plan].revenue += total;
+    }
+  }
+  var byPlan = Object.keys(byPlanMap)
+    .map(function (key) { return byPlanMap[key]; })
+    .sort(function (a, b) { return b.revenue - a.revenue; });
+
+  return jsonOut({ ok: true,
+    funnel: { popupSignups: popupSignups, checkoutsStarted: checkoutsStarted, orders: ordersCount },
+    byPlan: byPlan });
+}
+
+/**
+ * READ-ONLY: per-day completed-order count + revenue for the traffic dashboard.
+ * Auth: ?key= must equal Script Property ORDERS_STATS_KEY (no PII is ever returned).
+ * Optional ?since=YYYY-MM-DD & ?until=YYYY-MM-DD (inclusive, by row Timestamp).
+ * Response: { ok:true, orders:[ {date:'YYYY-MM-DD', count:N, revenue:N}, ... ] }.
+ */
+function orderStats_(params) {
+  var expected = PropertiesService.getScriptProperties().getProperty('ORDERS_STATS_KEY');
+  if (!expected || String(params.key || '') !== String(expected)) {
+    return jsonOut({ ok: false, error: 'unauthorized' });
+  }
+  var sheetId = getSheetId();
+  if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
+  var sheet = SpreadsheetApp.openById(sheetId).getSheetByName(TABS.completed);
+  if (!sheet || sheet.getLastRow() < 2) return jsonOut({ ok: true, orders: [] });
+
+  var since = String(params.since || '');
+  var until = String(params.until || '');
+  // Completed Orders columns: 1 = Timestamp ('yyyy-MM-dd HH:mm:ss'), 9 = Total.
+  var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 9).getValues();
+  // Exclude team/test orders (owner emails + the order-alert CC) so the
+  // dashboard reflects real customers only.
+  var excluded = {};
+  for (var k = 0; k < OWNER_EMAILS.length; k++) excluded[String(OWNER_EMAILS[k]).toLowerCase().trim()] = true;
+  if (ORDER_ALERT_CC) excluded[String(ORDER_ALERT_CC).toLowerCase().trim()] = true;
+
+  var byDate = {};
+  for (var i = 0; i < values.length; i++) {
+    // Skip team/test orders by email (col 4 = Email).
+    var email = String(values[i][3] || '').toLowerCase().trim();
+    if (excluded[email]) continue;
+    // Timestamp cell may be a real Date (Sheets auto-converts) or a string.
+    var raw = values[i][0];
+    var date = (raw instanceof Date)
+      ? Utilities.formatDate(raw, TIMEZONE, 'yyyy-MM-dd')
+      : String(raw || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+    if (since && date < since) continue;
+    if (until && date > until) continue;
+    var total = parseFloat(String(values[i][8]).replace(/[^0-9.\-]/g, '')) || 0;
+    if (!byDate[date]) byDate[date] = { date: date, count: 0, revenue: 0 };
+    byDate[date].count += 1;
+    byDate[date].revenue += total;
+  }
+  var out = Object.keys(byDate).sort().map(function (k) { return byDate[k]; });
+  return jsonOut({ ok: true, orders: out });
 }
 
 function doPost(e) {
@@ -315,7 +454,12 @@ function doPost(e) {
       if (data.email) sendOrderConfirmation(data);
     }
 
-    sendNotification(type, data, ss);
+    // Log every abandoned cart to the sheet (row already written above), but only
+    // EMAIL the ones we can act on: skip the owner notification for an anonymous
+    // cart abandonment that carries no email and no phone. Keeps the inbox to
+    // contactable leads while metrics still capture every abandon.
+    var skipEmail = (type === 'started' && !data.email && !data.phone);
+    if (!skipEmail) sendNotification(type, data, ss);
 
     // Email the customer their freshly-minted code, and stamp the send time
     // (col 8) so re-sends to returning visitors are rate-limited to once / 24h.
@@ -639,8 +783,7 @@ function subjectFor(type, d) {
     return '🟡 NGFM — ' + labelForSource(d.source) + ' — ' + (d.email || '');
   }
   if (type === 'started') {
-    var planLabel = d.plan ? labelForSource('waitlist_' + d.plan) : '(no plan)';
-    return '🟠 NGFM abandoned — ' + planLabel + ' — ' + (d.email || d.phone || '');
+    return '🟠 NGFM abandoned cart — ' + planLabelFor_(d.plan) + ' — ' + (d.email || d.phone || '');
   }
   if (type === 'completed') {
     return '🟢 NGFM NEW ORDER — ' + (d.orderNum || '') + ' (' + (d.name || d.email || '') + ')';
@@ -672,7 +815,7 @@ function bodyFor(type, d) {
   } else if (type === 'started' && d.plan) {
     packageCallout =
       '<div style="background:#FFE5B4;color:#000;padding:14px 18px;border-radius:6px;margin:0 0 16px;font-size:18px;font-weight:bold">' +
-      escapeHtml(labelForSource('waitlist_' + d.plan)) +
+      escapeHtml(planLabelFor_(d.plan)) +
       '</div>';
   }
 
