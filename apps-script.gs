@@ -66,7 +66,16 @@ const HEADERS = {
 const HEADER_BG = '#E8D900';   // brand gold
 const HIGHLIGHT_BG = '#FFF59D'; // soft yellow for newly added rows
 
-const DISCOUNT_PERCENT = 10;    // first-order discount the codes grant
+const DISCOUNT_PERCENT = 10;    // first-order discount the popup-issued, per-email codes grant
+
+// Static, non-personalized promo codes: fixed percent, NOT tied to a specific
+// customer email, and NOT single-use (never marked "used"). Add new codes
+// here — keep IN SYNC with STATIC_DISCOUNT_CODES in api/create-payment.js and
+// api/payment-callback.js (three separate deploys, no shared import between
+// this Apps Script project and the Vercel repo).
+const STATIC_DISCOUNT_CODES = {
+  'FRIENDS15': 15
+};
 
 // Human-readable label for each `source` value the site sends.
 // Used in email subject + body so a glance at the inbox tells you
@@ -80,6 +89,14 @@ const SOURCE_LABELS = {
 };
 function labelForSource(source) {
   return SOURCE_LABELS[source] || source || '(unknown source)';
+}
+// Label for the tracking `plan` field, which is either a single package KEY
+// (single/starter/results) → its emoji label, or a readable multi-item cart
+// summary (e.g. "חבילת אול-אין ×2, חבילת הביישן") → used as-is.
+function planLabelFor_(plan) {
+  if (!plan) return '(no plan)';
+  var byKey = SOURCE_LABELS['waitlist_' + plan];
+  return byKey ? byKey : String(plan);
 }
 
 // Clean plan names (no emoji prefixes) for the customer-facing confirmation
@@ -301,7 +318,18 @@ function doPost(e) {
     // The code must exist, belong to the given email (anti-sharing), and be
     // unused. Does NOT mark it used — that happens only after SUMIT confirms
     // payment (see the markUsed branch + the payment-callback function).
+    //
+    // A checkout ever sends exactly ONE `code` string (never a list), so two
+    // discount codes can never be validated — let alone applied — together.
     if (type === 'redeemCheck') {
+      const upperCode = String(data.code || '').toUpperCase().trim();
+
+      // Static promo codes (e.g. FRIENDS15): no email binding, not single-use,
+      // always valid while listed in STATIC_DISCOUNT_CODES above.
+      if (STATIC_DISCOUNT_CODES.hasOwnProperty(upperCode)) {
+        return jsonOut({ ok: true, valid: true, percent: STATIC_DISCOUNT_CODES[upperCode] });
+      }
+
       const sheetId = getSheetId();
       if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
       const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(TABS.discount);
@@ -316,6 +344,13 @@ function doPost(e) {
     // ── WRITE: mark a code used (called by the server AFTER SUMIT confirms a
     // valid payment). Idempotent: re-marking an already-used code is a no-op. ─
     if (type === 'markUsed') {
+      const upperCode = String(data.code || '').toUpperCase().trim();
+
+      // Static promo codes are reusable across customers — nothing to mark.
+      if (STATIC_DISCOUNT_CODES.hasOwnProperty(upperCode)) {
+        return jsonOut({ ok: true, used: true, alreadyUsed: false });
+      }
+
       const sheetId = getSheetId();
       if (!sheetId) return jsonOut({ ok: false, error: 'not configured' });
       const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(TABS.discount);
@@ -419,7 +454,12 @@ function doPost(e) {
       if (data.email) sendOrderConfirmation(data);
     }
 
-    sendNotification(type, data, ss);
+    // Log every abandoned cart to the sheet (row already written above), but only
+    // EMAIL the ones we can act on: skip the owner notification for an anonymous
+    // cart abandonment that carries no email and no phone. Keeps the inbox to
+    // contactable leads while metrics still capture every abandon.
+    var skipEmail = (type === 'started' && !data.email && !data.phone);
+    if (!skipEmail) sendNotification(type, data, ss);
 
     // Email the customer their freshly-minted code, and stamp the send time
     // (col 8) so re-sends to returning visitors are rate-limited to once / 24h.
@@ -743,8 +783,7 @@ function subjectFor(type, d) {
     return '🟡 NGFM — ' + labelForSource(d.source) + ' — ' + (d.email || '');
   }
   if (type === 'started') {
-    var planLabel = d.plan ? labelForSource('waitlist_' + d.plan) : '(no plan)';
-    return '🟠 NGFM abandoned — ' + planLabel + ' — ' + (d.email || d.phone || '');
+    return '🟠 NGFM abandoned cart — ' + planLabelFor_(d.plan) + ' — ' + (d.email || d.phone || '');
   }
   if (type === 'completed') {
     return '🟢 NGFM NEW ORDER — ' + (d.orderNum || '') + ' (' + (d.name || d.email || '') + ')';
@@ -776,7 +815,7 @@ function bodyFor(type, d) {
   } else if (type === 'started' && d.plan) {
     packageCallout =
       '<div style="background:#FFE5B4;color:#000;padding:14px 18px;border-radius:6px;margin:0 0 16px;font-size:18px;font-weight:bold">' +
-      escapeHtml(labelForSource('waitlist_' + d.plan)) +
+      escapeHtml(planLabelFor_(d.plan)) +
       '</div>';
   }
 
