@@ -94,6 +94,21 @@
     li { margin-bottom: 8px; }
     strong { color: var(--white); }
 
+    /* ── READABLE PROSE ──────────────────────────────────────────
+       Reusable readability layer, shared with index.html. Mirrors:
+       text-gray-300 · leading-relaxed · max-w-prose · mx-auto · font-medium.
+       Sets no font-size so it layers over any context. Keep in sync
+       with the definition in index.html. */
+    .readable-prose {
+      color: var(--grey-light);   /* text-gray-300  → readable light grey */
+      line-height: 1.8;           /* leading-relaxed */
+      max-width: 65ch;            /* max-w-prose */
+      margin-inline: auto;        /* mx-auto (RTL-safe logical property) */
+      font-weight: 500;           /* font-medium */
+    }
+    /* space-y-4: vertical rhythm when the block wraps multiple children */
+    .readable-prose > * + * { margin-top: 1rem; }
+
     /* Founder portrait + intro */
     .founder-card {
       display: flex;
@@ -250,7 +265,7 @@
 
     <p class="eyebrow">הסיפור שלנו</p>
     <h1>מדע אמיתי. מתוך אכפתיות אמיתית.</h1>
-    <p class="lead">
+    <p class="lead readable-prose">
       NOGYMFORME לא נולד בחדר שיווק. הוא נולד מתוך שנים של מחקר, מתוך הבנה עמוקה של הגוף האנושי,
       ומתוך רצון פשוט לעזור לגברים להרגיש טוב יותר בגוף שלהם - בלי קסמים ובלי הבטחות ריקות.
     </p>
@@ -270,7 +285,7 @@
     </div>
 
     <h2>האדם מאחורי הפורמולה</h2>
-    <p>
+    <p class="readable-prose">
       את NOGYMFORME פיתח <strong>ד״ר דייויד קיין</strong> - חוקר שהקדיש למעלה מ-20 שנה למחקר מדעי בתחומי
       <strong>הלב והמוח</strong>, שתי המערכות שמכתיבות יותר מכל איך אנחנו מרגישים, אוכלים ומתפקדים לאורך היום.
       רקע מחקרי מעמיק כזה מלמד דבר אחד היטב: הגוף לא מגיב לסיסמאות. הוא מגיב למנגנונים. ולכן כל החלטה
@@ -282,6 +297,7 @@
     </div>
 
     <h2>המדע שמאחורי המותג</h2>
+    <div class="readable-prose">
     <p>
       NOGYMFORME בנוי סביב שילוב של <strong>סיבים תזונתיים מסיסים ורכיבים תומכי מטבוליזם</strong> שנבחרו
       בקפידה, כל אחד בזכות תפקיד ברור ומובן:
@@ -295,6 +311,7 @@
       הפורמולה אינה תחליף לתזונה או לתנועה, ואינה „פתרון פלא". היא כלי יומי חכם שנועד להשתלב בשגרה קיימת
       ולעזור לך להחזיק תהליך - מתוך כבוד לאינטליגנציה שלך ולגוף שלך.
     </p>
+    </div>
 
     <h2>למה דווקא לגברים</h2>
     <p>

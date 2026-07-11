@@ -513,6 +513,23 @@
       line-height: 1.85;
     }
 
+    /* ── READABLE PROSE ──────────────────────────────────────────
+       Reusable readability layer for body copy (science explanations,
+       "workday" paragraphs, etc.). Static-HTML equivalent of a shared
+       <ReadableProse> component. Mirrors the Tailwind combo:
+       text-gray-300 · leading-relaxed · max-w-prose · mx-auto · font-medium.
+       Intentionally sets no font-size so it layers over any context.
+       Reused on about.html — keep the two definitions in sync. */
+    .readable-prose {
+      color: var(--grey-light);   /* text-gray-300  → readable light grey */
+      line-height: 1.8;           /* leading-relaxed */
+      max-width: 65ch;            /* max-w-prose */
+      margin-inline: auto;        /* mx-auto (RTL-safe logical property) */
+      font-weight: 500;           /* font-medium */
+    }
+    /* space-y-4: vertical rhythm when the block wraps multiple children */
+    .readable-prose > * + * { margin-top: 1rem; }
+
     /* ── SOLUTION SECTION ── */
     .solution-section {
       background: var(--deep);
@@ -2012,22 +2029,22 @@
       <div class="problem-card reveal">
         <div class="problem-number">01</div>
         <h3 class="problem-title">חילוף חומרים איטי</h3>
-        <p class="problem-text">אחרי גיל 35 הגוף שורף פחות קלוריות בזמן מנוחה. מה שעבד בגיל 25 - פשוט לא עובד יותר.</p>
+        <p class="problem-text readable-prose">אחרי גיל 35 הגוף שורף פחות קלוריות בזמן מנוחה. מה שעבד בגיל 25 - פשוט לא עובד יותר.</p>
       </div>
       <div class="problem-card reveal">
         <div class="problem-number">02</div>
         <h3 class="problem-title">הכרס שלא הולכת</h3>
-        <p class="problem-text">קשה במיוחד להיפטר משומן בטני אצל גברים; גם שילוב של ספורט ודיאטה לא תמיד עוזר, כי הגוף פשוט נאחז בו.</p>
+        <p class="problem-text readable-prose">קשה במיוחד להיפטר משומן בטני אצל גברים; גם שילוב של ספורט ודיאטה לא תמיד עוזר, כי הגוף פשוט נאחז בו.</p>
       </div>
       <div class="problem-card reveal">
         <div class="problem-number">03</div>
         <h3 class="problem-title">עייפות וחוסר מוטיבציה</h3>
-        <p class="problem-text">אחרי יום עבודה ומשפחה - מי בכלל רוצה ללכת לחדר כושר? הרצון קיים, האנרגיה - פחות.</p>
+        <p class="problem-text readable-prose">אחרי יום עבודה ומשפחה - מי בכלל רוצה ללכת לחדר כושר? הרצון קיים, האנרגיה - פחות.</p>
       </div>
       <div class="problem-card reveal">
         <div class="problem-number">04</div>
         <h3 class="problem-title">אין פתרון בשבילנו</h3>
-        <p class="problem-text">כל המוצרים בשוק מיועדים לנשים. הצבעים, הטעמים, השיווק - הכל. פשוט לא רלוונטי לגברים.</p>
+        <p class="problem-text readable-prose">כל המוצרים בשוק מיועדים לנשים. הצבעים, הטעמים, השיווק - הכל. פשוט לא רלוונטי לגברים.</p>
       </div>
     </div>
   </div>
@@ -2045,7 +2062,7 @@
         <div class="doctor-content">
           <p class="section-label">המדע מאחורי NOGYMFORME</p>
           <h2 class="section-title">לא קסם. <em>פשוט פורמולה שעושה שכל.</em></h2>
-          <p class="section-body">בלי קסמים ובלי הבטחות ריקות. פורמולה אחת, רכיבים טבעיים - שעובדים על שלושה דברים שמפילים כל דיאטה: <strong style="color:var(--white)">רעב, חשק למתוק, ונפילות אנרגיה.</strong></p>
+          <p class="section-body readable-prose">בלי קסמים ובלי הבטחות ריקות. פורמולה אחת, רכיבים טבעיים - שעובדים על שלושה דברים שמפילים כל דיאטה: <strong style="color:var(--white)">רעב, חשק למתוק, ונפילות אנרגיה.</strong></p>
         </div>
       </div>
 
@@ -2134,7 +2151,7 @@
         <div class="founder-content">
           <p class="section-label">מי עומד מאחורי המוצר</p>
           <h2 class="section-title">הפורמולה שפיתח <em>ד&quot;ר דייויד קיין</em></h2>
-          <p class="section-body">
+          <p class="section-body readable-prose">
             NOGYMFORME פותח על ידי ד&quot;ר דייויד קיין - חוקר בתחומי הלב והמוח עם למעלה מ-20 שנות ניסיון מדעי.
             מתוך תשוקה אמיתית להפוך את העולם למקום טוב יותר, הוא יצר פורמולה שמבוססת על מדע אמיתי ועל הבנה
             עמוקה של הגוף - לא על הבטחות ריקות ולא על טרנדים חולפים, אלא על מה שבאמת עובד.
