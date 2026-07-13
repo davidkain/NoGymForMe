@@ -1098,6 +1098,65 @@
   </div>
 </section>
 
+<!-- ════════ CHOOSE YOUR PACKAGE (compact) ════════ -->
+<section class="mini-pack" id="quick-packages" dir="rtl">
+  <style>
+    .mini-pack{padding:66px 0;background:var(--bg)}
+    .mini-pack .mini-head{text-align:center;margin-bottom:38px}
+    .mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:840px;margin-inline:auto}
+    .mini-card{
+      position:relative;background:var(--panel);border:1px solid var(--line);
+      border-radius:var(--r);padding:30px 22px 26px;text-align:center;
+      display:flex;flex-direction:column;align-items:center;gap:9px;
+      transition:border-color .25s,transform .25s;
+    }
+    .mini-card:hover{border-color:rgba(242,203,27,.45);transform:translateY(-5px)}
+    .mini-card.best{border-color:var(--gold);background:linear-gradient(180deg,#1a1610,var(--panel))}
+    .mini-card .mini-img{height:92px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:4px}
+    .mini-card .mini-img img{height:100%;width:auto;max-width:100%;object-fit:contain;filter:drop-shadow(0 12px 18px rgba(0,0,0,.55))}
+    .mini-card .mini-name{font-family:'Rubik',sans-serif;font-weight:800;font-size:19px;color:var(--ink)}
+    .mini-card .mini-desc{color:var(--muted);font-size:13.5px;line-height:1.5;min-height:40px}
+    .mini-card .mini-price{font-family:'Rubik',sans-serif;font-weight:900;font-size:34px;color:var(--gold);line-height:1;margin:2px 0 4px}
+    .mini-card .btn{width:100%;justify-content:center;margin-top:auto}
+    .mini-card .mini-tag{
+      position:absolute;top:-11px;inset-inline-start:50%;transform:translateX(50%);
+      background:linear-gradient(180deg,var(--gold-soft),var(--gold));color:#1a1206;
+      font-family:'Rubik',sans-serif;font-weight:800;font-size:11px;letter-spacing:.02em;
+      padding:4px 12px;border-radius:999px;white-space:nowrap;
+    }
+    @media(max-width:720px){.mini-grid{grid-template-columns:1fr;max-width:400px}}
+  </style>
+  <div class="wrap">
+    <div class="mini-head reveal">
+      <h2 class="h2 display">בחר את החבילה שלך</h2>
+    </div>
+    <div class="mini-grid">
+      <div class="mini-card reveal">
+        <div class="mini-img"><img src="assets/redesign/bottle-1-crop.png" alt="בקבוק אחד" loading="lazy"></div>
+        <div class="mini-name">חבילת הביישן</div>
+        <div class="mini-desc">בקבוק אחד · חודש שלם</div>
+        <div class="mini-price">₪198</div>
+        <a href="order.html?plan=single" onclick="addToCart('single',event)" class="btn btn-ghost">הוסף לסל</a>
+      </div>
+      <div class="mini-card reveal">
+        <div class="mini-img"><img src="assets/redesign/bottle-2-crop.png" alt="שני בקבוקים" loading="lazy"></div>
+        <div class="mini-name">יאללה, בוא ננסה</div>
+        <div class="mini-desc">שני בקבוקים · חודשיים</div>
+        <div class="mini-price">₪396</div>
+        <a href="order.html?plan=starter" onclick="addToCart('starter',event)" class="btn btn-ghost">הוסף לסל</a>
+      </div>
+      <div class="mini-card best reveal">
+        <span class="mini-tag">הכי נמכר</span>
+        <div class="mini-img"><img src="assets/redesign/bottle-3-crop.png" alt="שלושה בקבוקים" loading="lazy"></div>
+        <div class="mini-name">חבילת אול-אין</div>
+        <div class="mini-desc">שלושה בקבוקים · 3 חודשים</div>
+        <div class="mini-price">₪496</div>
+        <a href="order.html?plan=results" onclick="addToCart('results',event)" class="btn btn-gold">הוסף לסל</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ════════ SCIENCE / SCIENTIST ════════ -->
 <section class="sci pad" id="science">
   <div class="wrap">
