@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
+  <!-- TikTok Pixel Code Start -->
+  <script>
+  !function (w, d, t) {
+    w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
+  var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
+  ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
+
+
+    ttq.load('D9DQ9NBC77UBS5FSGEJ0');
+    ttq.page();
+  }(window, document, 'ttq');
+  </script>
+  <!-- TikTok Pixel Code End -->
   <!-- Google tag (gtag.js) — GA4 property NoGymForMe -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JNX9VJVC75"></script>
   <script>
@@ -155,6 +168,29 @@
           value: value,
           currency: 'ILS'
         }, { eventID: eventId });
+      }
+
+      // 1a) TikTok Pixel - CompletePayment. Same paid=1 gate and same value as the
+      // Meta Purchase above, so both platforms record ONE verified conversion. We
+      // reuse `eventId` so a future TikTok Events API server event can dedupe.
+      if (typeof ttq !== 'undefined' && typeof ttq.track === 'function') {
+        var ttContents = (pending && Array.isArray(pending.items) && pending.items.length)
+          ? pending.items.map(function (it) {
+              return {
+                content_id:   it.plan,
+                content_name: (PLAN_LABELS[it.plan] && PLAN_LABELS[it.plan].label) || it.plan,
+                quantity:     it.qty || 1,
+                price:        (PLAN_LABELS[it.plan] && PLAN_LABELS[it.plan].value) || undefined
+              };
+            })
+          : [{ content_id: order.summary, content_name: order.label, quantity: 1, price: value }];
+        ttq.track('CompletePayment', {
+          content_type: 'product',
+          content_name: order.label,
+          contents:     ttContents,
+          value:        value,
+          currency:     'ILS'
+        }, { event_id: eventId });
       }
 
       // 1b) Record the COMPLETED order in the Google Sheet + trigger the buyer's
