@@ -170,6 +170,29 @@
         }, { eventID: eventId });
       }
 
+      // 1a) TikTok Pixel - CompletePayment. Same paid=1 gate and same value as the
+      // Meta Purchase above, so both platforms record ONE verified conversion. We
+      // reuse `eventId` so a future TikTok Events API server event can dedupe.
+      if (typeof ttq !== 'undefined' && typeof ttq.track === 'function') {
+        var ttContents = (pending && Array.isArray(pending.items) && pending.items.length)
+          ? pending.items.map(function (it) {
+              return {
+                content_id:   it.plan,
+                content_name: (PLAN_LABELS[it.plan] && PLAN_LABELS[it.plan].label) || it.plan,
+                quantity:     it.qty || 1,
+                price:        (PLAN_LABELS[it.plan] && PLAN_LABELS[it.plan].value) || undefined
+              };
+            })
+          : [{ content_id: order.summary, content_name: order.label, quantity: 1, price: value }];
+        ttq.track('CompletePayment', {
+          content_type: 'product',
+          content_name: order.label,
+          contents:     ttContents,
+          value:        value,
+          currency:     'ILS'
+        }, { event_id: eventId });
+      }
+
       // 1b) Record the COMPLETED order in the Google Sheet + trigger the buyer's
       // confirmation email. Clear the stash right after so a page refresh can't
       // record the order or email the buyer twice.
