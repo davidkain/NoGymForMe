@@ -1512,8 +1512,12 @@
       if (!plan) { console.warn('handlePurchase: unknown plan', planId); return; }
 
       // ── Facebook Pixel ──────────────────────────────────────────────────
+      // AddToCart, not InitiateCheckout: this is the "buy now" shortcut that
+      // skips the cart drawer, but the visitor has still only PICKED a package.
+      // order.html owns the single InitiateCheckout for every path into
+      // checkout — firing it here too would double-count the same person.
       if (typeof fbq === 'function') {
-        fbq('track', 'InitiateCheckout', {
+        fbq('track', 'AddToCart', {
           content_name:     plan.name,
           content_ids:      [planId],
           content_type:     'product',
@@ -1564,6 +1568,54 @@
     }, { threshold: 0.12 });
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    /* Meta Pixel: "ViewContent" — the visitor actually reached the packages
+       and saw the prices, as opposed to bouncing off the hero. This is the
+       top of the retargetable funnel (ViewContent → AddToCart →
+       InitiateCheckout → AddPaymentInfo → Purchase) and by far the largest
+       audience, so it is worth collecting even though it is not a click.
+
+       Fires once per page load, and only after the section has been on screen
+       for a full second — a fast scroll straight past the prices is not a
+       view, and counting it would flood the audience with people who never
+       looked. */
+    (function () {
+      var packages = document.getElementById('packages');
+      if (!packages || typeof fbq !== 'function' || !window.IntersectionObserver) return;
+
+      var dwell = null;
+      var vcObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            if (dwell) return;
+            dwell = setTimeout(function () {
+              vcObserver.disconnect();
+              fbq('track', 'ViewContent', {
+                content_name: 'חבילות NOGYMFORME',
+                content_ids:  ['single', 'starter', 'results'],
+                content_type: 'product',
+                currency:     'ILS'
+              });
+            }, 1000);
+          } else {
+            clearTimeout(dwell);
+            dwell = null;
+          }
+        });
+      }, {
+        /* Do NOT use a ratio threshold here. This section is ~4400px tall, so
+           the fraction of it on screen at once can never reach even 0.2 on a
+           real viewport and the event would never fire. Instead shrink the
+           observer root to a horizontal band across the middle 30% of the
+           screen: "intersecting" then means the packages are under the
+           visitor's eyes, which is what we actually want and is independent
+           of how tall the section grows. */
+        threshold:  0,
+        rootMargin: '-35% 0px -35% 0px'
+      });
+
+      vcObserver.observe(packages);
+    })();
 
     // Stagger children in grids
     document.querySelectorAll('.problem-grid, .benefit-grid, .trust-grid, .testimonials-grid').forEach(grid => {
@@ -2040,6 +2092,20 @@
       for (var i = 0; i < cart.length; i++) { if (cart[i].plan === plan) { row = cart[i]; break; } }
       if (row) { if (row.qty < 20) row.qty++; } else { cart.push({ plan: plan, qty: 1 }); }
       save(); render(); open();
+
+      /* Meta Pixel: the literal add-to-cart. Reports the ONE unit just added
+         (not the whole basket) so value/num_items stay additive across repeat
+         adds instead of re-counting what is already in the cart. */
+      if (typeof fbq === 'function') {
+        fbq('track', 'AddToCart', {
+          content_name: CART_PLANS[plan].name,
+          content_ids:  [plan],
+          content_type: 'product',
+          value:        CART_PLANS[plan].price,
+          currency:     'ILS',
+          num_items:    1
+        });
+      }
     }
     function setQty(plan, d) {
       for (var i = 0; i < cart.length; i++) {
@@ -2087,14 +2153,9 @@
     function checkout() {
       if (!count()) return;
       save();
-      if (typeof fbq === 'function') {
-        fbq('track', 'InitiateCheckout', {
-          content_ids: cart.map(function (r) { return r.plan; }),
-          content_type: 'product',
-          value: subtotal(), currency: 'ILS',
-          num_items: count()
-        });
-      }
+      /* NO Meta InitiateCheckout here — order.html fires exactly one on load,
+         covering this path, the "buy now" shortcut, and direct/ad landings
+         alike. Firing here as well double-counted everyone who used the cart. */
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({ event: 'InitiateCheckout', value: subtotal(), currency: 'ILS', quantity: count() });
       proceedingToCheckout = true;   // going to checkout, not abandoning

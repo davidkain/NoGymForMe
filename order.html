@@ -1212,8 +1212,11 @@
     if (typeof fbq === 'function') {
       fbq('track', 'AddPaymentInfo', {
         content_name: orderName(),
+        content_ids:  orderItems.map(function (o) { return o.key; }),
+        content_type: 'product',
         value:        currentTotal,   // reflects an applied discount
-        currency:     'ILS'
+        currency:     'ILS',
+        num_items:    orderItems.reduce(function (s, o) { return s + o.qty; }, 0)
       });
     }
 
@@ -1296,23 +1299,26 @@
 
   document.getElementById('payBtn').textContent = 'המשך לתשלום מאובטח';
 
-  /* Meta Pixel: standard "InitiateCheckout" - fires once when the visitor
-     reaches this order page with a plan selected. Lets Meta optimize ad
-     delivery toward people who actually reach checkout, and measures the
-     drop-off between landing and reaching this step.
+  /* Meta Pixel: the SINGLE "InitiateCheckout" for the whole site. Fires once
+     on load here, which covers every route into checkout — the cart drawer,
+     the "buy now" shortcut, and direct/ad links carrying ?plan=. The homepage
+     deliberately does NOT fire it; it fires AddToCart instead. Keep it that
+     way, or everyone who arrives via the shop gets counted twice.
 
-     NOTE: there is intentionally NO "Purchase" event here - this page is
-     currently a waitlist (no payment gateway connected), so firing Purchase
-     would report fake conversions and mis-train ad optimization. When the
-     real payment flow goes live, fire it at the verified success step:
-       fbq('track', 'Purchase', { value: currentTotal, currency: 'ILS',
-           content_name: plan.name }); */
+     NOTE: there is intentionally NO "Purchase" event here. Purchase fires only
+     at the verified success step — thank-you.html plus the server-side CAPI
+     call in api/meta-capi-purchase.js, which share an event_id so Meta
+     deduplicates them. Firing it on this page would report a conversion for
+     anyone who merely reached the form. */
   if (typeof fbq === 'function') {
     fbq('track', 'InitiateCheckout', {
       content_name:     orderName(),
+      content_ids:      orderItems.map(function (o) { return o.key; }),
+      content_type:     'product',
       content_category: 'one_time',
       value:            subtotal(),
-      currency:         'ILS'
+      currency:         'ILS',
+      num_items:        orderItems.reduce(function (s, o) { return s + o.qty; }, 0)
     });
   }
 </script>
