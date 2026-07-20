@@ -22,6 +22,7 @@ const TRACKING_WEBAPP_URL = process.env.TRACKING_WEBAPP_URL ||
   'https://script.google.com/macros/s/AKfycbwBmCaPLs3cFn2zvJw4vuMoFypgigvDIJbPuLxnLTebWOISz5o892F_H0gLtBtFvfn5/exec';
 
 const { sendPurchaseEvent } = require('../lib/meta-capi');
+const { sendCompletePaymentEvent } = require('../lib/tiktok-events');
 
 // Plan → VAT-inclusive price (ILS) for the CAPI Purchase value. KEEP IN SYNC
 // with PLANS in create-payment.js and PLAN_LABELS in thank-you.html.
@@ -169,19 +170,43 @@ module.exports = async (req, res) => {
   if (value != null) {
     const cookies = parseCookies(req.headers.cookie);
     const xff = req.headers['x-forwarded-for'];
-    const result = await sendPurchaseEvent({
-      value,
-      currency: 'ILS',
-      email,                                   // hashed inside; '' when we have none
-      fbp: cookies._fbp,
-      fbc: cookies._fbc,
-      clientIp: xff ? String(xff).split(',')[0].trim() : (req.socket && req.socket.remoteAddress),
-      userAgent: req.headers['user-agent'],
-      eventId,
-      eventSourceUrl: thankYou('1'),
-      orderId: String(paymentId),
-    });
+    const clientIp = xff ? String(xff).split(',')[0].trim() : (req.socket && req.socket.remoteAddress);
+    const userAgent = req.headers['user-agent'];
+    // Meta and TikTok are fired in PARALLEL: each self-limits to 5s and never
+    // throws, so running them in sequence would stack the timeouts and could
+    // hold the customer on a blank redirect for 10s. Promise.all keeps the
+    // worst case at 5s. Both reuse the SAME eventId, so each platform dedupes
+    // its server event against its browser pixel event.
+    const [result, ttResult] = await Promise.all([
+      sendPurchaseEvent({
+        value,
+        currency: 'ILS',
+        email,                                 // hashed inside; '' when we have none
+        fbp: cookies._fbp,
+        fbc: cookies._fbc,
+        clientIp,
+        userAgent,
+        eventId,
+        eventSourceUrl: thankYou('1'),
+        orderId: String(paymentId),
+      }),
+      sendCompletePaymentEvent({
+        value,
+        currency: 'ILS',
+        email,                                 // hashed inside; '' when we have none
+        ttp: cookies._ttp,                     // TikTok browser id, set by the pixel
+        ttclid: cookies.ttclid || cookies._ttclid,
+        clientIp,
+        userAgent,
+        eventId,
+        eventSourceUrl: thankYou('1'),
+        orderId: String(paymentId),
+      }),
+    ]);
     capiSent = !!(result && result.ok);
+    if (ttResult && !ttResult.ok && !ttResult.skipped) {
+      console.error('[payment-callback] TikTok CompletePayment failed:', ttResult.error, ttResult.message || '');
+    }
   } else {
     console.error('[payment-callback] No order amount/price — CAPI Purchase skipped. plan:', planKey, 'amt:', q.amt);
   }
