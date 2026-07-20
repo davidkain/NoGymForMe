@@ -9,7 +9,7 @@
   ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
 
 
-    ttq.load('D9DQ9NBC77UBS5FSGEJ0');
+    ttq.load('D9F1Q1RC77U8SCOM3C9G');
     ttq.page();
   }(window, document, 'ttq');
   </script>
@@ -1526,6 +1526,16 @@
           num_items:        plan.quantity
         });
       }
+      if (typeof ttq !== 'undefined' && typeof ttq.track === 'function') {
+        ttq.track('AddToCart', {
+          content_type: 'product',
+          content_id:   planId,
+          content_name: plan.name,
+          quantity:     plan.quantity,
+          value:        plan.price,
+          currency:     plan.currency
+        });
+      }
 
       // ── Google Tag Manager dataLayer ────────────────────────────────────
       window.dataLayer = window.dataLayer || [];
@@ -1596,6 +1606,16 @@
                 content_type: 'product',
                 currency:     'ILS'
               });
+              if (typeof ttq !== 'undefined' && typeof ttq.track === 'function') {
+                ttq.track('ViewContent', {
+                  content_type: 'product',
+                  content_name: 'חבילות NOGYMFORME',
+                  contents: ['single', 'starter', 'results'].map(function (k) {
+                    return { content_id: k, content_name: PLANS[k].name, price: PLANS[k].price };
+                  }),
+                  currency: 'ILS'
+                });
+              }
             }, 1000);
           } else {
             clearTimeout(dwell);
@@ -2104,6 +2124,16 @@
           value:        CART_PLANS[plan].price,
           currency:     'ILS',
           num_items:    1
+        });
+      }
+      if (typeof ttq !== 'undefined' && typeof ttq.track === 'function') {
+        ttq.track('AddToCart', {
+          content_type: 'product',
+          content_id:   plan,
+          content_name: CART_PLANS[plan].name,
+          quantity:     1,
+          value:        CART_PLANS[plan].price,
+          currency:     'ILS'
         });
       }
     }
