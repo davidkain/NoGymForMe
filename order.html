@@ -9,7 +9,7 @@
   ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
 
 
-    ttq.load('D9DQ9NBC77UBS5FSGEJ0');
+    ttq.load('D9F1Q1RC77U8SCOM3C9G');
     ttq.page();
   }(window, document, 'ttq');
   </script>
@@ -1220,6 +1220,15 @@
         num_items:    orderItems.reduce(function (s, o) { return s + o.qty; }, 0)
       });
     }
+    if (typeof ttq !== 'undefined' && typeof ttq.track === 'function') {
+      ttq.track('AddPaymentInfo', {
+        content_type: 'product',
+        content_name: orderName(),
+        contents:     orderItems.map(function (o) { return { content_id: o.key, quantity: o.qty }; }),
+        value:        currentTotal,   // reflects an applied discount
+        currency:     'ILS'
+      });
+    }
 
     /* Ask OUR backend to create the SUMIT payment page. We send only plan KEYS +
        quantities + contact details - never an amount. The server decides prices. */
@@ -1320,6 +1329,15 @@
       value:            subtotal(),
       currency:         'ILS',
       num_items:        orderItems.reduce(function (s, o) { return s + o.qty; }, 0)
+    });
+  }
+  if (typeof ttq !== 'undefined' && typeof ttq.track === 'function') {
+    ttq.track('InitiateCheckout', {
+      content_type: 'product',
+      content_name: orderName(),
+      contents:     orderItems.map(function (o) { return { content_id: o.key, content_name: PLANS[o.key].name, quantity: o.qty, price: PLANS[o.key].price }; }),
+      value:        subtotal(),
+      currency:     'ILS'
     });
   }
 </script>
