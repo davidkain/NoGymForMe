@@ -808,10 +808,25 @@ function isOwnerEmail_(email) {
   return false;
 }
 
-// The recovery email itself. Copy is fixed by the brand; `name` is optional and
-// the greeting degrades to a bare "היי," when the checkout captured no name.
+// The checkout's Name field is free text and never required (the abandon
+// beacon only gates on email-OR-phone), so the sheet holds plenty of junk:
+// test input, addresses pasted into the wrong box, stray keystrokes. Greeting
+// someone "היי asdf," reads as broken automation and undercuts a letter whose
+// whole job is to feel personal — so anything that doesn't look like a given
+// name is dropped in favour of the perfectly good bare "היי,".
+// Returns '' when the value isn't usable.
+function recoveryGreetingName_(raw) {
+  var first = String(raw || '').trim().split(/\s+/)[0] || '';   // given name only
+  if (first.length < 2 || first.length > 20) return '';         // initials, or a pasted sentence
+  if (/[@\d]/.test(first))                   return '';         // an email or phone in the wrong field
+  return first;
+}
+
+// The recovery email itself. Copy is fixed by the brand; the greeting degrades
+// to a bare "היי," whenever the checkout captured no usable name.
 function recoveryEmailHtml_(name, code) {
-  var greeting = name ? ('היי ' + escapeHtml(name) + ',') : 'היי,';
+  var clean    = recoveryGreetingName_(name);
+  var greeting = clean ? ('היי ' + escapeHtml(clean) + ',') : 'היי,';
   var p = 'margin:0 0 16px;font-size:15px;line-height:1.8;color:#cfccc6;';
   return '' +
     '<div dir="rtl" lang="he" style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:auto;' +
