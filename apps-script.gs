@@ -55,10 +55,12 @@ const TABS = {
 };
 
 const HEADERS = {
-  discount:  ['Timestamp', 'Email', 'Source', 'User-Agent', 'Code', 'Used', 'Used At', 'Code Emailed At'],
+  discount:  ['Timestamp', 'Email', 'Source', 'User-Agent', 'Code', 'Used', 'Used At', 'Code Emailed At',
+              'Expires At', 'Percent'],
   // New address columns are APPENDED at the end so the auto-migration in
   // ensureSheet() keeps existing rows aligned (old rows just get blank cells).
-  started:   ['Timestamp', 'Name', 'Email', 'Phone', 'Plan', 'Status', 'User-Agent', 'Address', 'City', 'Comments'],
+  started:   ['Timestamp', 'Name', 'Email', 'Phone', 'Plan', 'Status', 'User-Agent', 'Address', 'City', 'Comments',
+              'Recovery Emailed At', 'Recovery Code'],
   completed: ['Timestamp', 'Order #', 'Name', 'Email', 'Phone', 'Address', 'City', 'Plan', 'Total', 'User-Agent', 'Comments'],
   appwait:   ['Timestamp', 'Email', 'Source', 'User-Agent']
 };
@@ -76,6 +78,30 @@ const DISCOUNT_PERCENT = 10;    // first-order discount the popup-issued, per-em
 const STATIC_DISCOUNT_CODES = {
   'FRIENDS15': 15
 };
+
+// ── Abandoned-cart recovery campaign ──────────────────────────────────────
+// sendRecoveryEmails() runs on a time-based trigger and emails everyone who
+// reached checkout, left an email, and never completed an order. Each gets a
+// personal, single-use, time-limited code.
+//
+// RECOVERY_CODE_PREFIX is load-bearing: api/create-payment.js derives the 15%
+// from this exact prefix (see PREFIX_PERCENTS in lib/discount-codes.js). If you
+// change it here you MUST change it there, or recovery buyers get charged the
+// 10% default while the email promises 15%.
+const RECOVERY_CODE_PREFIX  = 'BACK15-';
+const RECOVERY_PERCENT      = 15;
+const RECOVERY_EXPIRY_HOURS = 48;   // code lifetime, promised in the email copy
+const RECOVERY_MIN_AGE_MIN  = 60;   // don't email until the cart is ~1h cold
+// Upper age bound, and the reason the FIRST run can't blast your backlog: rows
+// older than this are permanently out of scope. Also self-heals a trigger
+// outage — a day of downtime doesn't cause a burst of stale sends on recovery.
+const RECOVERY_MAX_AGE_HRS  = 72;
+// Per-run send cap. A consumer Gmail account allows ~100 GmailApp recipients per
+// day and the brand inbox also sends order confirmations + code emails, so leave
+// headroom. Hitting the cap pings the operator instead of silently dropping people.
+const RECOVERY_MAX_PER_RUN  = 40;
+const RECOVERY_CART_URL =
+  'https://www.nogymforme.com/order.html?plan=results&utm_source=email&utm_medium=recovery&utm_campaign=abandoned_allin';
 
 // Human-readable label for each `source` value the site sends.
 // Used in email subject + body so a glance at the inbox tells you
@@ -338,7 +364,13 @@ function doPost(e) {
       if (!rec)                                                  return jsonOut({ ok: true, valid: false, reason: 'notfound' });
       if (rec.email !== String(data.email || '').toLowerCase().trim()) return jsonOut({ ok: true, valid: false, reason: 'wrongemail' });
       if (rec.used)                                              return jsonOut({ ok: true, valid: false, reason: 'used' });
-      return jsonOut({ ok: true, valid: true, percent: DISCOUNT_PERCENT });
+      // Time-limited codes (abandoned-cart recovery). Evergreen popup codes
+      // leave Expires At blank and skip this entirely.
+      if (rec.expiresAt && rec.expiresAt.getTime() < Date.now())  return jsonOut({ ok: true, valid: false, reason: 'expired' });
+      // `percent` here is DISPLAY ONLY — the checkout page uses it to show the
+      // right saving. api/create-payment.js re-derives the charged percent from
+      // the code string itself and never trusts this number.
+      return jsonOut({ ok: true, valid: true, percent: rec.percent || DISCOUNT_PERCENT });
     }
 
     // ── WRITE: mark a code used (called by the server AFTER SUMIT confirms a
@@ -518,21 +550,27 @@ function findDiscountByEmail(sheet, email) {
   return null;
 }
 
-// Find a discount row by code → { rowIndex, email, code, used } | null.
+// Find a discount row by code → { rowIndex, email, code, used, expiresAt, percent } | null.
+// expiresAt is a Date for time-limited codes (recovery) and null for the
+// evergreen popup codes; percent is null unless the row explicitly recorded one.
 function findDiscountByCode(sheet, code) {
   var norm = String(code || '').toUpperCase().trim();
   if (!norm) return null;
   var last = sheet.getLastRow();
   if (last < 2) return null;
-  var width = Math.max(7, sheet.getLastColumn());
+  var width = Math.max(10, sheet.getLastColumn());
   var values = sheet.getRange(2, 1, last - 1, width).getValues();
   for (var i = 0; i < values.length; i++) {
     if (String(values[i][4] || '').toUpperCase().trim() === norm) { // col 5 = Code
+      var exp = values[i][8];                                       // col 9 = Expires At
+      var pct = parseInt(values[i][9], 10);                         // col 10 = Percent
       return {
         rowIndex: i + 2,
         email: String(values[i][1] || '').toLowerCase().trim(),     // col 2 = Email
         code: norm,
-        used: String(values[i][5] || '').toLowerCase() === 'yes'    // col 6 = Used
+        used: String(values[i][5] || '').toLowerCase() === 'yes',   // col 6 = Used
+        expiresAt: (exp instanceof Date) ? exp : (exp ? new Date(exp) : null),
+        percent: (pct >= 1 && pct <= 100) ? pct : null
       };
     }
   }
@@ -702,6 +740,229 @@ function maybeResendCode(sheet, rec, email) {
   if (last && (Date.now() - last.getTime()) < DAY_MS) return; // emailed < 24h ago → skip
   sendCustomerCode(email, rec.code);
   sheet.getRange(rec.rowIndex, 8).setValue(new Date());
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ABANDONED-CART RECOVERY
+   ══════════════════════════════════════════════════════════════════════════
+   sendRecoveryEmails() is driven by a TIME-BASED TRIGGER (every 30 minutes),
+   not by doPost. Install it once from the Apps Script editor:
+     Triggers → Add Trigger → sendRecoveryEmails → Time-driven →
+     Minutes timer → Every 30 minutes
+   Until that trigger exists, nothing sends.
+
+   Safety properties, in order of how much they'd cost you if they broke:
+     1. Never emails anyone who completed an order  (double-checked: the row's
+        own Status, AND a live lookup in Completed Orders).
+     2. Never emails the same address twice in 30 days.
+     3. Never touches carts older than RECOVERY_MAX_AGE_HRS — which is what
+        stops the very first run from blasting the historical backlog.
+     4. Stops at RECOVERY_MAX_PER_RUN and at the real Gmail quota, and tells
+        the operator rather than failing silently.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+// Recovery codes look like BACK15-7F2K9. The prefix is what earns the 15% in
+// api/create-payment.js — see RECOVERY_CODE_PREFIX above.
+function genRecoveryCode() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // no I/O/0/1 — read aloud safely
+  var s = '';
+  for (var i = 0; i < 5; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+  return RECOVERY_CODE_PREFIX + s;
+}
+
+// Issue a personal, single-use, expiring code and record it in Discount Signups
+// so the existing redeemCheck / markUsed machinery validates it unchanged.
+// Returns { code, expiresAt }.
+function issueRecoveryCode_(discountSheet, email, ua) {
+  var code;
+  for (var attempt = 0; attempt < 10; attempt++) {
+    code = genRecoveryCode();
+    if (!findDiscountByCode(discountSheet, code)) break;
+  }
+  var expiresAt = new Date(Date.now() + RECOVERY_EXPIRY_HOURS * 60 * 60 * 1000);
+  var ts = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm:ss');
+  // Column order must match HEADERS.discount exactly.
+  discountSheet.appendRow([ts, String(email).toLowerCase().trim(), 'recovery', ua || '',
+                           code, 'No', '', new Date(), expiresAt, RECOVERY_PERCENT]);
+  return { code: code, expiresAt: expiresAt };
+}
+
+// True if this email was already sent a recovery email in the last 30 days.
+// Prevents a serial abandoner from getting the same offer over and over.
+function recentlyRecovered_(startedValues, email) {
+  var norm = String(email).toLowerCase().trim();
+  var cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  for (var i = 0; i < startedValues.length; i++) {
+    if (String(startedValues[i][2] || '').toLowerCase().trim() !== norm) continue;
+    var sentAt = asDate_(startedValues[i][10]);              // col 11 = Recovery Emailed At
+    if (sentAt && sentAt.getTime() > cutoff) return true;
+  }
+  return false;
+}
+
+function isOwnerEmail_(email) {
+  var norm = String(email || '').toLowerCase().trim();
+  for (var i = 0; i < OWNER_EMAILS.length; i++) {
+    if (String(OWNER_EMAILS[i]).toLowerCase().trim() === norm) return true;
+  }
+  return false;
+}
+
+// The recovery email itself. Copy is fixed by the brand; `name` is optional and
+// the greeting degrades to a bare "היי," when the checkout captured no name.
+function recoveryEmailHtml_(name, code) {
+  var greeting = name ? ('היי ' + escapeHtml(name) + ',') : 'היי,';
+  var p = 'margin:0 0 16px;font-size:15px;line-height:1.8;color:#cfccc6;';
+  return '' +
+    '<div dir="rtl" lang="he" style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:auto;' +
+      'background:#0A0A0A;color:#ffffff;padding:32px 26px;border-radius:12px;text-align:right;">' +
+
+      '<div style="font-size:22px;font-weight:900;color:#E8D900;letter-spacing:1px;text-align:center;">' +
+        'NOGYM<span style="color:#ffffff;">FORME</span></div>' +
+
+      '<p style="' + p + 'margin-top:26px;color:#ffffff;font-size:16px;">' + greeting + '</p>' +
+
+      '<p style="' + p + '">שמנו לב שקפצת לביקור באתר שלנו, הוספת את החבילה לעגלה – ובסוף החלטת לחכות עם זה.</p>' +
+
+      '<p style="' + p + '">אנחנו לגמרי מבינים את ההתלבטות. להוריד את הכרס זה תהליך, ובדיוק בגלל זה הקמנו את ' +
+        'NOGYMFORME. המטרה שלנו היא לעזור לך להגיע לתוצאות, בלי להרגיש שצריך להשתעבד לחדר כושר. ' +
+        'התוסף שבחרת נועד לתת לך בדיוק את הפוש הזה, בדרך קלה ונוחה שמשתלבת בשגרה שלך.</p>' +
+
+      '<p style="' + p + '">כדי לעשות לך את ההחלטה קצת יותר קלה, החלטנו לתת לך הנחת חברים מיוחדת של ' +
+        '<strong style="color:#E8D900;">15%</strong> על החבילה שמחכה לך.</p>' +
+
+      '<p style="' + p + '">כל מה שצריך לעשות הוא להזין את קוד הקופון בקופה:</p>' +
+
+      '<div style="text-align:center;margin:0 0 8px;">' +
+        '<div style="display:inline-block;background:#E8D900;color:#0A0A0A;font-family:monospace;' +
+          'font-size:26px;font-weight:900;letter-spacing:3px;padding:13px 28px;border-radius:10px;">' +
+          escapeHtml(code) + '</div></div>' +
+      '<p style="text-align:center;color:#8a8680;font-size:13px;margin:0 0 22px;">' +
+        '(הקופון תקף ל-48 השעות הקרובות)</p>' +
+
+      '<p style="' + p + 'text-align:center;">' +
+        '<a href="' + RECOVERY_CART_URL + '" style="color:#E8D900;font-weight:bold;text-decoration:underline;">' +
+          'לחץ/י כאן לחזרה לעגלה שלך ומימוש ההנחה.</a></p>' +
+
+      '<div style="text-align:center;margin:22px 0 26px;">' +
+        '<a href="' + RECOVERY_CART_URL + '" style="display:inline-block;background:#E8D900;color:#0A0A0A;' +
+          'font-size:16px;font-weight:900;padding:14px 34px;border-radius:10px;text-decoration:none;">' +
+          'חזרה לעגלה שלי ←</a></div>' +
+
+      '<p style="' + p + '">אם יש לך שאלות על התוסף, איך הוא עובד או מתי רואים תוצאות – אנחנו כאן בשבילך. ' +
+        'פשוט אפשר להשיב למייל הזה ונשמח לעזור.</p>' +
+
+      '<p style="' + p + '">מחכים לראות אותך איתנו!</p>' +
+
+      '<p style="' + p + 'margin-bottom:4px;">צוות NOGYMFORME</p>' +
+      '<p style="margin:0;"><a href="https://www.nogymforme.com" style="color:#E8D900;font-size:14px;">' +
+        'www.nogymforme.com</a></p>' +
+    '</div>';
+}
+
+const RECOVERY_SUBJECT =
+  'אין זמן למכון? אל תוותר על הכרס. העגלה שלך ב-NOGYMFORME מחכה (15% הנחה בפנים!)';
+
+/**
+ * Time-triggered sweep. Safe to run by hand and safe to run twice — every
+ * recipient is stamped in the sheet before the next candidate is considered.
+ * Returns a short summary string (handy when running it manually from the editor).
+ */
+function sendRecoveryEmails() {
+  var sheetId = getSheetId();
+  if (!sheetId) return 'not configured';
+  var ss = SpreadsheetApp.openById(sheetId);
+  var started = ss.getSheetByName(TABS.started);
+  if (!started) return 'no abandoned tab';
+
+  var discount  = ensureSheet(ss, 'discount');
+  var completed = ss.getSheetByName(TABS.completed);
+
+  var last = started.getLastRow();
+  if (last < 2) return 'no rows';
+
+  // ensureSheet() only widens the header row; make sure the DATA range we read
+  // is wide enough to include the two new recovery columns even on a sheet
+  // whose rows predate them.
+  ensureSheet(ss, 'started');
+  var width  = Math.max(HEADERS.started.length, started.getLastColumn());
+  var values = started.getRange(2, 1, last - 1, width).getValues();
+
+  var now      = Date.now();
+  var minAge   = RECOVERY_MIN_AGE_MIN * 60 * 1000;
+  var maxAge   = RECOVERY_MAX_AGE_HRS * 60 * 60 * 1000;
+  var sent = 0, skipped = 0, capped = false;
+  var sentThisRun = {};   // guards duplicates WITHIN a single run
+
+  for (var i = 0; i < values.length; i++) {
+    if (sent >= RECOVERY_MAX_PER_RUN) { capped = true; break; }
+
+    var row     = values[i];
+    var rowNum  = i + 2;
+    var email   = String(row[2] || '').toLowerCase().trim();
+    var name    = String(row[1] || '').trim();
+    var status  = String(row[5] || '').trim();
+    var alreadySent = row[10];                       // col 11 = Recovery Emailed At
+
+    if (!email || email.indexOf('@') < 0) continue;  // no email → nothing to send to
+    if (status !== 'Abandoned')           continue;  // already promoted to Completed
+    if (alreadySent)                      continue;  // this row was handled before
+    if (sentThisRun[email])               continue;
+    if (isOwnerEmail_(email))             continue;  // team/test checkouts
+
+    var ts = asDate_(row[0]);
+    if (!ts) continue;
+    var age = now - ts.getTime();
+    if (age < minAge || age > maxAge) continue;      // too fresh, or out of scope
+
+    // Belt-and-braces: promoteAbandonedToCompleted() matches on email OR phone
+    // and can miss edge cases. Never send a discount to someone who already paid.
+    if (completed && completedEmailExists(completed, email)) { skipped++; continue; }
+    if (recentlyRecovered_(values, email))                   { skipped++; continue; }
+
+    // Real quota, not just our own cap. GmailApp throws once exhausted, which
+    // would abort the whole run mid-sweep and lose the stamping.
+    if (MailApp.getRemainingDailyQuota() < 5) { capped = true; break; }
+
+    var issued = issueRecoveryCode_(discount, email, String(row[6] || ''));
+    sendCustomerEmail_(email, RECOVERY_SUBJECT, recoveryEmailHtml_(name, issued.code));
+
+    // Stamp AFTER sending, so a crash mid-send retries rather than silently
+    // skipping the customer forever.
+    started.getRange(rowNum, 11).setValue(new Date());
+    started.getRange(rowNum, 12).setValue(issued.code);
+    sentThisRun[email] = true;
+    sent++;
+  }
+
+  if (capped) {
+    notifyOps_('⚠️ NGFM recovery emails hit the send cap',
+      'sendRecoveryEmails stopped after ' + sent + ' sends (cap ' + RECOVERY_MAX_PER_RUN +
+      ', Gmail quota left ' + MailApp.getRemainingDailyQuota() + '). ' +
+      'Remaining carts will be picked up on the next run if still inside the ' +
+      RECOVERY_MAX_AGE_HRS + 'h window.');
+  }
+  return 'sent ' + sent + ', skipped ' + skipped + (capped ? ', CAPPED' : '');
+}
+
+/**
+ * ONE-OFF TEST. Run this from the Apps Script editor to send yourself the real
+ * email with a real, redeemable code — without touching the Abandoned tab and
+ * without waiting for the trigger. Change the address if you like.
+ * The code it issues is genuine: you can spend it at checkout to verify 15%.
+ */
+function testRecoveryEmail() {
+  var sheetId = getSheetId();
+  if (!sheetId) throw new Error('Sheet not configured — set the script property first.');
+  var ss = SpreadsheetApp.openById(sheetId);
+  var discount = ensureSheet(ss, 'discount');
+
+  var to = 'davidkain1@gmail.com';
+  var issued = issueRecoveryCode_(discount, to, 'manual-test');
+  sendCustomerEmail_(to, RECOVERY_SUBJECT, recoveryEmailHtml_('דוד', issued.code));
+  Logger.log('Sent to %s — code %s, expires %s', to, issued.code,
+             Utilities.formatDate(issued.expiresAt, TIMEZONE, 'yyyy-MM-dd HH:mm'));
+  return issued.code;
 }
 
 // Branded order-confirmation email to the BUYER, sent once a payment is
