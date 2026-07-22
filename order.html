@@ -28,7 +28,7 @@
   <title>השלמת הזמנה | NOGYMFORME</title>
   <meta name="robots" content="noindex,follow">
   <link rel="icon" type="image/svg+xml" href="/app-icon.svg">
-  <meta name="theme-color" content="#0A0A0A">
+  <meta name="theme-color" content="#f4f1e9">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800;900&family=Heebo:wght@400;500;700;800;900&family=Rubik:wght@500;700;800;900&display=swap" rel="stylesheet">
@@ -53,17 +53,18 @@
 
   <style>
     :root {
-      --black:       #08080a;
-      --deep:        #0d0d10;
-      --card:        #131317;
-      --border:      rgba(255,255,255,0.08);
-      --border-mid:  #2c2c30;
+      --black:       #f4f1e9;
+      --deep:        #ece9df;
+      --card:        #ffffff;
+      --border:      rgba(0,0,0,0.10);
+      --border-mid:  #d9d5c9;
       --gold:        #f2cb1b;
       --gold-light:  #fde585;
       --gold-muted:  rgba(242,203,27,0.15);
-      --white:       #f5f4f0;
-      --grey:        #9a9893;
-      --grey-light:  #c9c7c2;
+      --gold-ink:    #a9760a;
+      --white:       #141210;
+      --grey:        #6f6b62;
+      --grey-light:  #3f3b33;
       --red:         #b83232;
       --green:       #2e7d32;
       --font:        'Heebo', sans-serif;
@@ -110,7 +111,7 @@
       font-size: 20px; font-weight:900; letter-spacing:-.5px;
       color: var(--white); text-decoration:none;
     }
-    .co-logo span { color: var(--gold); }
+    .co-logo span { color:var(--gold-ink); }
     .co-back {
       font-size: 13px; color: var(--grey);
       text-decoration:none; display:flex; align-items:center; gap:6px;
@@ -160,10 +161,10 @@
 
     /* sign-in link */
     .sign-in-link {
-      font-size:13px; color:var(--gold); text-decoration:none;
+      font-size:13px; color:var(--gold-ink); text-decoration:none;
       border-bottom:1px solid transparent; transition:border-color .2s;
     }
-    .sign-in-link:hover { border-color:var(--gold); }
+    .sign-in-link:hover { border-color:var(--gold-ink); }
 
     /* form rows */
     .field-row { display:grid; gap:12px; margin-bottom:12px; }
@@ -189,7 +190,7 @@
     }
     .field-input::placeholder { color: var(--grey); }
     .field-input:focus {
-      border-color: var(--gold);
+      border-color:var(--gold-ink);
       box-shadow: 0 0 0 3px var(--gold-muted);
     }
     .field-input.error {
@@ -228,7 +229,7 @@
       cursor:pointer;
     }
     .checkbox-row input[type=checkbox] {
-      width:18px; height:18px; cursor:pointer; accent-color:var(--gold);
+      width:18px; height:18px; cursor:pointer; accent-color:var(--gold-ink);
       flex-shrink:0;
     }
     .checkbox-label { font-size:14px; color:var(--grey-light); }
@@ -256,7 +257,7 @@
     }
     .shipping-name { font-size:15px; font-weight:600; }
     .shipping-sub { font-size:13px; color:var(--grey); }
-    .shipping-price { font-size:15px; font-weight:700; color:var(--gold); }
+    .shipping-price { font-size:15px; font-weight:700; color:var(--gold-ink); }
 
     /* payment icons row */
     .payment-icons {
@@ -279,7 +280,7 @@
     .co-submit-btn {
       width:100%;
       background: var(--gold);
-      color: var(--black);
+      color:#1a1206;
       font-family: var(--font);
       font-size: 17px;
       font-weight: 800;
@@ -331,7 +332,7 @@
     .summary-toggle-left { display:flex; align-items:center; gap:8px; }
     .summary-toggle-icon { transition:transform .3s; }
     .summary-toggle.open .summary-toggle-icon { transform:rotate(180deg); }
-    .summary-toggle-total { color:var(--gold); font-weight:800; }
+    .summary-toggle-total { color:var(--gold-ink); font-weight:800; }
 
     .summary-inner { padding: 20px; }
     .summary-inner.collapsed { display:none; }
@@ -354,7 +355,7 @@
     .product-qty-badge {
       position:absolute; top:-8px; left:-8px;
       background: var(--grey);
-      color: var(--black);
+      color:#1a1206;
       font-size:11px; font-weight:800;
       width:20px; height:20px; border-radius:50%;
       display:flex; align-items:center; justify-content:center;
@@ -380,7 +381,7 @@
       direction:rtl;
     }
     .coupon-input::placeholder { color:var(--grey); }
-    .coupon-input:focus { border-color:var(--gold); }
+    .coupon-input:focus { border-color:var(--gold-ink); }
     .coupon-apply-btn {
       background: var(--card);
       border: 1px solid var(--border-mid);
@@ -390,7 +391,7 @@
       color:var(--white); cursor:pointer; white-space:nowrap;
       transition:border-color .2s, color .2s;
     }
-    .coupon-apply-btn:hover { border-color:var(--gold); color:var(--gold); }
+    .coupon-apply-btn:hover { border-color:var(--gold-ink); color:var(--gold-ink); }
     .coupon-success {
       font-size:13px; color:#4caf50; margin-top:-10px; margin-bottom:6px;
       display:none;
@@ -409,7 +410,7 @@
       line-height: 1.55;
     }
     .sub-discount-note strong {
-      color: var(--gold);
+      color:var(--gold-ink);
       font-weight: 800;
     }
 
@@ -427,7 +428,7 @@
       font-size:16px; font-weight:700; color:var(--white);
     }
     .totals-row.grand .totals-value {
-      font-size:20px; font-weight:900; color:var(--gold);
+      font-size:20px; font-weight:900; color:var(--gold-ink);
     }
     .totals-installment {
       font-size:12px; color:var(--grey); text-align:center;
@@ -496,7 +497,7 @@
     }
     .success-back-btn {
       display:inline-block;
-      background:var(--gold); color:var(--black);
+      background:var(--gold); color:#1a1206;
       font-family:var(--font); font-size:15px; font-weight:800;
       padding:14px 36px; border-radius:var(--radius-pill);
       text-decoration:none; transition:background .2s;
@@ -591,7 +592,7 @@
     .brand-inline {
       display: inline-block;
       font-weight: 900;
-      color: var(--gold);
+      color:var(--gold-ink);
       letter-spacing: -.2px;
       vertical-align: baseline;
     }
