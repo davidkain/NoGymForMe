@@ -27,7 +27,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NOGYMFORME | הורדת האפליקציה</title>
   <link rel="icon" type="image/svg+xml" href="/app-icon.svg">
-  <meta name="theme-color" content="#0A0A0A">
+  <meta name="theme-color" content="#f4f1e9">
   <!-- This page is the QR-code target for app downloads. Reachable at /app. -->
   <meta name="robots" content="noindex">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,14 +53,15 @@
 
   <style>
     :root {
-      --black: #111111;
-      --deep: #181818;
-      --card: #1e1e1e;
-      --border: #2a2a2a;
-      --gold: #E8D900;
-      --white: #f0ece4;
-      --grey: #8a8680;
-      --grey-light: #b0aba4;
+      --black: #f4f1e9;
+      --deep: #ece9df;
+      --card: #ffffff;
+      --border: rgba(0,0,0,0.10);
+      --gold: #f2cb1b;
+      --gold-ink: #a9760a;
+      --white: #141210;
+      --grey: #6f6b62;
+      --grey-light: #4a463e;
       --font-display: 'Rubik', 'Assistant', sans-serif;
       --font-body: 'Assistant', sans-serif;
       --radius-pill: 100px;
@@ -100,7 +101,7 @@
       font-weight: 900;
       font-size: 22px;
       letter-spacing: 1px;
-      color: var(--gold);
+      color: var(--gold-ink);
       margin-bottom: 28px;
       position: relative;
       z-index: 1;
@@ -172,7 +173,7 @@
     }
     @media (hover: hover) {
       .app-store-btn:hover {
-        border-color: var(--gold);
+        border-color: var(--gold-ink);
         transform: translateY(-1px);
       }
     }
@@ -271,7 +272,7 @@
     .modal-copy .team {
       display: block;
       margin-top: 12px;
-      color: var(--gold);
+      color: var(--gold-ink);
       font-weight: 800;
     }
     #waitForm { display: flex; flex-direction: column; gap: 12px; }
@@ -288,10 +289,10 @@
       outline: none;
       transition: border-color .2s;
     }
-    #waitEmail:focus { border-color: var(--gold); }
+    #waitEmail:focus { border-color: var(--gold-ink); }
     #waitSubmit {
       background: var(--gold);
-      color: var(--black);
+      color: #1a1206;
       font-family: var(--font-display);
       font-weight: 900;
       font-size: 16px;
@@ -359,10 +360,10 @@
       outline: none;
       transition: border-color .2s;
     }
-    #gateEmail:focus { border-color: var(--gold); }
+    #gateEmail:focus { border-color: var(--gold-ink); }
     #gateSubmit {
       background: var(--gold);
-      color: var(--black);
+      color: #1a1206;
       font-family: var(--font-display);
       font-weight: 900;
       font-size: 16px;
