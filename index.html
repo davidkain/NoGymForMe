@@ -2090,8 +2090,9 @@
       starter: { name: 'יאללה, בוא ננסה', variant: '2 בקבוקים · 180 קפסולות',  price: 396 },
       results: { name: 'חבילת אול-אין',   variant: '3 בקבוקים · 270 קפסולות',  price: 496 }
     };
+    var TS_KEY = 'ngfm_cart_ts';                    // last time the cart was touched
+    var CART_TTL_MS = 7 * 24 * 60 * 60 * 1000;      // carts go stale after a week
     var cart = [];
-    var proceedingToCheckout = false;   // true once heading to checkout — suppresses the abandon beacon
     var lastFocus = null;
     var $ = function (id) { return document.getElementById(id); };
     function fmt(n) { return '₪' + Math.round(n).toLocaleString('he-IL'); }
@@ -2099,13 +2100,33 @@
     function load() {
       try {
         var raw = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
-        if (Array.isArray(raw)) {
-          cart = raw.filter(function (it) { return it && CART_PLANS[it.plan]; })
-                    .map(function (it) { var q = parseInt(it.qty, 10); return { plan: it.plan, qty: (q >= 1 ? Math.min(q, 20) : 1) }; });
+        if (!Array.isArray(raw)) return;
+
+        /* Carts expire a week after they were last touched, so a shopper who
+           wandered off in June doesn't come back to a cart they've forgotten
+           picking. A cart with no stamp predates this code: stamp it now rather
+           than bin it, so nobody mid-purchase on deploy day loses their basket. */
+        var ts = parseInt(localStorage.getItem(TS_KEY), 10);
+        if (!ts) {
+          localStorage.setItem(TS_KEY, String(Date.now()));
+        } else if (Date.now() - ts > CART_TTL_MS) {
+          localStorage.removeItem(LS_KEY);
+          localStorage.removeItem(TS_KEY);
+          return;                                   // cart stays []
         }
+
+        cart = raw.filter(function (it) { return it && CART_PLANS[it.plan]; })
+                  .map(function (it) { var q = parseInt(it.qty, 10); return { plan: it.plan, qty: (q >= 1 ? Math.min(q, 20) : 1) }; });
       } catch (e) { cart = []; }
     }
-    function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(cart)); } catch (e) {} }
+    function save() {
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(cart));
+        // Touching the cart resets the clock; emptying it drops the stamp too.
+        if (cart.length) localStorage.setItem(TS_KEY, String(Date.now()));
+        else localStorage.removeItem(TS_KEY);
+      } catch (e) {}
+    }
 
     function open() {
       lastFocus = document.activeElement;
@@ -2207,44 +2228,28 @@
          alike. Firing here as well double-counted everyone who used the cart. */
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({ event: 'InitiateCheckout', value: subtotal(), currency: 'ILS', quantity: count() });
-      proceedingToCheckout = true;   // going to checkout, not abandoning
       window.location.href = 'order.html';
     }
 
-    /* ── Cart-stage abandonment ────────────────────────────────────────────
-       Fire a "started" (abandoned cart) event when a visitor has items in the
-       cart and LEAVES the page without heading to checkout. Deduped to once per
-       tab session. Carries the popup email if we captured one; else anonymous. */
-    function cartPlanField() {
-      if (cart.length === 1 && cart[0].qty === 1) return cart[0].plan;   // single package → key (matches order.html)
-      return cart.map(function (r) { return CART_PLANS[r.plan].name + (r.qty > 1 ? ' ×' + r.qty : ''); }).join(', ');
-    }
-    function lastKnownEmail() {
-      try {
-        var arr = JSON.parse(localStorage.getItem('ngfm_discount_emails') || '[]');
-        if (Array.isArray(arr) && arr.length) return arr[arr.length - 1];
-      } catch (e) {}
-      return '';
-    }
-    function sendCartAbandon() {
-      if (proceedingToCheckout || !cart.length) return;
-      try {
-        if (sessionStorage.getItem('ngfm_cart_abandon_sent')) return;
-        sessionStorage.setItem('ngfm_cart_abandon_sent', '1');
-      } catch (e) {}
-      if (!window.NGFMTrack) return;
-      var payload = { plan: cartPlanField(), email: lastKnownEmail() };
-      if (typeof NGFMTrack._startedBeacon === 'function') NGFMTrack._startedBeacon(payload);   // sendBeacon — survives unload
-      else if (typeof NGFMTrack.started === 'function') NGFMTrack.started(payload);
-    }
+    /* ── NO cart-stage abandonment beacon here — deliberately ──────────────
+       This used to fire a "started" event whenever a visitor had items in the
+       cart and the page went hidden. On mobile, `visibilitychange → hidden`
+       fires on every app switch, screen lock and notification pull-down, so
+       ordinary browsing was logged as an abandoned checkout. Worse, the cart
+       never expired, so a returning visitor with an old cart produced a fresh
+       row every session, and rows carrying the popup email triggered a BACK15
+       recovery discount to people who never reached checkout.
+
+       An abandoned checkout now means exactly one thing: the shopper reached
+       order.html, entered an email or phone, and left without paying. That is
+       captured by NGFMTrack.watchAbandon() in order.html. Do not re-add a
+       cart-stage beacon here without a contact-gated, time-bounded trigger. */
 
     function init() {
       load();
       $('ngfmCartClose').addEventListener('click', close);
       $('ngfmScrim').addEventListener('click', close);
       $('ngfmCartCheckout').addEventListener('click', checkout);
-      window.addEventListener('pagehide', sendCartAbandon);
-      document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') sendCartAbandon(); });
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && $('ngfmDrawer').classList.contains('open')) close();
       });
