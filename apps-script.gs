@@ -493,7 +493,15 @@ function doPost(e) {
     var skipEmail = (type === 'started' && !data.email && !data.phone);
     // …and don't alert twice for the same lead inside a day. The row above is
     // already written either way, so throttling costs no data.
-    if (!skipEmail && type === 'started' && alertedRecently_(sheet, data)) skipEmail = true;
+    //
+    // Fail OPEN, deliberately. The throttle is a convenience; alerting is not.
+    // If this ever throws — a renamed helper, a sheet reshaped by hand — the
+    // cost of swallowing it is a duplicate email, while the cost of letting it
+    // propagate is that doPost dies here and the operator silently stops being
+    // told about abandoned checkouts altogether. Noisy beats blind.
+    if (!skipEmail && type === 'started') {
+      try { if (alertedRecently_(sheet, data)) skipEmail = true; } catch (e) {}
+    }
     if (!skipEmail) sendNotification(type, data, ss);
 
     // Email the customer their freshly-minted code, and stamp the send time
