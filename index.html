@@ -1501,81 +1501,31 @@
   <script src="tracking.js"></script>
   <script>
     // ─────────────────────────────────────────────────────────────────────────
-    // PURCHASE ORCHESTRATION
+    // PACKAGE CATALOGUE
     // ─────────────────────────────────────────────────────────────────────────
 
-    // Package catalogue - single source of truth for prices and labels.
+    /* Single source of truth for prices and labels at page scope. Read by the
+       ViewContent dwell observer below; the cart drawer keeps its own
+       CART_PLANS (same packages, plus the variant strings the drawer renders).
+       Prices here are display-only — api/create-payment.js re-prices the order
+       server-side and is the authority on what anyone is actually charged. */
     var PLANS = {
       single:       { name: 'חבילת הביישן',         price: 198, currency: 'ILS', quantity: 1 },
       starter:      { name: 'חבילת יאללה, בוא ננסה', price: 396, currency: 'ILS', quantity: 2 },
       results:      { name: 'חבילת אול-אין',         price: 496, currency: 'ILS', quantity: 3 }
     };
 
-    /**
-     * handlePurchase(planId)
-     *
-     * Fires tracking events (FB Pixel + GTM dataLayer + NGFMTrack),
-     * then redirects to the order page.
-     *
-     * To connect a payment API later:
-     *   1. Replace (or augment) the window.location redirect below with
-     *      your gateway initialisation call (e.g. Stripe.redirectToCheckout,
-     *      or a local Israeli gateway like Cardcom / Tranzila / Grow).
-     *   2. Pass `plan.price` and `plan.currency` to the gateway.
-     *   3. On success callback, call NGFMTrack.completed({ ... }).
-     */
-    function handlePurchase(planId, event) {
-      if (event) event.preventDefault();
+    /* handlePurchase() — the old "buy now" shortcut that skipped the cart
+       drawer — lived here and was removed once nothing called it any more.
+       Every package button now goes through addToCart(), which opens the
+       drawer; order.html owns InitiateCheckout for every route into checkout.
 
-      var plan = PLANS[planId];
-      if (!plan) { console.warn('handlePurchase: unknown plan', planId); return; }
-
-      // ── Facebook Pixel ──────────────────────────────────────────────────
-      // AddToCart, not InitiateCheckout: this is the "buy now" shortcut that
-      // skips the cart drawer, but the visitor has still only PICKED a package.
-      // order.html owns the single InitiateCheckout for every path into
-      // checkout — firing it here too would double-count the same person.
-      if (typeof fbq === 'function') {
-        fbq('track', 'AddToCart', {
-          content_name:     plan.name,
-          content_ids:      [planId],
-          content_type:     'product',
-          value:            plan.price,
-          currency:         plan.currency,
-          num_items:        plan.quantity
-        });
-      }
-      if (typeof ttq !== 'undefined' && typeof ttq.track === 'function') {
-        ttq.track('AddToCart', {
-          content_type: 'product',
-          content_id:   planId,
-          content_name: plan.name,
-          quantity:     plan.quantity,
-          value:        plan.price,
-          currency:     plan.currency
-        });
-      }
-
-      // ── Google Tag Manager dataLayer ────────────────────────────────────
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event:          'InitiateCheckout',
-        plan_id:        planId,
-        plan_name:      plan.name,
-        value:          plan.price,
-        currency:       plan.currency,
-        quantity:       plan.quantity
-      });
-
-      // ── Internal tracker (Google Sheet) ─────────────────────────────────
-      if (window.NGFMTrack) {
-        NGFMTrack.started({ plan: planId });
-      }
-
-      // ── Redirect to order page ───────────────────────────────────────────
-      // TODO: replace with payment gateway call when ready
-      window.location.href = 'order.html?plan=' + encodeURIComponent(planId);
-    }
+       It is worth knowing why it was deleted rather than left lying around: it
+       carried a bare NGFMTrack.started({ plan }) call, which writes a row to
+       the Abandoned Checkouts tab with no contact details. Re-wiring a button
+       to a function like that reintroduces the phantom-abandoned-checkout
+       problem fixed in #77. If a buy-now shortcut is ever wanted again, send
+       AddToCart to the pixels and let order.html own the started event. */
   </script>
   <script>
     // FAQ toggle
