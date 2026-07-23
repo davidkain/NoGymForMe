@@ -491,6 +491,9 @@ function doPost(e) {
     // cart abandonment that carries no email and no phone. Keeps the inbox to
     // contactable leads while metrics still capture every abandon.
     var skipEmail = (type === 'started' && !data.email && !data.phone);
+    // …and don't alert twice for the same lead inside a day. The row above is
+    // already written either way, so throttling costs no data.
+    if (!skipEmail && type === 'started' && alertedRecently_(sheet, data)) skipEmail = true;
     if (!skipEmail) sendNotification(type, data, ss);
 
     // Email the customer their freshly-minted code, and stamp the send time
@@ -1034,6 +1037,43 @@ function sendOrderConfirmation(d) {
     '</div>';
 
   sendCustomerEmail_(email, 'ההזמנה שלך ב-NOGYMFORME התקבלה 🎉', html);
+}
+
+// ── Owner-alert throttle ──────────────────────────────────────────────────
+// One shopper can legitimately produce more than one `started` row: a phone
+// that captures the email first and the phone number a moment later, a second
+// device, a fresh session hours on. Every one of those is a real checkout, so
+// the row belongs in the sheet — but the operator does not need the same lead
+// mailed to them over and over. Cap the 🟠 alert to one per contact per day.
+//
+// This is the server-side half of the fix; tracking.js also dedupes per browser
+// session. Both exist on purpose: the client guard cannot see a second device
+// or a cleared session, and this one cannot stop duplicate ROWS. Between them,
+// the sheet stays complete and the inbox stays readable.
+const ALERT_THROTTLE_HRS = 24;
+
+function alertedRecently_(sheet, d) {
+  const last = sheet.getLastRow();
+  if (last < 3) return false;          // header + the row we just appended = nothing prior
+
+  const email = String(d.email || '').toLowerCase().trim();
+  const phone = String(d.phone || '').replace(/\D/g, '');
+  if (!email && !phone) return false;
+
+  const cutoff = Date.now() - ALERT_THROTTLE_HRS * 60 * 60 * 1000;
+  // Rows 2 .. last-1 — deliberately excluding the row written for THIS event,
+  // which would otherwise match itself and suppress every alert.
+  const values = sheet.getRange(2, 1, last - 2, 4).getValues();
+
+  // Walk backwards: rows are appended chronologically, so the first row older
+  // than the cutoff means every remaining row is older still.
+  for (let i = values.length - 1; i >= 0; i--) {
+    const ts = asDate_(values[i][0]);
+    if (!ts || ts.getTime() < cutoff) break;
+    if (email && String(values[i][2] || '').toLowerCase().trim() === email) return true;
+    if (phone && String(values[i][3] || '').replace(/\D/g, '') === phone) return true;
+  }
+  return false;
 }
 
 function sendNotification(type, d, ss) {
