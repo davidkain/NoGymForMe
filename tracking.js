@@ -273,7 +273,7 @@
      * Fires a "started" beacon for a shopper who has entered an email/phone and
      * then LEAVES the page (closes the tab, navigates away, or switches away)
      * without completing — so the operator gets their contact details to follow
-     * up. Deduped by contact signature, so a person yields at most one alert.
+     * up.
      *
      * @param getSnapshot  fn returning current {name,email,phone,plan,...} or null
      * @param wasCompleted fn returning true once the order was submitted (Pay
@@ -284,16 +284,40 @@
      *                     but noisier). Defaults to leave-only (balanced).
      */
     watchAbandon: function (getSnapshot, wasCompleted, opts) {
-      var lastSentSig = '';
+      /* Dedupe state — deliberately NOT the contact signature.
+         Keying on email+phone meant a shopper who typed their email, glanced at
+         another app, came back, typed their phone and glanced away again sent
+         TWO events and earned TWO owner alerts: the signature had changed, so
+         the guard waved it through. It also lived in a plain variable, so any
+         reload re-armed it from scratch.
+
+         The rule now: at most one send per browser session, plus a single
+         upgrade if the first send carried no email and one appears later. The
+         email address is what the recovery campaign needs, so it is worth one
+         extra row to capture it — and never more than that. */
+      var SENT_KEY = 'ngfm_abandon_sent';   // '1' = sent, '2' = sent WITH an email
+      var memState = '';                    // mirror, for private mode where sessionStorage throws
+
+      function getState() {
+        try { return sessionStorage.getItem(SENT_KEY) || memState; } catch (e) { return memState; }
+      }
+      function setState(v) {
+        memState = v;                       // set first, so a throw below still dedupes in-page
+        try { sessionStorage.setItem(SENT_KEY, v); } catch (e) {}
+      }
+
       function trySend(useBeacon) {
         if (wasCompleted && wasCompleted()) return;
         var snap = getSnapshot();
         if (!snap) return;
         // Only count as "started" if at least email or phone is filled.
         if (!snap.email && !snap.phone) return;
-        var sig = (snap.email || '') + '|' + (snap.phone || '');
-        if (sig === lastSentSig) return;
-        lastSentSig = sig;
+
+        var state = getState();
+        if (state === '2') return;                  // already captured, email and all
+        if (state === '1' && !snap.email) return;   // already sent; nothing new to add
+
+        setState(snap.email ? '2' : '1');
         send('started', snap, !!useBeacon);
       }
 
