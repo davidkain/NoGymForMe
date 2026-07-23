@@ -754,7 +754,8 @@ function maybeResendCode(sheet, rec, email) {
    Safety properties, in order of how much they'd cost you if they broke:
      1. Never emails anyone who completed an order  (double-checked: the row's
         own Status, AND a live lookup in Completed Orders).
-     2. Never emails the same address twice in 30 days.
+     2. Never emails the same address twice, ever — one offer per address for
+        the lifetime of the sheet.
      3. Never touches carts older than RECOVERY_MAX_AGE_HRS — which is what
         stops the very first run from blasting the historical backlog.
      4. Stops at RECOVERY_MAX_PER_RUN and at the real Gmail quota, and tells
@@ -787,15 +788,20 @@ function issueRecoveryCode_(discountSheet, email, ua) {
   return { code: code, expiresAt: expiresAt };
 }
 
-// True if this email was already sent a recovery email in the last 30 days.
-// Prevents a serial abandoner from getting the same offer over and over.
-function recentlyRecovered_(startedValues, email) {
+// True if this email address has EVER been sent a recovery email, for the whole
+// lifetime of the sheet. The 15% code is a one-time win-back offer, not a
+// standing discount someone can farm by abandoning a cart whenever they want
+// money off — so one address gets one offer, permanently.
+//
+// Any non-empty value in the column counts, not just a parseable date: if that
+// cell has something in it we treat the address as spent and skip. Failing
+// closed is the right direction here — the cost of wrongly skipping someone is
+// one unsent email, the cost of wrongly sending is an unlimited discount.
+function alreadyRecovered_(startedValues, email) {
   var norm = String(email).toLowerCase().trim();
-  var cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
   for (var i = 0; i < startedValues.length; i++) {
     if (String(startedValues[i][2] || '').toLowerCase().trim() !== norm) continue;
-    var sentAt = asDate_(startedValues[i][10]);              // col 11 = Recovery Emailed At
-    if (sentAt && sentAt.getTime() > cutoff) return true;
+    if (startedValues[i][10]) return true;                   // col 11 = Recovery Emailed At
   }
   return false;
 }
@@ -933,7 +939,7 @@ function sendRecoveryEmails() {
     // Belt-and-braces: promoteAbandonedToCompleted() matches on email OR phone
     // and can miss edge cases. Never send a discount to someone who already paid.
     if (completed && completedEmailExists(completed, email)) { skipped++; continue; }
-    if (recentlyRecovered_(values, email))                   { skipped++; continue; }
+    if (alreadyRecovered_(values, email))                    { skipped++; continue; }
 
     // Real quota, not just our own cap. GmailApp throws once exhausted, which
     // would abort the whole run mid-sweep and lose the stamping.
