@@ -21,6 +21,17 @@ function syncCompletedOrders() {
   if (!lock.tryLock(10000)) return
 
   try {
+    // Apps Script kills any run at a hard ~6-minute ceiling. This loop makes one
+    // synchronous webhook POST per un-synced row, so a burst of new orders — or a
+    // cold app/DB at low-traffic hours — can push a single run past the wall and
+    // trigger a failure email. Stop at a self-imposed budget WELL short of 6 min
+    // instead: rows left un-stamped simply resume on the next 5-minute run, since
+    // the scan below skips already-stamped rows and continues at the first gap.
+    // 4 minutes leaves headroom for one in-flight fetch (UrlFetchApp can hang up
+    // to ~1 min) to finish before the real kill.
+    var startMs = Date.now()
+    var TIME_BUDGET_MS = 4 * 60 * 1000
+
     var props = PropertiesService.getScriptProperties()
     var url = props.getProperty('APP_WEBHOOK_URL')
     var secret = props.getProperty('ORDERS_WEBHOOK_SECRET')
@@ -59,6 +70,11 @@ function syncCompletedOrders() {
         writeStatus(sheet, row, 'Error: missing plan')
         continue
       }
+
+      // Out of time budget — leave this and any remaining rows for the next run.
+      // Checked here, right before the network-bound POST, so the cheap skips
+      // above (already-synced rows, blank rows) never trip it.
+      if (Date.now() - startMs > TIME_BUDGET_MS) break
 
       var result = postOrder(url, secret, email, plan)
       if (result.ok) {
