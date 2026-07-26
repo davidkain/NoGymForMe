@@ -817,7 +817,8 @@
 
       <div class="summary-inner" id="summaryInner">
 
-        <!-- product lines — one per package in the cart, filled by JS -->
+        <!-- product lines — normally the single package the shopper clicked,
+             filled by JS; still renders multiple for a legacy basket -->
         <div id="productLines"></div>
         <template id="coLineTpl">
           <div class="product-line">
@@ -929,10 +930,36 @@
 
   var params = new URLSearchParams(window.location.search);
 
-  /* Build the order from the cart (localStorage ngfm_cart, set by the shop
-     drawer). Fallback for direct / ad links: a single ?plan= key. Each entry is
-     { key, qty }; unknown keys are dropped, qty clamped to 1..20. */
+  /* Build the order. ?plan= WINS — the homepage has no cart any more, every
+     package button links straight here carrying its own plan key, and that
+     click is the freshest statement of what the shopper wants. Each entry is
+     { key, qty }; unknown keys are dropped, qty clamped to 1..20.
+
+     The order of these two checks is the whole point. It used to be the other
+     way round, which was correct while the side-cart drawer existed and wrong
+     the moment it went away: a visitor still holding a basket in localStorage
+     from the drawer era would click "one bottle" on the homepage and land on a
+     checkout priced for whatever they abandoned last week. Reading ?plan= first
+     makes a fresh click authoritative.
+
+     The localStorage read stays as a FALLBACK, not as the primary source, for
+     one transitional case: someone who had the drawer open when this shipped
+     and pressed its "מעבר לתשלום" button, which navigates to a bare order.html
+     with no query string. They keep their basket instead of being silently
+     repriced to the default package. Once the old 7-day cart TTL has lapsed for
+     everyone, this branch and the removeItem() in index.html can both go. */
   function loadOrder() {
+    var pk = params.get('plan');
+    if (PLANS[pk]) {
+      // A fresh click supersedes any leftover basket — drop it so it cannot
+      // resurface on a later visit that happens to arrive without ?plan=.
+      try {
+        localStorage.removeItem('ngfm_cart');
+        localStorage.removeItem('ngfm_cart_ts');
+      } catch (e) {}
+      return [{ key: pk, qty: 1 }];
+    }
+
     var items = [];
     try {
       var raw = JSON.parse(localStorage.getItem('ngfm_cart') || 'null');
@@ -944,11 +971,8 @@
           items.push({ key: key, qty: qty });
         });
       }
-    } catch (e) { /* malformed cart — fall through to ?plan= */ }
-    if (!items.length) {
-      var pk = params.get('plan');
-      items.push({ key: PLANS[pk] ? pk : 'results', qty: 1 });
-    }
+    } catch (e) { /* malformed cart — fall through to the default package */ }
+    if (!items.length) items.push({ key: 'results', qty: 1 });
     return items;
   }
 
@@ -1311,10 +1335,10 @@
   document.getElementById('payBtn').textContent = 'המשך לתשלום מאובטח';
 
   /* Meta Pixel: the SINGLE "InitiateCheckout" for the whole site. Fires once
-     on load here, which covers every route into checkout — the cart drawer,
-     the "buy now" shortcut, and direct/ad links carrying ?plan=. The homepage
-     deliberately does NOT fire it; it fires AddToCart instead. Keep it that
-     way, or everyone who arrives via the shop gets counted twice.
+     on load here, which covers every route into checkout — package buttons on
+     the homepage, the plan-picker modal, and direct/ad/recovery links carrying
+     ?plan=. The homepage deliberately does NOT fire it; buyNow() there fires
+     AddToCart instead. Keep it that way, or every shopper is counted twice.
 
      NOTE: there is intentionally NO "Purchase" event here. Purchase fires only
      at the verified success step — thank-you.html plus the server-side CAPI
