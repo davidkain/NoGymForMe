@@ -306,18 +306,34 @@
         try { sessionStorage.setItem(SENT_KEY, v); } catch (e) {}
       }
 
+      /* Noise floor. The leave-flush fires on whatever happens to be in the
+         fields at that moment, so "tapped the box, typed one character,
+         switched apps" was indistinguishable from a real lead: through late
+         July 2026 phone numbers arrived as "8" and "0", emails as "מ", ".com"
+         and ",#" — 13 of 14 alerts in a day, each a different visitor, so the
+         server's per-contact throttle could not collapse them either.
+
+         The bar is the checkout form's OWN definition of a valid contact
+         (isValidEmail + 9 digits in order.html), so anything the shopper could
+         actually have paid with still counts, and nothing else does. Mirrored
+         server-side in usableLead_() (apps-script.gs) — this guard only covers
+         browsers running this file, not a stale cached copy or a bot. */
+      function usableEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim()); }
+      function usablePhone(v) { return String(v || '').replace(/\D/g, '').length >= 9; }
+
       function trySend(useBeacon) {
         if (wasCompleted && wasCompleted()) return;
         var snap = getSnapshot();
         if (!snap) return;
-        // Only count as "started" if at least email or phone is filled.
-        if (!snap.email && !snap.phone) return;
+        // Only count as "started" for a contact someone could actually follow up.
+        var hasEmail = usableEmail(snap.email);
+        if (!hasEmail && !usablePhone(snap.phone)) return;
 
         var state = getState();
         if (state === '2') return;                  // already captured, email and all
-        if (state === '1' && !snap.email) return;   // already sent; nothing new to add
+        if (state === '1' && !hasEmail) return;     // already sent; nothing new to add
 
-        setState(snap.email ? '2' : '1');
+        setState(hasEmail ? '2' : '1');
         send('started', snap, !!useBeacon);
       }
 
