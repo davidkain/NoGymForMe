@@ -193,6 +193,11 @@ function doGet(e) {
  *   funnel: { popupSignups, checkoutsStarted, orders },
  *   byPlan: [ {plan, count, revenue}, ... ] }.
  * Team/test rows (owner emails + order-alert CC) are excluded everywhere.
+ *
+ * `checkoutsStarted` counts CONTACTABLE abandoned checkouts only — usableLead_()
+ * stopped recording anonymous and half-typed ones. Expect a step change down at
+ * that deploy (the old figure was ~99% ad-network bot traffic, not shoppers);
+ * numbers either side of it are not comparable.
  */
 function bizStats_(params) {
   var expected = PropertiesService.getScriptProperties().getProperty('ORDERS_STATS_KEY');
@@ -423,6 +428,13 @@ function doPost(e) {
 
     if (!TABS[type]) return jsonOut({ ok: false, error: 'unknown type' });
 
+    // Abandoned checkouts are only worth recording when there is someone to
+    // follow up with. Dropped BEFORE the spreadsheet is even opened, so a flood
+    // costs one function invocation and nothing else. See usableLead_().
+    if (type === 'started' && !usableLead_(data)) {
+      return jsonOut({ ok: true, alreadyExists: false, code: '', skipped: 'no usable contact' });
+    }
+
     const sheetId = getSheetId();
     if (!sheetId) {
       // Fail with a clear message instead of "ארגומנט לא חוקי: id".
@@ -486,12 +498,11 @@ function doPost(e) {
       if (data.email) sendOrderConfirmation(data);
     }
 
-    // Log every abandoned cart to the sheet (row already written above), but only
-    // EMAIL the ones we can act on: skip the owner notification for an anonymous
-    // cart abandonment that carries no email and no phone. Keeps the inbox to
-    // contactable leads while metrics still capture every abandon.
-    var skipEmail = (type === 'started' && !data.email && !data.phone);
-    // …and don't alert twice for the same lead inside a day. The row above is
+    // Every abandoned cart that reaches this point is contactable — usableLead_()
+    // turned the anonymous and half-typed ones away before the sheet was opened.
+    // What is left to decide is only whether to alert AGAIN for the same person.
+    var skipEmail = false;
+    // Don't alert twice for the same lead inside a day. The row above is
     // already written either way, so throttling costs no data.
     //
     // Fail OPEN, deliberately. The throttle is a convenience; alerting is not.
@@ -1045,6 +1056,36 @@ function sendOrderConfirmation(d) {
     '</div>';
 
   sendCustomerEmail_(email, 'ההזמנה שלך ב-NOGYMFORME התקבלה 🎉', html);
+}
+
+// ── What counts as an abandoned checkout worth keeping ────────────────────
+// A `started` event earns a row (and therefore an alert, and eligibility for a
+// 15% recovery code) only when someone could actually be followed up. Two kinds
+// of noise arrive here and neither is a lead:
+//
+//   • Anonymous carts — no email and no phone at all. Through July 2026 these
+//     ran at 1,100–1,200 rows a DAY, 100% of them from one ad network's in-app
+//     browser (`open_news` webviews) with carts like "חבילת אול-אין ×20". They
+//     never emailed anyone (nothing to email), but they buried the real rows
+//     ~100:1, and every alert attaches a full XLSX export of this spreadsheet.
+//
+//   • Fragments — the client's leave-beacon fires on whatever is in the fields,
+//     so a shopper who taps the email box, types one character and switches
+//     apps produced a row and a 🟠 alert. Real examples: phone "8", email
+//     ",#". Each fragment differs, so alertedRecently_() cannot collapse them.
+//
+// The bar is deliberately the checkout form's own validation (order.html:
+// isValidEmail + at least 9 digits) — anything a shopper could have completed
+// the purchase with survives, and the guard can never reject a real Pay-click
+// lead. It rejects obvious noise; it does not try to verify anybody.
+//
+// tracking.js applies the same rule client-side. Both exist on purpose: the
+// client guard spares the round-trip for browsers running the current file,
+// and this one is the only thing a stale cached copy or a bot cannot skip.
+function usableLead_(d) {
+  const email = String((d && d.email) || '').trim();
+  const digits = String((d && d.phone) || '').replace(/\D/g, '');
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || digits.length >= 9;
 }
 
 // ── Owner-alert throttle ──────────────────────────────────────────────────
