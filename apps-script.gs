@@ -575,25 +575,54 @@ function findDiscountByEmail(sheet, email) {
 // Find a discount row by code → { rowIndex, email, code, used, expiresAt, percent } | null.
 // expiresAt is a Date for time-limited codes (recovery) and null for the
 // evergreen popup codes; percent is null unless the row explicitly recorded one.
+// Shape one Discount Signups row into the record redeemCheck/markUsed expect.
+function discountRecord_(rowIndex, row, norm) {
+  var exp = row[8];                                       // col 9  = Expires At
+  var pct = parseInt(row[9], 10);                         // col 10 = Percent
+  return {
+    rowIndex: rowIndex,
+    email: String(row[1] || '').toLowerCase().trim(),     // col 2  = Email
+    code: norm,
+    used: String(row[5] || '').toLowerCase() === 'yes',   // col 6  = Used
+    expiresAt: (exp instanceof Date) ? exp : (exp ? new Date(exp) : null),
+    percent: (pct >= 1 && pct <= 100) ? pct : null
+  };
+}
+
+// Every checkout with a discount code calls this, and it used to pull the ENTIRE
+// tab into the script (getValues over all rows × 10 cols) just to find one code —
+// cost that grows with every code ever issued, on the critical path of a payment.
+//
+// Fast path: let the Sheets backend find the cell and read only that row.
+// matchEntireCell stops BACK15-AB from matching BACK15-ABCDE; matchCase(false)
+// preserves the old case-insensitive comparison.
+//
+// Slow path: on a MISS, fall back to the original full scan. TextFinder compares
+// the whole cell, so a hand-typed row carrying a stray leading/trailing space
+// would not match it, while the old trim()-based loop did. Misses are the error
+// path (an invalid code) so paying twice there is cheap, and correctness stays
+// exactly what it was.
 function findDiscountByCode(sheet, code) {
   var norm = String(code || '').toUpperCase().trim();
   if (!norm) return null;
   var last = sheet.getLastRow();
   if (last < 2) return null;
+
+  var hit = sheet.getRange(2, 5, last - 1, 1)             // col 5 = Code
+    .createTextFinder(norm)
+    .matchEntireCell(true)
+    .matchCase(false)
+    .findNext();
+  if (hit) {
+    var rowIndex = hit.getRow();
+    return discountRecord_(rowIndex, sheet.getRange(rowIndex, 1, 1, 10).getValues()[0], norm);
+  }
+
   var width = Math.max(10, sheet.getLastColumn());
   var values = sheet.getRange(2, 1, last - 1, width).getValues();
   for (var i = 0; i < values.length; i++) {
     if (String(values[i][4] || '').toUpperCase().trim() === norm) { // col 5 = Code
-      var exp = values[i][8];                                       // col 9 = Expires At
-      var pct = parseInt(values[i][9], 10);                         // col 10 = Percent
-      return {
-        rowIndex: i + 2,
-        email: String(values[i][1] || '').toLowerCase().trim(),     // col 2 = Email
-        code: norm,
-        used: String(values[i][5] || '').toLowerCase() === 'yes',   // col 6 = Used
-        expiresAt: (exp instanceof Date) ? exp : (exp ? new Date(exp) : null),
-        percent: (pct >= 1 && pct <= 100) ? pct : null
-      };
+      return discountRecord_(i + 2, values[i], norm);
     }
   }
   return null;

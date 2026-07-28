@@ -63,12 +63,31 @@ async function callTracking(payload, timeoutMs) {
 // almost always answers in under a second. Worst case is bounded at two
 // timeouts. Only worth retrying READ-ONLY payloads (redeemCheck): retrying a
 // write would risk double-applying it.
+//
+// Both paths log elapsed ms. That number is the whole diagnosis when this fails:
+// a slow-but-completing call means the Apps Script itself is the cost, whereas
+// hitting the full timeout twice in a row points at execution contention (the
+// ad-bot doPost traffic occupying Apps Script slots) rather than our own work.
 async function callTrackingWithRetry(payload) {
+  const t0 = Date.now();
   try {
-    return await callTracking(payload);
+    const out = await callTracking(payload);
+    const ms = Date.now() - t0;
+    // Warn while still succeeding, so the budget can be tuned BEFORE it starts
+    // costing checkouts again.
+    if (ms > 4000) console.warn(`[create-payment] slow tracking call: ${ms}ms (budget ${TRACKING_TIMEOUT_MS}ms)`);
+    return out;
   } catch (err) {
-    console.warn('[create-payment] tracking call failed, retrying once:', err && err.name);
-    return await callTracking(payload);
+    console.warn(`[create-payment] tracking call failed after ${Date.now() - t0}ms, retrying once:`, err && err.name);
+    const t1 = Date.now();
+    try {
+      const out = await callTracking(payload);
+      console.warn(`[create-payment] retry succeeded in ${Date.now() - t1}ms`);
+      return out;
+    } catch (err2) {
+      console.error(`[create-payment] retry also failed after ${Date.now() - t1}ms (${Date.now() - t0}ms total)`);
+      throw err2;
+    }
   }
 }
 
