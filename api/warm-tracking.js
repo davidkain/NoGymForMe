@@ -57,11 +57,20 @@ module.exports = async (req, res) => {
   try {
     const r = await fetch(TRACKING_WEBAPP_URL, { signal: ctrl.signal });
     const ms = Date.now() - started;
-    // A cold hit here is the SUCCESS case — it means this ping absorbed the
-    // wake-up that a shopper would otherwise have paid for. Log it either way so
-    // the warm/cold ratio over time shows whether the 5-minute interval is
-    // actually holding the instance open.
-    console.log(`[warm-tracking] ok in ${ms}ms (http ${r.status})${ms > 8000 ? ' — COLD, ping earned its keep' : ''}`);
+    const cold = ms > 8000 ? ' — COLD, ping earned its keep' : '';
+    // Reaching Google is NOT the same as reaching our script. Observed on the
+    // very first run: http 404 after 31.7s, i.e. Google served an error page
+    // instead of doGet. Calling that "ok" would hide a warm-up that stopped
+    // warming anything — precisely the silent failure this endpoint exists to
+    // prevent — so a non-2xx upstream is logged as a warning and reported as
+    // ok:false, even though the HTTP response here stays 200 for the scheduler.
+    if (!r.ok) {
+      console.warn(`[warm-tracking] upstream returned http ${r.status} in ${ms}ms${cold} — script may not have been reached`);
+      return res.status(200).json({ ok: false, ms, upstream: r.status });
+    }
+    // A cold hit is the SUCCESS case. Log warm ones too, so the warm/cold ratio
+    // over time shows whether the 5-minute interval is holding the instance open.
+    console.log(`[warm-tracking] ok in ${ms}ms (http ${r.status})${cold}`);
     return res.status(200).json({ ok: true, ms, upstream: r.status });
   } catch (err) {
     // Never throw: a failed warm-up must not look like a broken deployment, and
