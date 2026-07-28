@@ -836,6 +836,68 @@ function isOwnerEmail_(email) {
   return false;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   OWNER CHECKOUT TEST CODE — 99% off, one use, owner emails only
+   ──────────────────────────────────────────────────────────────────────────
+   Mints a code that turns a ₪198 package into ~₪2 so the REAL SUMIT flow can
+   be run with a live card: redirect → payment → payment-callback → markUsed →
+   confirmation email. Cheap enough to throw away, non-zero so SUMIT still
+   accepts the line item.
+
+   Run it MANUALLY from the Apps Script editor (Run ▸ issueOwnerTestCode) and
+   read the code out of the execution log. It is deliberately NOT reachable
+   from doPost — there is no request type that calls it, so no one on the
+   internet can mint a 99% code.
+
+   Two independent locks keep this from becoming a discount leak:
+     1. This function refuses any address not in OWNER_EMAILS, so it can't be
+        repurposed to hand 99% to a customer.
+     2. The 99% itself comes from OWNER_TEST_CODE_PREFIX matching PREFIX_PERCENTS
+        in the Vercel repo's lib/discount-codes.js — the sheet's Percent column
+        is display-only. Keep the prefix IN SYNC with that file; change it here
+        alone and the charge silently drops to the 10% default.
+   ══════════════════════════════════════════════════════════════════════════ */
+const OWNER_TEST_CODE_PREFIX = 'TEST99-';
+const OWNER_TEST_EXPIRY_HOURS = 24;   // short fuse: a leaked code dies fast
+
+// Change this before running if you want the code bound to a different owner
+// address (must be listed in OWNER_EMAILS).
+const OWNER_TEST_EMAIL = 'davidkain1@gmail.com';
+
+function issueOwnerTestCode() {
+  var email = String(OWNER_TEST_EMAIL || '').toLowerCase().trim();
+  if (!isOwnerEmail_(email)) {
+    throw new Error('Refusing to issue a 99% code to ' + email +
+                    ' — add it to OWNER_EMAILS first if this is intentional.');
+  }
+
+  var sheetId = getSheetId();
+  if (!sheetId) throw new Error('SHEET_ID is not configured.');
+  var sheet = ensureSheet(SpreadsheetApp.openById(sheetId), 'discount');
+
+  // Random suffix (same read-aloud-safe alphabet as recovery codes) so the code
+  // is unguessable even though the prefix is public in the repo.
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code;
+  for (var attempt = 0; attempt < 10; attempt++) {
+    var s = '';
+    for (var i = 0; i < 6; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+    code = OWNER_TEST_CODE_PREFIX + s;
+    if (!findDiscountByCode(sheet, code)) break;
+  }
+
+  var expiresAt = new Date(Date.now() + OWNER_TEST_EXPIRY_HOURS * 60 * 60 * 1000);
+  var ts = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm:ss');
+  // Column order must match HEADERS.discount exactly.
+  sheet.appendRow([ts, email, 'owner_test', 'manual', code, 'No', '', '', expiresAt, 99]);
+
+  var msg = 'TEST CODE: ' + code + '\nEmail: ' + email +
+            '\nExpires: ' + Utilities.formatDate(expiresAt, TIMEZONE, 'yyyy-MM-dd HH:mm') +
+            '\nSingle use — ₪198 package becomes ₪2.';
+  Logger.log(msg);
+  return msg;
+}
+
 // The checkout's Name field is free text and never required (the abandon
 // beacon only gates on email-OR-phone), so the sheet holds plenty of junk:
 // test input, addresses pasted into the wrong box, stray keystrokes. Greeting
