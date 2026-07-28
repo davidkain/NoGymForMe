@@ -32,11 +32,19 @@ const TRACKING_WEBAPP_URL = process.env.TRACKING_WEBAPP_URL ||
 
 const { discountPercentFor } = require('../lib/discount-codes');
 
+// A COLD Apps Script container needs well over the 6s this used to allow:
+// redeemCheck does SpreadsheetApp.openById + a full read of the Discount Signups
+// tab, which is routinely 6-10s on first hit. The old budget turned every cold
+// start into a hard checkout failure ("לא הצלחנו לאמת את קוד ההנחה כרגע") even
+// though the code was perfectly valid — observed in production 2026-07-28 as
+// `AbortError` out of the redeemCheck call below.
+const TRACKING_TIMEOUT_MS = 12000;
+
 // POST a JSON payload to the Apps Script web app and return its parsed JSON.
 // text/plain avoids a CORS preflight (matches the browser tracking client).
 async function callTracking(payload, timeoutMs) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), timeoutMs || 6000);
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs || TRACKING_TIMEOUT_MS);
   try {
     const r = await fetch(TRACKING_WEBAPP_URL, {
       method: 'POST',
@@ -47,6 +55,20 @@ async function callTracking(payload, timeoutMs) {
     return await r.json();
   } finally {
     clearTimeout(timer);
+  }
+}
+
+// One retry, because aborting our fetch does NOT cancel the Apps Script run —
+// it finishes server-side and leaves the container warm, so the second attempt
+// almost always answers in under a second. Worst case is bounded at two
+// timeouts. Only worth retrying READ-ONLY payloads (redeemCheck): retrying a
+// write would risk double-applying it.
+async function callTrackingWithRetry(payload) {
+  try {
+    return await callTracking(payload);
+  } catch (err) {
+    console.warn('[create-payment] tracking call failed, retrying once:', err && err.name);
+    return await callTracking(payload);
   }
 }
 
@@ -141,7 +163,7 @@ module.exports = async (req, res) => {
     if (!email) return res.status(400).json({ error: discountMessage('noemail'), reason: 'noemail' });
     let check;
     try {
-      check = await callTracking({ type: 'redeemCheck', code, email });
+      check = await callTrackingWithRetry({ type: 'redeemCheck', code, email });
     } catch (err) {
       console.error('[create-payment] discount validation unreachable:', err);
       return res.status(502).json({ error: discountMessage('unreachable'), reason: 'unreachable' });
