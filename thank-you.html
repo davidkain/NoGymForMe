@@ -198,7 +198,15 @@
       // confirmation email. Clear the stash right after so a page refresh can't
       // record the order or email the buyer twice.
       try {
-        if (pending && window.NGFMTrack && typeof NGFMTrack.completed === 'function') {
+        // rec=1 means api/payment-callback.js ALREADY wrote the Completed Orders
+        // row (and triggered the buyer's confirmation email) from the verified-
+        // payment point, so we must not write it again: apps-script.gs appends
+        // unconditionally with no idempotency on the order number, so a second
+        // write means a duplicate row AND a second email to the customer.
+        // The server only claims single-plan orders, so a multi-item cart still
+        // lands here — where the per-item `order.summary` breakdown exists.
+        var alreadyRecorded = params.get('rec') === '1';
+        if (pending && !alreadyRecorded && window.NGFMTrack && typeof NGFMTrack.completed === 'function') {
           var orderNum = (params.get('eid') || '').replace(/^purchase_/, '');
           NGFMTrack.completed({
             orderNum: orderNum,
@@ -211,6 +219,10 @@
             plan:     order.summary,   // e.g. "single x1, results x2" for a cart
             total:    '₪' + value + (planKey === 'subscription' ? '/חודש' : '')
           });
+        }
+        // Clear the stash whichever writer won, so a page refresh can never
+        // record the order or email the buyer twice.
+        if (pending) {
           localStorage.removeItem('ngfm_order');
           localStorage.removeItem('ngfm_cart');   // empty the cart after a completed order
         }
