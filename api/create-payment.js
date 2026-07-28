@@ -38,7 +38,15 @@ const { discountPercentFor } = require('../lib/discount-codes');
 // start into a hard checkout failure ("לא הצלחנו לאמת את קוד ההנחה כרגע") even
 // though the code was perfectly valid — observed in production 2026-07-28 as
 // `AbortError` out of the redeemCheck call below.
-const TRACKING_TIMEOUT_MS = 12000;
+// Sized from MEASURED production attempt-1 durations (2026-07-28): 8.6s, 11.6s,
+// 12.0s+. A 12s budget sat on the median, which is the worst possible place for
+// one — half of all calls paid a full timeout plus a retry, so a validation that
+// would have finished in 12.5s took 14s instead, and the customer waited longer
+// than if we had simply been patient. Vercel allows 300s, so there is no reason
+// to be stingy here: let a slow-but-healthy call finish, and keep the retry for
+// calls that genuinely fail (an abort at 25s, or the HTML-instead-of-JSON error
+// page Apps Script intermittently returns, seen as SyntaxError in the logs).
+const TRACKING_TIMEOUT_MS = 25000;
 
 // POST a JSON payload to the Apps Script web app and return its parsed JSON.
 // text/plain avoids a CORS preflight (matches the browser tracking client).
