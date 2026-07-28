@@ -1,5 +1,8 @@
 {
   "rewrites": [
     { "source": "/app", "destination": "/app.html" }
+  ],
+  "crons": [
+    { "path": "/api/warm-tracking", "schedule": "*/5 * * * *" }
   ]
 }
