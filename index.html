@@ -1639,7 +1639,7 @@
     });
 
     // ── DISCOUNT POPUP ──
-    // Show once per session: after 12 s, or on exit-intent.
+    // Show once per session: after 50 s, or on exit-intent.
     // (Per-email dedup happens at submit time - see submitPopup below.)
     (function initPopup() {
       if (sessionStorage.getItem('ngfm_popup_seen')) return;
@@ -1649,7 +1649,7 @@
         shown = true;
         document.getElementById('discountPopup').classList.add('popup-visible');
       }
-      setTimeout(showPopup, 12000);
+      setTimeout(showPopup, 50000);
       document.addEventListener('mouseleave', function(e) {
         if (e.clientY <= 0) showPopup();
       });
