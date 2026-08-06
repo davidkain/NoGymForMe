@@ -283,9 +283,12 @@
     .hero.hero--photo .hero-photo-d{
       display:block;
       /* height drives the box; aspect-ratio matches hero-lab.jpg exactly, so
-         `cover` fits the full frame with nothing cropped */
-      height:clamp(430px,42vw,620px);
-      aspect-ratio:1321/1926;
+         `cover` fits the full frame with nothing cropped. The photo is now
+         landscape (1.22), so height is capped lower than it was when the
+         source was a portrait — at the old clamp the box grew to ~758px wide
+         and left the headline column too narrow to set. */
+      height:clamp(300px,30vw,460px);
+      aspect-ratio:1321/1080;
       background:url('hero-lab.jpg') center center / cover no-repeat;
       border-radius:18px;border:1px solid var(--line);
       box-shadow:0 24px 60px rgba(20,16,8,.16);
