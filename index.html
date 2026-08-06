@@ -247,7 +247,7 @@
     padding:96px 0 44px;
     background:
       linear-gradient(to top, var(--bg) 6%, rgba(8,8,10,.55) 40%, rgba(8,8,10,.05) 70%),
-      url('hero-lab.jpg');
+      url('hero-founder.jpg');
     background-repeat:no-repeat,no-repeat;
     background-size:cover,cover;
     background-position:center, 28% top;
@@ -265,33 +265,51 @@
   .hero.hero--photo .hero-copy .hero-sub,
   .hero.hero--photo .hero-copy .lead{text-shadow:0 2px 18px rgba(0,0,0,.75)}
 
-  /* Desktop: SPLIT — founder photo on the left, copy on the right.
-     The founder shot is a portrait, so it can't be cropped into a full-bleed
-     16:9 band without losing either his head or the bottle. Giving it its own
-     column lets the whole composition show at its native ratio. */
+  /* Desktop: founder photo bleeding across the left of the section with the
+     copy over the right, the photo dissolving into the page background. */
   @media(min-width:981px){
     .hero.hero--photo{
+      position:relative;overflow:hidden;
       align-items:center;
-      min-height:0;height:auto;
-      padding:72px 0 84px;
+      min-height:clamp(460px,42vw,600px);height:auto;
+      padding:104px 0 72px;
       background:var(--bg);
     }
-    .hero.hero--photo .hero-grid{
-      display:grid;grid-template-columns:1fr auto;
-      gap:clamp(32px,5vw,72px);align-items:center;
-    }
+    .hero.hero--photo .hero-grid{display:block}
+    .hero.hero--photo .hero-copy{max-width:min(560px,54%)}
+    /* Full-bleed photo running off the left edge, melting into the page
+       background rather than sitting in a card.
+       Sized by HEIGHT (`auto 100%`), not `cover`: at this crop the subject
+       fills the frame top to bottom, so a full-width `cover` band would have
+       to crop either the head or the bottle out — the head sits at 12% of the
+       frame and the bottle runs to 94%, which no wide band can both contain. */
     .hero.hero--photo .hero-photo-d{
       display:block;
-      /* height drives the box; aspect-ratio matches hero-lab.jpg exactly, so
-         `cover` fits the full frame with nothing cropped. The photo is now
-         landscape (1.22), so height is capped lower than it was when the
-         source was a portrait — at the old clamp the box grew to ~758px wide
-         and left the headline column too narrow to set. */
-      height:clamp(300px,30vw,460px);
-      aspect-ratio:1321/1080;
-      background:url('hero-lab.jpg') center center / cover no-repeat;
-      border-radius:18px;border:1px solid var(--line);
-      box-shadow:0 24px 60px rgba(20,16,8,.16);
+      position:absolute;top:0;bottom:0;left:0;right:auto;z-index:0;
+      /* width follows the height via the source ratio, so the box is exactly
+         the photo — no dead area, and `cover` crops nothing */
+      width:auto;height:auto;aspect-ratio:1321/1080;
+      background:url('hero-founder.jpg') left center / cover no-repeat;
+      border:0;border-radius:0;box-shadow:none;
+    }
+    /* Cream washes so the photo dissolves into the page instead of ending on a
+       hard line. Percentages resolve against THIS box, not the section, so the
+       fade stays aligned to the photo's real edge at every viewport width —
+       the photo's width tracks the hero's height, so a section-relative fade
+       would drift off the edge on wide screens. The bottom stop is kept above
+       94%, since the bottle runs to 93.5% of the frame and a longer fade
+       washes it out. */
+    .hero.hero--photo .hero-photo-d::after{
+      content:"";position:absolute;
+      /* overhangs the right edge by 2px: the box width is fractional, so the
+         overlay and the background-image round to different pixels and leave a
+         1px sliver of un-faded photo showing as a hairline. Clipped by the
+         section's overflow:hidden. */
+      top:0;bottom:0;left:0;right:-2px;
+      background:
+        linear-gradient(to right, rgba(244,241,233,0) 44%, var(--bg) 90%),
+        linear-gradient(to bottom, rgba(244,241,233,0) 95%, var(--bg) 100%),
+        linear-gradient(to top, rgba(244,241,233,0) 93%, var(--bg) 100%);
     }
     /* Copy now sits on the cream page, not over a dark photo → dark text. */
     .hero.hero--photo .hero-copy h1{color:var(--ink);text-shadow:none}
@@ -314,7 +332,7 @@
     .hero.hero--photo .hero-photo-m{
       display:block;width:100%;
       aspect-ratio:1/1;
-      background:url('hero-lab.jpg') center top / cover no-repeat;
+      background:url('hero-founder.jpg') center top / cover no-repeat;
       -webkit-mask-image:linear-gradient(to bottom,#000 84%,transparent 100%);
       mask-image:linear-gradient(to bottom,#000 84%,transparent 100%);
     }
@@ -1104,6 +1122,10 @@
        (on mobile the copy no longer overlays the photo, so the bottle stays visible). -->
   <div class="hero-photo-m" role="img" aria-label="ד״ר דיוויד קיין מחזיק את מיכל NOGYMFORME"></div>
 
+  <!-- Desktop-only: full-bleed founder photo behind the copy. Must be a direct
+       child of the section, not of .wrap, so it can reach the page edge. -->
+  <div class="hero-photo-d" role="img" aria-label="ד״ר דיוויד קיין מחזיק את מיכל NOGYMFORME"></div>
+
   <div class="wrap hero-grid">
     <div class="hero-copy">
       <p class="eyebrow">תוסף תזונה לגברים · נוסחה ייחודית</p>
@@ -1120,9 +1142,6 @@
         <span class="t"><span class="dot"></span>משלוח חינם</span>
       </div>
     </div>
-
-    <!-- Desktop-only: founder + bottle beside the copy (see .hero-photo-d). -->
-    <div class="hero-photo-d" role="img" aria-label="ד״ר דיוויד קיין מחזיק את מיכל NOGYMFORME"></div>
   </div>
 </section>
 
