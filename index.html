@@ -238,96 +238,95 @@
     box-shadow:0 36px 80px -24px rgba(0,0,0,.85), 0 0 60px -20px rgba(242,203,27,.18);
   }
 
-  /* ── Hero: full-bleed product shot, copy overlaid ──
-     Dark treatment. The photo runs edge to edge behind a scrim and the copy
-     sits on top of it. RTL, so the copy occupies the right-hand side and the
-     scrim is weighted to the right to guarantee contrast there.
-     NOTE: the gradients below are physical (`to right`), not logical — they
-     assume the RTL copy placement and would need flipping for an LTR page. */
+  /* ── Full-bleed founder photo hero ─────────────── */
+  /* Base = mobile: founder framed up top, copy anchored to the bottom over a
+     gradient scrim that melts into the page background. */
   .hero.hero--photo{
-    position:relative;overflow:hidden;
-    display:flex;align-items:center;
-    /* Taller than it looks like it needs to be: `cover` on a 2.36 banner means
-       extra height also buys extra horizontal overflow, which is what lets the
-       crop shift far enough for the bottles to clear the copy column. */
-    min-height:clamp(580px,58vw,780px);
-    height:auto;max-height:none;
-    padding:104px 0 0;
-    background:#0b0b0d;
-  }
-  .hero.hero--photo .hero-bg{display:none}   /* the photo carries the hero on its own */
-  .hero.hero--photo .hero-photo{
-    position:absolute;inset:0;z-index:0;
-    /* 72% (not centre) shifts the crop so the bottles clear the copy column
-       on the right — they sit around 48% of the source frame. */
-    background:url('hero-bottles.jpg') 100% center / cover no-repeat;
-  }
-  .hero.hero--photo .hero-photo::after{
-    content:"";position:absolute;inset:0;
+    display:flex;align-items:flex-end;
+    min-height:88vh;
+    padding:96px 0 44px;
     background:
-      linear-gradient(to right, rgba(11,11,13,.42) 0%, rgba(11,11,13,.68) 48%, rgba(11,11,13,.93) 100%),
-      linear-gradient(to top, rgba(11,11,13,.80) 0%, rgba(11,11,13,0) 42%);
+      linear-gradient(to top, var(--bg) 6%, rgba(8,8,10,.55) 40%, rgba(8,8,10,.05) 70%),
+      url('hero-lab.jpg');
+    background-repeat:no-repeat,no-repeat;
+    background-size:cover,cover;
+    background-position:center, 28% top;
   }
-  .hero.hero--photo .hero-grid{
-    position:relative;z-index:1;
-    display:block;width:100%;padding-block:20px;
-  }
-  /* RTL: inline-start is the right edge, so push the free space to the end. */
-  .hero.hero--photo .hero-copy{max-width:min(600px,100%);margin-inline-end:auto}
-  /* Eyebrow becomes the mockup's bordered tag. */
-  .hero.hero--photo .hero-copy .eyebrow{
-    display:inline-block;padding:8px 15px;
-    border:1px solid rgba(242,203,27,.55);border-radius:4px;
-    color:var(--gold);font-size:13px;letter-spacing:.09em;
-  }
-  /* Copy overlays a dark photo → light text. */
-  .hero.hero--photo .hero-copy h1{color:var(--on-photo);text-shadow:0 2px 24px rgba(0,0,0,.65)}
-  .hero.hero--photo .hero-copy .lead{color:var(--on-photo-muted);text-shadow:0 2px 16px rgba(0,0,0,.75)}
-  .hero.hero--photo .hero-copy .hero-sub{text-shadow:0 2px 18px rgba(0,0,0,.75)}
-  .hero.hero--photo .btn-ghost{color:#fff;border-color:rgba(255,255,255,.62);border-width:2px}
+  .hero.hero--photo .hero-bg{display:none}   /* photo carries its own glow + molecule */
+  .hero.hero--photo .hero-photo-m{display:none}   /* desktop uses its own split-layout photo */
+  .hero.hero--photo .hero-photo-d{display:none}   /* shown only at >=981px, see below */
+  /* Copy sits over the dark photo → force light text regardless of the light page palette. */
+  .hero.hero--photo .hero-copy h1{color:var(--on-photo)}
+  .hero.hero--photo .hero-copy .lead{color:var(--on-photo-muted)}
+  .hero.hero--photo .hero-copy h1{text-shadow:0 2px 22px rgba(0,0,0,.55)}
+  .hero.hero--photo .btn-ghost{color:var(--on-photo);border-color:rgba(255,255,255,.4)}
   .hero.hero--photo .btn-ghost:hover{color:var(--gold);border-color:var(--gold)}
-  /* Trust items styled as the mockup's stat strip. These are the site's real
-     badges — the mockup's PURITY/BIOAVAILABILITY figures are not used, as
-     inventing supplement metrics is not something to ship. */
-  .hero.hero--photo .hero-trust{
-    margin-top:36px;padding-top:20px;
-    border-top:1px solid rgba(255,255,255,.20);
-    gap:clamp(16px,3vw,40px);
-  }
-  .hero.hero--photo .hero-trust .t{color:rgba(255,255,255,.86);letter-spacing:.05em;font-size:13px}
+  .hero.hero--photo .hero-trust .t{color:var(--on-photo-muted)}
+  .hero.hero--photo .hero-copy .hero-sub,
+  .hero.hero--photo .hero-copy .lead{text-shadow:0 2px 18px rgba(0,0,0,.75)}
 
-  /* Narrow screens: STACK instead of overlaying. On a portrait viewport the
-     copy would otherwise land on the brightest part of the photo, and no
-     scrim strong enough to fix that leaves the product visible. Photo band
-     on top, copy underneath on the hero's dark background. */
+  /* Desktop: SPLIT — founder photo on the left, copy on the right.
+     The founder shot is a portrait, so it can't be cropped into a full-bleed
+     16:9 band without losing either his head or the bottle. Giving it its own
+     column lets the whole composition show at its native ratio. */
+  @media(min-width:981px){
+    .hero.hero--photo{
+      align-items:center;
+      min-height:0;height:auto;
+      padding:72px 0 84px;
+      background:var(--bg);
+    }
+    .hero.hero--photo .hero-grid{
+      display:grid;grid-template-columns:1fr auto;
+      gap:clamp(32px,5vw,72px);align-items:center;
+    }
+    .hero.hero--photo .hero-photo-d{
+      display:block;
+      /* height drives the box; aspect-ratio matches hero-lab.jpg exactly, so
+         `cover` fits the full frame with nothing cropped. The photo is now
+         landscape (1.22), so height is capped lower than it was when the
+         source was a portrait — at the old clamp the box grew to ~758px wide
+         and left the headline column too narrow to set. */
+      height:clamp(300px,30vw,460px);
+      aspect-ratio:1321/1080;
+      background:url('hero-lab.jpg') center center / cover no-repeat;
+      border-radius:18px;border:1px solid var(--line);
+      box-shadow:0 24px 60px rgba(20,16,8,.16);
+    }
+    /* Copy now sits on the cream page, not over a dark photo → dark text. */
+    .hero.hero--photo .hero-copy h1{color:var(--ink);text-shadow:none}
+    .hero.hero--photo .hero-copy .lead{color:var(--muted);text-shadow:none}
+    .hero.hero--photo .hero-copy .hero-sub{text-shadow:none}
+    .hero.hero--photo .btn-ghost{color:var(--ink);border-color:var(--line)}
+    .hero.hero--photo .btn-ghost:hover{color:var(--gold-ink);border-color:var(--gold)}
+    .hero.hero--photo .hero-trust .t{color:var(--muted)}
+  }
+
+  /* Mobile/tablet: STACK — show the founder + bottle as a clean photo on top,
+     copy below on the solid background (never overlay, so the bottle stays visible). */
   @media(max-width:980px){
     .hero.hero--photo{
       display:block;
-      align-items:stretch;
-      min-height:0;
-      /* Clears the 73px sticky header. Without this the band starts at y=0 and
-         the header hides the bottle caps — and because `cover` height-matches
-         a 2.36 banner here, there is no vertical slack for background-position
-         to push them down. */
-      padding:76px 0 12px;
+      min-height:0;height:auto;max-height:none;
+      padding:0 0 8px;
+      background:var(--bg);
     }
-    .hero.hero--photo .hero-photo{
-      position:relative;inset:auto;
-      width:100%;aspect-ratio:4/3;
-      /* A square/4:3 crop of a 2.36 banner is a narrow slice, so re-centre
-         on the bottles rather than reusing the desktop 72% offset. */
-      background-position:42% center;
-      -webkit-mask-image:linear-gradient(to bottom,#000 86%,transparent 100%);
-      mask-image:linear-gradient(to bottom,#000 86%,transparent 100%);
+    .hero.hero--photo .hero-photo-m{
+      display:block;width:100%;
+      aspect-ratio:1/1;
+      background:url('hero-lab.jpg') center top / cover no-repeat;
+      -webkit-mask-image:linear-gradient(to bottom,#000 84%,transparent 100%);
+      mask-image:linear-gradient(to bottom,#000 84%,transparent 100%);
     }
-    .hero.hero--photo .hero-photo::after{
-      background:linear-gradient(to top, rgba(11,11,13,.88) 0%, rgba(11,11,13,0) 42%);
-    }
-    .hero.hero--photo .hero-copy{max-width:100%}
-    .hero.hero--photo .hero-copy h1,
-    .hero.hero--photo .hero-copy .lead,
-    .hero.hero--photo .hero-copy .hero-sub{text-shadow:none}
-    .hero.hero--photo .hero-grid{padding-top:4px;padding-bottom:8px}
+    .hero.hero--photo .hero-copy .hero-sub,
+    .hero.hero--photo .hero-copy .lead{text-shadow:none}
+    /* Stacked layout: copy is on the cream page, not the photo → dark text. */
+    .hero.hero--photo .hero-copy h1{color:var(--ink)}
+    .hero.hero--photo .hero-copy .lead{color:var(--muted)}
+    .hero.hero--photo .hero-copy .hero-sub{color:var(--gold-ink)}
+    .hero.hero--photo .btn-ghost{color:var(--ink);border-color:var(--line)}
+    .hero.hero--photo .hero-trust .t{color:var(--muted)}
+    .hero.hero--photo .hero-grid{padding-top:20px}
   }
 
   /* ── Stats strip ───────────────────────────────── */
@@ -1101,8 +1100,9 @@
     </svg>
   </div>
 
-  <!-- Hero photo band; the copy sits underneath it at every width. -->
-  <div class="hero-photo" role="img" aria-label="ד״ר דיוויד קיין מחזיק את מיכל NOGYMFORME"></div>
+  <!-- Mobile-only: founder + bottle shown as a clean photo above the copy
+       (on mobile the copy no longer overlays the photo, so the bottle stays visible). -->
+  <div class="hero-photo-m" role="img" aria-label="ד״ר דיוויד קיין מחזיק את מיכל NOGYMFORME"></div>
 
   <div class="wrap hero-grid">
     <div class="hero-copy">
@@ -1121,6 +1121,8 @@
       </div>
     </div>
 
+    <!-- Desktop-only: founder + bottle beside the copy (see .hero-photo-d). -->
+    <div class="hero-photo-d" role="img" aria-label="ד״ר דיוויד קיין מחזיק את מיכל NOGYMFORME"></div>
   </div>
 </section>
 
