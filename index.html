@@ -369,11 +369,15 @@
      almost the full frame height, so a wide banner crop always loses the
      bottle. A portrait box makes background-size:cover fill on HEIGHT and crop
      width instead, which keeps both the face and the product in frame. */
-  .story-head{padding:clamp(34px,5vw,64px) 0 clamp(26px,3.5vw,44px)}
+  .story-head{padding:clamp(34px,5vw,64px) 0 0}
+  /* align-items:start (not center) is what puts the opening text right under
+     the headline — centering it against a 600px-tall photo pushed the first
+     paragraph most of a screen away from the H1. */
   .story-head-grid{
     display:grid;grid-template-columns:1fr 0.82fr;
-    gap:clamp(24px,4vw,52px);align-items:center;
+    gap:clamp(24px,4vw,52px);align-items:start;
   }
+  .story-head-copy{max-width:52ch}
   .story-photo{
     aspect-ratio:4/5;
     border-radius:var(--r);
@@ -383,16 +387,21 @@
     box-shadow:0 30px 70px -40px rgba(0,0,0,.6);
   }
   .story-head h1{margin-bottom:0}
+  /* The story continues below the photo, so the seam between the two columns
+     and the full-width remainder has to stay tight. */
+  .story > .wrap{padding-top:clamp(16px,2vw,26px)}
 
   @media(max-width:860px){
     .story-head-grid{grid-template-columns:1fr;gap:24px}
+    .story-head-copy{max-width:none}
     /* Photo first on mobile, and squarer so it does not eat the whole screen. */
     .story-photo{order:-1;aspect-ratio:1/1}
   }
   .story-col{max-width:66ch;margin-inline:auto}
-  .story h1{font-size:clamp(30px,5vw,52px);margin:0}
+  /* Long headline now, so it steps down from the old 52px cap. */
+  .story h1{font-size:clamp(25px,3.2vw,40px);margin:0}
   .story-rule{
-    width:62px;height:4px;border-radius:2px;margin:24px 0 30px;
+    width:62px;height:4px;border-radius:2px;margin:20px 0 22px;
     background:linear-gradient(90deg,var(--gold),var(--gold-deep));
   }
   .story-body p{
@@ -1194,9 +1203,18 @@
 <section class="story" id="top">
   <div class="story-head">
     <div class="wrap story-head-grid">
-      <div>
-        <h1 class="display">איך הכל התחיל?</h1>
+      <div class="story-head-copy">
+        <h1 class="display">"אין לי זמן להתאמן": איך הפכתי את התירוץ הזה לפורמולה מנצחת?</h1>
         <div class="story-rule" aria-hidden="true"></div>
+        <!-- The first two paragraphs sit beside the photo so the story starts
+             directly under the headline instead of below a 600px-tall image. -->
+        <div class="story-body">
+          <p class="opening">אז ככה: אני ד״ר דייויד קין, חוקר לב ומוח כבר למעלה מ-20 שנה, אבא ל-3, וחי את מרוץ החיים בדיוק כמוכם.</p>
+
+          <p>בינינו? אין לי באמת זמן להתאמן. ואם נודה על האמת, אני גם לא ממש אוהב את זה. הגוף שלי בסך הכל נראה טוב, אבל הגיע השלב שבו הכרס הזאת צצה משום מקום והתחילה להציק. פתאום, ללכת לים או לבריכה עם הילדים הפך לרגע שאני חושב פעמיים לפני שאני מוריד חולצה. לא עשה לי נעים להתבייש, ובעיקר – נמאס לי למצוא את עצמי כל פעם מחדש "מחזיק את הבטן בפנים".</p>
+
+          <p>אז עשיתי את מה שאני יודע לעשות הכי טוב והחלטתי לחקור. קראתי ולמדתי כל מה שרק אפשר על תוספי תזונה ובחנתי אילו מרכיבים יתאימו לי – כן, לי, דייויד. משהו שיעזור לי לשלוט ברעב במהלך היום העמוס שלי, יסייע לגוף שלי לשרוף שומן, ופשוט יאפשר לי להוריד את הכרס.</p>
+        </div>
       </div>
       <div class="story-photo" role="img" aria-label="ד״ר דייויד קין מחזיק את מיכל NOGYMFORME"></div>
     </div>
@@ -1206,15 +1224,11 @@
     <div class="story-col">
 
       <div class="story-body">
-        <p class="opening">אז ככה: אני ד״ר דייויד קין, חוקר לב ומוח כבר למעלה מ-20 שנה, 3 ילדים, מרוץ החיים. אתם מכירים את זה נכון?</p>
+        <p>זה לקח קצת זמן. ניסוי, שיפור, עוד מחקר ועוד קצת שיפור... אבל בסוף פיצחתי את זה. הגעתי לפורמולה המדויקת שעזרה לי, ועוזרת לי עד היום, פשוט להרגיש שוב בנוח עם הגוף שלי מבלי להתבייש, ולנשום רגיל במקום להחזיק בפנים.</p>
 
-        <p>אבל מה, אין לי זמן להתאמן ואם גם נודה (בינינו) אני לא כל כך אוהב את זה, אבל מה לעשות הגיע הגיל שבו הכרס כבר מתחילה להביך, וללכת לים ולבריכה עם הילדים ולהוריד חולצה לא עשה לי כל כך נעים וגם בוא נודה באמת נמאס לי כל פעם "להחזיק בפנים".</p>
+        <p>ועכשיו, אחרי שנה של ניסויים ושיפורים, החלטתי: <em class="said">וואלה, למה שאני אשמור את זה רק לעצמי? למה לא לשתף את כל מי שנמצא באותו מרוץ בדיוק של עבודה, משפחה ולחץ?</em> בין אם אתם מתאמנים ובין אם לא, או אם את קוראת את זה ויודעת שזה בדיוק מה שבן הזוג שלך צריך – יש פה פורמולה שיכולה לסייע להיפטר מהכרס המציקה הזאת שלא תמיד מצליחה לרדת.</p>
 
-        <p>אז כמו מדען אמיתי החלטתי לחקור, קראתי ולמדתי כל מה שרק אפשר על תוספי תזונה ובחנתי אילו מרכיבים יתאימו לי, כן כן לי דייויד. להוריד את הכרס ולהפסיק להתבייש.</p>
-
-        <p>אז כן, זה לקח קצת זמן, ניסוי, שיפור עוד מחקר ועוד שיפור אבל בסוף הגעתי לפורמולה המדויקת שעזרה לי ועוזרת לי עד היום להוריד חולצה בים/בבריכה מבלי להתבייש או "להחזיק בפנים".</p>
-
-        <p>ועכשיו אחרי שנה של ניסויים ושיפורים החלטתי: <em class="said">"וואלה, למה שאני אשמור את זה רק לעצמי? למה שאני לא אשתף את כל העולם במה שעזר לי להוריד את הכרס המציקה הזאת, ואולי אפילו לעזור לעוד כאלה שנמצאים במרוץ של החיים, עבודה, משפחה ולחץ."</em> בין אם הם מתאמנים ובין אם לא, יש פה פורמולה שיכולה לסייע להוריד את הכרס המציקה הזאת.</p>
+        <p>אז הנה אני, החוקר שעליו זה עבד, מביא לכם פה את הנוסחה שעבדה עליי – ומקווה שתעבוד גם עליכם.</p>
       </div>
 
       <!-- ── All-In package + community ── -->
