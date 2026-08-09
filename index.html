@@ -1453,7 +1453,7 @@
       </div>
       <div class="prob-card reveal">
         <span class="prob-num">04</span>
-        <h3>השחיקה מהתהליך</h3>
+        <h3>הייאוש מהדרך</h3>
         <p>הניסיון לנהל אורח חיים 'בריא' הופך למטלה מעיקה שגורמת לנו להרגיש רחוקים יותר מהמטרה שלנו.</p>
       </div>
     </div>
@@ -1480,6 +1480,23 @@
     .mini-card .mini-name{font-family:'Rubik',sans-serif;font-weight:800;font-size:19px;color:var(--ink)}
     .mini-card .mini-desc{color:var(--muted);font-size:13.5px;line-height:1.5;min-height:40px}
     .mini-card .mini-price{font-family:'Rubik',sans-serif;font-weight:900;font-size:34px;color:var(--gold-ink);line-height:1;margin:2px 0 4px}
+    /* Same benefits as the full pricing cards below. The card centres its
+       children, so the list needs width:100% + text-align:start or the bullets
+       centre themselves and stop reading as a list. */
+    .mini-card .mini-feat{
+      list-style:none;display:grid;gap:8px;
+      margin:8px 0 16px;width:100%;text-align:start;
+    }
+    .mini-card .mini-feat li{
+      display:flex;align-items:flex-start;gap:8px;
+      font-size:13.5px;line-height:1.5;color:var(--muted);
+    }
+    .mini-card .mini-feat li.strong{color:var(--ink);font-weight:700}
+    .mini-card .mini-feat svg{
+      width:15px;height:15px;flex:0 0 auto;margin-top:2px;
+      fill:none;stroke:var(--gold-ink);stroke-width:3;
+      stroke-linecap:round;stroke-linejoin:round;
+    }
     .mini-card .btn{width:100%;justify-content:center;margin-top:auto}
     .mini-card .mini-tag{
       position:absolute;top:-11px;inset-inline-start:50%;transform:translateX(50%);
@@ -1499,6 +1516,12 @@
         <div class="mini-name">חבילת היכרות</div>
         <div class="mini-desc">בקבוק אחד · חודש שלם</div>
         <div class="mini-price">₪198</div>
+        <ul class="mini-feat">
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>בקבוק NOGYMFORME אחד</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>משלוח חינם ל-7 ימי עסקים</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>גישה לקהילת הגברים שלנו</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>14 יום החזר כספי מלא</li>
+        </ul>
         <a href="order.html?plan=single" onclick="buyNow('single')" class="btn btn-ghost">קנה עכשיו</a>
       </div>
       <div class="mini-card reveal">
@@ -1506,6 +1529,13 @@
         <div class="mini-name">חבילת ההתמדה</div>
         <div class="mini-desc">שני בקבוקים · חודשיים</div>
         <div class="mini-price">₪396</div>
+        <ul class="mini-feat">
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>2 בקבוקי NOGYMFORME</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>משלוח חינם ל-7 ימי עסקים</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>גישה לקהילת הגברים שלנו</li>
+          <li class="strong"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>אפליקציה ייעודית ל-NOGYMFORME</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>14 יום החזר כספי מלא</li>
+        </ul>
         <a href="order.html?plan=starter" onclick="buyNow('starter')" class="btn btn-ghost">קנה עכשיו</a>
       </div>
       <div class="mini-card best reveal">
@@ -1514,6 +1544,13 @@
         <div class="mini-name">חבילת אול-אין</div>
         <div class="mini-desc">שלושה בקבוקים · 3 חודשים</div>
         <div class="mini-price">₪496</div>
+        <ul class="mini-feat">
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>3 בקבוקי NOGYMFORME</li>
+          <li class="strong"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>חיסכון של ₪92 לעומת בקבוק בודד</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>משלוח חינם + קהילת הגברים</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>אפליקציה ייעודית ל-NOGYMFORME</li>
+          <li class="strong"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>תפריט תזונה מותאם אישית</li>
+        </ul>
         <a href="order.html?plan=results" onclick="buyNow('results')" class="btn btn-gold">קנה עכשיו</a>
       </div>
     </div>
