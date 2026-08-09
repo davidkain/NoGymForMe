@@ -409,12 +409,17 @@
     font-size:clamp(16px,1.1vw,18px);
     line-height:1.95;
     margin-bottom:22px;
+    text-align:justify;
+    /* Browsers do not hyphenate Hebrew, so justify can only stretch the spaces
+       between words. text-align-last keeps the final line from being stretched
+       across the column, and the two properties below let the browser take up
+       some of the slack in letter/word spacing instead of opening rivers. */
+    text-align-last:start;
+    text-justify:inter-word;
+    hanging-punctuation:allow-end;
   }
   .story-body p:last-child{margin-bottom:0}
   .story-body .opening{font-size:clamp(17px,1.3vw,20px);color:var(--ink)}
-  /* The pivotal quote runs ~4 lines; gold + bold at that length reads as
-     shouting, so it gets colour and a rule but keeps body weight. */
-  .story-body .said{font-style:normal;color:var(--gold-ink);font-weight:400}
   .story-body strong{color:var(--ink);font-weight:700}
 
   /* All-In package + community — lifted onto a card so it reads as the offer,
@@ -1287,11 +1292,11 @@
         <!-- The first two paragraphs sit beside the photo so the story starts
              directly under the headline instead of below a 600px-tall image. -->
         <div class="story-body">
-          <p class="opening">אז ככה: אני ד״ר דייויד קין, חוקר לב ומוח כבר למעלה מ-20 שנה, אבא ל-3, וחי את מרוץ החיים בדיוק כמוכם.</p>
+          <p class="opening">אני ד״ר דייויד קין, חוקר לב ומוח כבר למעלה מ-20 שנה, אבא ל-3, וחי את מרוץ החיים בדיוק כמוכם.</p>
 
           <p>בינינו? אין לי באמת זמן להתאמן. ואם נודה על האמת, אני גם לא ממש אוהב את זה. הגוף שלי בסך הכל נראה טוב, אבל הגיע השלב שבו הכרס הזאת צצה משום מקום והתחילה להציק. פתאום, ללכת לים או לבריכה עם הילדים הפך לרגע שאני חושב פעמיים לפני שאני מוריד חולצה. לא עשה לי נעים להתבייש, ובעיקר – נמאס לי למצוא את עצמי כל פעם מחדש "מחזיק את הבטן בפנים".</p>
 
-          <p>אז עשיתי את מה שאני יודע לעשות הכי טוב והחלטתי לחקור. קראתי ולמדתי כל מה שרק אפשר על תוספי תזונה ובחנתי אילו מרכיבים יתאימו לי – כן, לי, דייויד. משהו שיעזור לי לשלוט ברעב במהלך היום העמוס שלי, יסייע לגוף שלי לשרוף שומן, ופשוט יאפשר לי להוריד את הכרס.</p>
+          <p>החלטתי לעשות את מה שאני יודע הכי טוב - לחקור. קראתי ולמדתי כל מה שרק אפשר על תוספי תזונה ובחנתי אילו מרכיבים יתאימו לי – כן, לי, דייויד. משהו שיעזור לי לשלוט ברעב במהלך היום העמוס שלי, יסייע לגוף שלי לשרוף שומן, ופשוט יאפשר לי להוריד את הכרס.</p>
         </div>
       </div>
       <div class="story-photo" role="img" aria-label="ד״ר דייויד קין מחזיק את מיכל NOGYMFORME"></div>
@@ -1302,9 +1307,9 @@
     <div class="story-col">
 
       <div class="story-body">
-        <p>זה לקח קצת זמן. ניסוי, שיפור, עוד מחקר ועוד קצת שיפור... אבל בסוף פיצחתי את זה. הגעתי לפורמולה המדויקת שעזרה לי, ועוזרת לי עד היום, פשוט להרגיש שוב בנוח עם הגוף שלי מבלי להתבייש, ולנשום רגיל במקום להחזיק בפנים.</p>
+        <p>זה לקח קצת זמן. ניסוי, שיפור, עוד מחקר ועוד קצת שיפור... אבל בסוף פיצחתי את זה. הגעתי לפורמולה המדויקת שעזרה לי, ועוזרת לי עד היום, להרגיש שוב בנוח עם הגוף שלי מבלי להתבייש, ולנשום רגיל במקום להחזיק בפנים. וזה הרבה מעבר ללהיפטר מהכרס – זה החזיר לי את תחושת החיוניות, חיזק לי את הביטחון העצמי ונתן לי את ההרגשה שאני סוף סוף בוחר בעצמי.</p>
 
-        <p>ועכשיו, אחרי שנה של ניסויים ושיפורים, החלטתי: <em class="said">וואלה, למה שאני אשמור את זה רק לעצמי? למה לא לשתף את כל מי שנמצא באותו מרוץ בדיוק של עבודה, משפחה ולחץ?</em> בין אם אתם מתאמנים ובין אם לא, או אם את קוראת את זה ויודעת שזה בדיוק מה שבן הזוג שלך צריך – יש פה פורמולה שיכולה לסייע להיפטר מהכרס המציקה הזאת שלא תמיד מצליחה לרדת.</p>
+        <p>ואם כבר להחזיק בפנים - זה עובד. אז למה לשמור את כל הטוב הזה לעצמי ולא לשתף בו את כל מי שנמצא באותו מרוץ בדיוק של עבודה, משפחה ולחץ? בין אם אתם מתאמנים ובין אם לא, או אם את קוראת את זה ויודעת שזה בדיוק מה שבן הזוג שלך צריך – יש פה פורמולה שיכולה לסייע להיפטר מהכרס המציקה הזאת שלא תמיד מצליחה לרדת.</p>
 
         <p>אז הנה אני, החוקר שעליו זה עבד, מביא לכם פה את הנוסחה שעבדה עליי – ומקווה שתעבוד גם עליכם.</p>
       </div>
