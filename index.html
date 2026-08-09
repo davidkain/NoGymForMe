@@ -1425,11 +1425,13 @@
   <div class="wrap center">
     <h2 class="h2 display reveal">אתה לא לבד</h2>
 
-    <!-- PLACEHOLDER IMAGE — swap images/community-placeholder.jpg for a real
-         community photo. onerror hides the figure so a missing file degrades
-         to nothing rather than a broken-image icon on a live sales page. -->
+    <!-- width/height match the file's real pixels so the browser reserves the
+         box before the image loads — without them this shifts the whole
+         section down mid-scroll. onerror hides the figure so a missing file
+         degrades to nothing rather than a broken-image icon. -->
     <figure class="community-photo reveal">
-      <img src="images/community-placeholder.jpg" alt="קהילת NOGYMFORME" loading="lazy" decoding="async"
+      <img src="images/community.jpg" alt="חברי קהילת NOGYMFORME על חוף הים"
+           width="1600" height="1066" loading="lazy" decoding="async"
            onerror="this.closest('.community-photo').style.display='none'">
     </figure>
     <p class="lead reveal" style="margin:20px auto 0;max-width:70ch;text-align:center">רוב פתרונות ההרזיה מדברים בשפה שלא תמיד פוגשת את הצרכים הגבריים. אנחנו ב-NoGymForMe בחרנו להתמקד בהתמודדויות הייחודיות של גברים. בשונה מגישות כלליות, הבנו שהשינויים הפיזיולוגיים וההורמונליים שאנו חווים – מחילוף החומרים המשתנה ועד לעומס היומיומי – דורשים גישה מותאמת אישית, ללא הלחצים של עולם הכושר המסורתי.</p>
