@@ -443,15 +443,33 @@
   }
   .allin-buy:hover bdi{color:var(--gold-deep)}
   .allin-buy:hover{text-decoration-color:var(--gold-deep)}
-  .allin-list{list-style:none;display:grid;gap:14px;margin:24px 0 0}
-  .allin-list li{display:flex;align-items:flex-start;gap:12px;font-size:clamp(15px,1.05vw,17px);color:var(--ink);font-weight:600}
-  .allin-list .dot{
-    width:8px;height:8px;border-radius:50%;background:var(--gold);flex:0 0 auto;margin-top:9px;
-    box-shadow:0 0 12px 1px rgba(242,203,27,.7);
+  .allin-intro{text-align:justify}
+  /* Each benefit is its own small card with a gold tick, so the three read as
+     what you get rather than as more prose. */
+  .allin-list{list-style:none;display:grid;gap:12px;margin:26px 0 0}
+  .allin-list li{
+    display:flex;align-items:flex-start;gap:12px;
+    background:var(--panel-2);border:1px solid var(--line-2);
+    border-radius:12px;padding:14px 16px;
+    font-size:clamp(15px,1.05vw,17px);line-height:1.65;color:var(--muted);
   }
-  .allin-list span small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:2px}
+  .allin-list b{color:var(--ink);font-weight:800}
+  .allin-list .tick{
+    flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--gold);
+    display:inline-flex;align-items:center;justify-content:center;margin-top:2px;
+  }
+  .allin-list .tick svg{
+    width:14px;height:14px;fill:none;stroke:#1a1206;
+    stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
+  }
+  /* Selector carries .allin so it outranks `.allin p` above, which would
+     otherwise force this back to muted body colour. */
+  .allin p.allin-cta{
+    margin:24px 0 0;padding-top:20px;border-top:1px solid var(--line);
+    color:var(--ink);font-weight:700;line-height:1.7;
+    font-size:clamp(16px,1.2vw,18px);
+  }
 
-  .story-close{margin-top:38px;font-size:clamp(17px,1.3vw,20px);color:var(--ink);font-weight:600;line-height:1.8}
 
   .signoff{display:flex;align-items:center;gap:15px;margin-top:30px;padding-top:26px;border-top:1px solid var(--line)}
   /* hero-founder.jpg is a landscape shot; object-fit:cover on a square would
@@ -477,6 +495,17 @@
     .story-cta .btn{width:100%;justify-content:center}
     .signoff .avatar{width:50px;height:50px}
   }
+
+  /* ── Community photo under "אתה לא לבד" ───────── */
+  .community-photo{
+    margin:28px auto 0;max-width:780px;
+    border-radius:var(--r);overflow:hidden;
+    border:1px solid var(--line);
+    box-shadow:0 30px 70px -42px rgba(0,0,0,.55);
+  }
+  /* display:block kills the inline-descender gap under the image, which would
+     otherwise show as a stripe of background inside the rounded corners. */
+  .community-photo img{display:block;width:100%;height:auto}
 
   /* ── Refer a friend on WhatsApp ─────────────────
      Static site, so there is no component state: the two fields hold their own
@@ -1275,20 +1304,27 @@
 
       <!-- ── All-In package + community ── -->
       <div class="allin">
-        <h2>ליווי אישי ולא סתם עוד תוסף על המדף.</h2>
+        <h2>ליווי אישי ולא סתם עוד תוסף על המדף</h2>
 
-        <p>החיים זה לא קסם ואנחנו לא מאמינים בפתרונות קסם אז גם כאן, לא רצינו למכור לכם תוסף וזהו, או איזה גומי שעושה לכם טעם נעים בפה וזהו. רצינו משהו מעבר, רצינו ליצור לך תמיכה וקהילה. אנחנו מאמינים שעם ליווי אישי, תוכנית אימונים והתוסף שלנו אפשר באמת להצליח.</p>
-
-        <p>אז בנינו קהילה, בנינו תפריט תזונה אישי לכל מי שרוכש אצלנו את חבילת ה־<a href="order.html?plan=results" onclick="buyNow('results')" class="allin-buy" aria-label="לרכישת חבילת האול-אין"><bdi>All-In</bdi></a>, בנינו אפליקציה למעקב, שתוכל לדעת באמת כמה ירדת ולקבל עדכונים והטבות מהקהילה. כמו שאמרתי, אנחנו מאמינים בתמיכה וליווי אישי, רק ככה אפשר להצליח.</p>
+        <p class="allin-intro">החיים זה לא קסם ואנחנו לא מאמינים בפתרונות קסם. לא רצינו למכור לכם תוסף וזהו, או איזה גומי שעושה לכם טעם נעים בפה וזהו. רצינו משהו מעבר. רצינו ליצור לך תמיכה וקהילה. אנחנו מאמינים שעם ליווי אישי והתוסף שלנו אפשר באמת להצליח.</p>
 
         <ul class="allin-list">
-          <li><span class="dot" aria-hidden="true"></span><span>קהילה<small>חיבור, ליווי ועדכונים שוטפים</small></span></li>
-          <li><span class="dot" aria-hidden="true"></span><span>תפריט תזונה אישי<small>לכל מי שרוכש את חבילת ה־<a href="order.html?plan=results" onclick="buyNow('results')" class="allin-buy" aria-label="לרכישת חבילת האול-אין"><bdi>All-In</bdi></a></small></span></li>
-          <li><span class="dot" aria-hidden="true"></span><span>אפליקציה למעקב<small>לראות באמת כמה ירדת, ולקבל הטבות מהקהילה</small></span></li>
+          <li>
+            <span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span><b>קהילה:</b> חיבור, ליווי ועדכונים שוטפים</span>
+          </li>
+          <li>
+            <span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span><b>תפריט תזונה אישי:</b> לכל מי שרוכש את חבילת ה־<a href="order.html?plan=results" onclick="buyNow('results')" class="allin-buy" aria-label="לרכישת חבילת האול-אין"><bdi>All-In</bdi></a></span>
+          </li>
+          <li>
+            <span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span><b>אפליקציה למעקב:</b> לראות באמת כמה ירדת, ולקבל הטבות מהקהילה</span>
+          </li>
         </ul>
-      </div>
 
-      <p class="story-close">אז אני מזמין אותך, להצטרף למאות שכבר התחילו, להוריד חולצה בים.</p>
+        <p class="allin-cta">אני מזמין אותך להצטרף למאות שכבר התחילו, להוריד חולצה בים.</p>
+      </div>
 
       <div class="signoff">
         <div class="avatar" role="img" aria-label="ד״ר דייויד קין"></div>
@@ -1309,7 +1345,7 @@
 <section class="ing pad" id="ingredients">
   <div class="wrap center">
     <p class="eyebrow reveal">מופעל על ידי 4 רכיבי מפתח</p>
-    <h2 class="h2 display reveal" style="margin-top:14px">העוצמה של הטבע.<br>הסטנדרט של המדע.</h2>
+    <h2 class="h2 display reveal" style="margin-top:14px">העוצמה של הטבע<br>הסטנדרט של המדע</h2>
     <p class="lead reveal" style="margin:20px auto 0;max-width:72ch;text-align:center">כל קפסולה של NOGYMFORME פותחה מתוך גישה מחקרית בלתי מתפשרת. הנוסחה משלבת שילוב מדויק של ארבעה רכיבים טבעיים שכל אחד מהם נבדק עצמאית במחקרים קליניים. יחד, הם יוצרים מעטפת התומכת בסיוע לתחושת שובע לאורך זמן, שמירה על רמות סוכר מאוזנות, ותמיכה בחילוף חומרים תקין – כחלק משגרת חיים מאוזנת. הנה המדע מאחורי הרכיבים שלנו:</p>
   </div>
   <div class="wrap ing-grid">
@@ -1349,7 +1385,15 @@
 <!-- ════════ WHY MEN ════════ -->
 <section class="problem pad" id="why-men">
   <div class="wrap center">
-    <h2 class="h2 display reveal">אתה לא לבד.</h2>
+    <h2 class="h2 display reveal">אתה לא לבד</h2>
+
+    <!-- PLACEHOLDER IMAGE — swap images/community-placeholder.jpg for a real
+         community photo. onerror hides the figure so a missing file degrades
+         to nothing rather than a broken-image icon on a live sales page. -->
+    <figure class="community-photo reveal">
+      <img src="images/community-placeholder.jpg" alt="קהילת NOGYMFORME" loading="lazy" decoding="async"
+           onerror="this.closest('.community-photo').style.display='none'">
+    </figure>
     <p class="lead reveal" style="margin:20px auto 0;max-width:70ch;text-align:center">רוב פתרונות ההרזיה מדברים בשפה שלא תמיד פוגשת את הצרכים הגבריים. אנחנו ב-NoGymForMe בחרנו להתמקד בהתמודדויות הייחודיות של גברים. בשונה מגישות כלליות, הבנו שהשינויים הפיזיולוגיים וההורמונליים שאנו חווים – מחילוף החומרים המשתנה ועד לעומס היומיומי – דורשים גישה מותאמת אישית, ללא הלחצים של עולם הכושר המסורתי.</p>
     <div class="problem-grid">
       <div class="prob-card reveal">
