@@ -355,6 +355,120 @@
   .stat .num{font-family:'Rubik',sans-serif;font-weight:900;font-size:clamp(56px,8vw,96px);color:var(--gold-ink);line-height:1}
   .stat .lab{font-family:'Rubik',sans-serif;font-weight:700;letter-spacing:0.04em;font-size:14px;color:var(--muted);margin-top:10px}
 
+  /* ── Founder story (top section) ───────────────── */
+  /* Long-form narrative, so this block deliberately opts out of the global
+     line-height (1.65) and .lead's 48ch measure — neither is comfortable for
+     ~450 words of Hebrew prose. */
+  .story{
+    padding:0 0 clamp(44px,6vw,76px);
+    background:linear-gradient(180deg,var(--bg),var(--bg-2));
+    border-bottom:1px solid var(--line);
+  }
+  /* Founder photo + headline.
+     hero-founder.jpg is 1325×1080 and the subject runs head-to-bottle across
+     almost the full frame height, so a wide banner crop always loses the
+     bottle. A portrait box makes background-size:cover fill on HEIGHT and crop
+     width instead, which keeps both the face and the product in frame. */
+  .story-head{padding:clamp(34px,5vw,64px) 0 clamp(26px,3.5vw,44px)}
+  .story-head-grid{
+    display:grid;grid-template-columns:1fr 0.82fr;
+    gap:clamp(24px,4vw,52px);align-items:center;
+  }
+  .story-photo{
+    aspect-ratio:4/5;
+    border-radius:var(--r);
+    border:1px solid var(--line);
+    /* 45% keeps the bottle (left of frame) and the face both inside the crop. */
+    background:url('hero-founder.jpg') 45% center / cover no-repeat;
+    box-shadow:0 30px 70px -40px rgba(0,0,0,.6);
+  }
+  .story-head h1{margin-bottom:0}
+
+  @media(max-width:860px){
+    .story-head-grid{grid-template-columns:1fr;gap:24px}
+    /* Photo first on mobile, and squarer so it does not eat the whole screen. */
+    .story-photo{order:-1;aspect-ratio:1/1}
+  }
+  .story-col{max-width:66ch;margin-inline:auto}
+  .story h1{font-size:clamp(30px,5vw,52px);margin:0}
+  .story-rule{
+    width:62px;height:4px;border-radius:2px;margin:24px 0 30px;
+    background:linear-gradient(90deg,var(--gold),var(--gold-deep));
+  }
+  .story-body p{
+    color:var(--muted);
+    font-size:clamp(16px,1.1vw,18px);
+    line-height:1.95;
+    margin-bottom:22px;
+  }
+  .story-body p:last-child{margin-bottom:0}
+  .story-body .opening{font-size:clamp(17px,1.3vw,20px);color:var(--ink)}
+  /* The pivotal quote runs ~4 lines; gold + bold at that length reads as
+     shouting, so it gets colour and a rule but keeps body weight. */
+  .story-body .said{font-style:normal;color:var(--gold-ink);font-weight:400}
+  .story-body strong{color:var(--ink);font-weight:700}
+
+  /* All-In package + community — lifted onto a card so it reads as the offer,
+     not as more narrative. */
+  .allin{
+    margin-top:42px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-top:3px solid var(--gold);
+    border-radius:var(--r);
+    padding:clamp(24px,3.6vw,42px);
+    box-shadow:0 26px 60px -36px rgba(0,0,0,.45);
+  }
+  .allin h2{font-family:'Rubik',sans-serif;font-weight:800;font-size:clamp(23px,2.8vw,33px);margin:0 0 18px;line-height:1.25}
+  .allin p{color:var(--muted);font-size:clamp(15px,1.05vw,17px);line-height:1.9;margin-bottom:18px}
+  /* The package name still needs to stand out now that it is no longer in the
+     heading — inline colour rather than a pill, which would be noisy mid-paragraph. */
+  .allin bdi{color:var(--gold-ink);font-weight:700}
+  /* "All-In" is a buy link straight into checkout, so it needs a visible
+     affordance — inline gold alone reads as emphasis, not as something clickable. */
+  .allin-buy{
+    text-decoration:underline;
+    text-decoration-color:rgba(169,118,10,.5);
+    text-underline-offset:3px;
+    transition:text-decoration-color .2s;
+  }
+  .allin-buy:hover bdi{color:var(--gold-deep)}
+  .allin-buy:hover{text-decoration-color:var(--gold-deep)}
+  .allin-list{list-style:none;display:grid;gap:14px;margin:24px 0 0}
+  .allin-list li{display:flex;align-items:flex-start;gap:12px;font-size:clamp(15px,1.05vw,17px);color:var(--ink);font-weight:600}
+  .allin-list .dot{
+    width:8px;height:8px;border-radius:50%;background:var(--gold);flex:0 0 auto;margin-top:9px;
+    box-shadow:0 0 12px 1px rgba(242,203,27,.7);
+  }
+  .allin-list span small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:2px}
+
+  .story-close{margin-top:38px;font-size:clamp(17px,1.3vw,20px);color:var(--ink);font-weight:600;line-height:1.8}
+
+  .signoff{display:flex;align-items:center;gap:15px;margin-top:30px;padding-top:26px;border-top:1px solid var(--line)}
+  /* hero-founder.jpg is a landscape shot; object-fit:cover on a square would
+     fit the full body height and leave the face tiny, so the crop is zoomed
+     onto the head the same way .hero-photo-d frames it. */
+  .signoff .avatar{
+    width:58px;height:58px;border-radius:50%;flex:0 0 auto;
+    border:2px solid var(--gold);
+    background:url('hero-founder.jpg') 54% 26% / 290% no-repeat;
+  }
+  .signoff .name{font-family:'Rubik',sans-serif;font-weight:800;font-size:19px}
+  .signoff .role{font-size:14px;color:var(--muted-2)}
+
+  .story-cta{margin-top:36px}
+  .story-cta .btn{font-size:clamp(15px,1.15vw,17px);padding:17px 32px}
+
+  /* The sticky 72px header would otherwise swallow the top of the packages
+     block when the story CTA scrolls there. */
+  #pricing{scroll-margin-top:92px}
+
+  @media(max-width:560px){
+    .story-col{max-width:none}
+    .story-cta .btn{width:100%;justify-content:center}
+    .signoff .avatar{width:50px;height:50px}
+  }
+
   /* ── Section scaffolding ───────────────────────── */
   section{position:relative}
   .pad{padding:90px 0}
@@ -1037,7 +1151,7 @@
 
           <a href="order.html?plan=single" onclick="buyNow('single')" class="plan-card-hover" style="display:flex;justify-content:space-between;align-items:center;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;">
             <div>
-              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת הביישן</div>
+              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת היכרות</div>
               <div style="font-size:13px;color:var(--grey);margin-top:4px;">בקבוק אחד - 90 קפסולות</div>
             </div>
             <div style="text-align:left;">
@@ -1048,7 +1162,7 @@
 
           <a href="order.html?plan=starter" onclick="buyNow('starter')" class="plan-card-hover" style="display:flex;justify-content:space-between;align-items:center;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-decoration:none;transition:border-color .2s;">
             <div>
-              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת<br>יאללה, בוא ננסה</div>
+              <div style="font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--white);">חבילת<br>ההתמדה</div>
               <div style="font-size:13px;color:var(--grey);margin-top:4px;">שני בקבוקים - 180 קפסולות</div>
             </div>
             <div style="text-align:left;">
@@ -1075,71 +1189,61 @@
   </div>
 
 
-<!-- ════════ HERO ════════ -->
-<section class="hero hero--photo" id="top">
-  <div class="hero-bg">
-    <div class="glow"></div>
-    <div class="glow2"></div>
-    <svg class="molecule mol-float" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <filter id="mglow" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="5" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-      <!-- bonds -->
-      <g stroke="rgba(242,203,27,0.16)" stroke-width="1.1" fill="none">
-        <path d="M250 250 L150 190 M250 250 L160 360 M250 250 L380 300 M250 250 L330 150"/>
-        <path d="M980 470 L1080 410 M980 470 L900 560 M980 470 L1090 560 M980 470 L900 380"/>
-        <path d="M380 300 L600 380 L820 330"/>
-        <path d="M160 360 L120 520"/>
-      </g>
-      <!-- depth nodes (soft teal, blurred) -->
-      <g fill="rgba(150,200,210,0.55)" filter="url(#mglow)" opacity="0.5">
-        <circle cx="600" cy="380" r="5"/>
-        <circle cx="820" cy="330" r="4"/>
-        <circle cx="700" cy="170" r="3"/>
-        <circle cx="500" cy="600" r="3"/>
-        <circle cx="1120" cy="240" r="3"/>
-        <circle cx="120" cy="520" r="3"/>
-      </g>
-      <!-- gold focal nodes (glowing) -->
-      <g fill="var(--gold)" filter="url(#mglow)">
-        <circle class="node" cx="250" cy="250" r="6"/>
-        <circle class="node" cx="330" cy="150" r="4"/>
-        <circle class="node" cx="160" cy="360" r="4"/>
-        <circle class="node" cx="380" cy="300" r="3"/>
-        <circle class="node" cx="980" cy="470" r="6"/>
-        <circle class="node" cx="1080" cy="410" r="4"/>
-        <circle class="node" cx="900" cy="560" r="4"/>
-        <circle class="node" cx="900" cy="380" r="3"/>
-        <circle class="node" cx="1090" cy="560" r="3"/>
-      </g>
-    </svg>
+<!-- ════════ FOUNDER STORY (top section) ════════ -->
+<!-- Keeps id="top": the header logo links to #top. -->
+<section class="story" id="top">
+  <div class="story-head">
+    <div class="wrap story-head-grid">
+      <div>
+        <h1 class="display">איך הכל התחיל?</h1>
+        <div class="story-rule" aria-hidden="true"></div>
+      </div>
+      <div class="story-photo" role="img" aria-label="ד״ר דייויד קין מחזיק את מיכל NOGYMFORME"></div>
+    </div>
   </div>
 
-  <!-- Mobile-only: founder + bottle shown as a clean photo above the copy
-       (on mobile the copy no longer overlays the photo, so the bottle stays visible). -->
-  <div class="hero-photo-m" role="img" aria-label="ד״ר דיוויד קיין מחזיק את מיכל NOGYMFORME"></div>
+  <div class="wrap">
+    <div class="story-col">
 
-  <!-- Desktop-only: full-bleed founder photo behind the copy. Must be a direct
-       child of the section, not of .wrap, so it can reach the page edge. -->
-  <div class="hero-photo-d" role="img" aria-label="ד״ר דיוויד קיין מחזיק את מיכל NOGYMFORME"></div>
+      <div class="story-body">
+        <p class="opening">אז ככה: אני ד״ר דייויד קין, חוקר לב ומוח כבר למעלה מ-20 שנה, 3 ילדים, מרוץ החיים. אתם מכירים את זה נכון?</p>
 
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <p class="eyebrow">תוסף תזונה לגברים · נוסחה ייחודית</p>
-      <h1 class="display" style="margin-top:14px;font-size:clamp(28px,3.8vw,46px);line-height:1.15">להחזיר את השליטה למשקל שלך – בלי הלחץ של חדר הכושר.<span style="display:block;margin-top:18px;font-size:.6em;font-weight:600;color:var(--gold-ink);line-height:1.5">הרעב הוא לא הבעיה; הבעיה היא חוסר החיבור בין אורח החיים שלך לבין המטרות שלך.</span></h1>
-      <p class="lead">הפתרון הטבעי הראשון בישראל שמיועד לגברים. תומך בחילוף החומרים ותורם לתחושת שובע — גם בלי ללכת לחדר כושר.</p>
-      <div class="hero-actions">
-        <a href="#" onclick="openPlanModal(event)" class="btn btn-gold">רוצה שינוי? הזמן עכשיו <span class="arrow">←</span></a>
-        <a href="#science" class="btn btn-ghost">המדע מאחורי המוצר</a>
+        <p>אבל מה, אין לי זמן להתאמן ואם גם נודה (בינינו) אני לא כל כך אוהב את זה, אבל מה לעשות הגיע הגיל שבו הכרס כבר מתחילה להביך, וללכת לים ולבריכה עם הילדים ולהוריד חולצה לא עשה לי כל כך נעים וגם בוא נודה באמת נמאס לי כל פעם "להחזיק בפנים".</p>
+
+        <p>אז כמו מדען אמיתי החלטתי לחקור, קראתי ולמדתי כל מה שרק אפשר על תוספי תזונה ובחנתי אילו מרכיבים יתאימו לי, כן כן לי דייויד. להוריד את הכרס ולהפסיק להתבייש.</p>
+
+        <p>אז כן, זה לקח קצת זמן, ניסוי, שיפור עוד מחקר ועוד שיפור אבל בסוף הגעתי לפורמולה המדויקת שעזרה לי ועוזרת לי עד היום להוריד חולצה בים/בבריכה מבלי להתבייש או "להחזיק בפנים".</p>
+
+        <p>ועכשיו אחרי שנה של ניסויים ושיפורים החלטתי: <em class="said">"וואלה, למה שאני אשמור את זה רק לעצמי? למה שאני לא אשתף את כל העולם במה שעזר לי להוריד את הכרס המציקה הזאת, ואולי אפילו לעזור לעוד כאלה שנמצאים במרוץ של החיים, עבודה, משפחה ולחץ."</em> בין אם הם מתאמנים ובין אם לא, יש פה פורמולה שיכולה לסייע להוריד את הכרס המציקה הזאת.</p>
       </div>
-      <div class="hero-trust">
-        <span class="t"><span class="dot"></span>GMP Certified</span>
-        <span class="t"><span class="dot"></span>כשר</span>
-        <span class="t"><span class="dot"></span>100% החזר כספי</span>
-        <span class="t"><span class="dot"></span>משלוח חינם</span>
+
+      <!-- ── All-In package + community ── -->
+      <div class="allin">
+        <h2>ליווי אישי ולא סתם עוד תוסף על המדף.</h2>
+
+        <p>החיים זה לא קסם ואנחנו לא מאמינים בפתרונות קסם אז גם כאן, לא רצינו למכור לכם תוסף וזהו, או איזה גומי שעושה לכם טעם נעים בפה וזהו. רצינו משהו מעבר, רצינו ליצור לך תמיכה וקהילה. אנחנו מאמינים שעם ליווי אישי, תוכנית אימונים והתוסף שלנו אפשר באמת להצליח.</p>
+
+        <p>אז בנינו קהילה, בנינו תפריט תזונה אישי לכל מי שרוכש אצלנו את חבילת ה־<a href="order.html?plan=results" onclick="buyNow('results')" class="allin-buy" aria-label="לרכישת חבילת האול-אין"><bdi>All-In</bdi></a>, בנינו אפליקציה למעקב, שתוכל לדעת באמת כמה ירדת ולקבל עדכונים והטבות מהקהילה. כמו שאמרתי, אנחנו מאמינים בתמיכה וליווי אישי, רק ככה אפשר להצליח.</p>
+
+        <ul class="allin-list">
+          <li><span class="dot" aria-hidden="true"></span><span>קהילה<small>חיבור, ליווי ועדכונים שוטפים</small></span></li>
+          <li><span class="dot" aria-hidden="true"></span><span>תפריט תזונה אישי<small>לכל מי שרוכש את חבילת ה־<a href="order.html?plan=results" onclick="buyNow('results')" class="allin-buy" aria-label="לרכישת חבילת האול-אין"><bdi>All-In</bdi></a></small></span></li>
+          <li><span class="dot" aria-hidden="true"></span><span>אפליקציה למעקב<small>לראות באמת כמה ירדת, ולקבל הטבות מהקהילה</small></span></li>
+        </ul>
+      </div>
+
+      <p class="story-close">אז אני מזמין אותך, להצטרף למאות שכבר התחילו, להוריד חולצה בים.</p>
+
+      <div class="signoff">
+        <div class="avatar" role="img" aria-label="ד״ר דייויד קין"></div>
+        <div>
+          <div class="name">ד״ר דייויד קין</div>
+          <div class="role">מפתח הנוסחה של NOGYMFORME</div>
+        </div>
+      </div>
+
+      <div class="story-cta">
+        <a href="#pricing" class="btn btn-gold">להצטרפות לקהילה ולהורדת החולצה <span class="arrow">←</span></a>
       </div>
     </div>
   </div>
@@ -1220,14 +1324,14 @@
     <div class="mini-grid">
       <div class="mini-card reveal">
         <div class="mini-img"><img src="assets/redesign/bottle-1-crop.png?v=3" alt="בקבוק אחד" loading="lazy"></div>
-        <div class="mini-name">חבילת הביישן</div>
+        <div class="mini-name">חבילת היכרות</div>
         <div class="mini-desc">בקבוק אחד · חודש שלם</div>
         <div class="mini-price">₪198</div>
         <a href="order.html?plan=single" onclick="buyNow('single')" class="btn btn-ghost">קנה עכשיו</a>
       </div>
       <div class="mini-card reveal">
         <div class="mini-img"><img src="assets/redesign/bottle-2-crop.png?v=3" alt="שני בקבוקים" loading="lazy"></div>
-        <div class="mini-name">יאללה, בוא ננסה</div>
+        <div class="mini-name">חבילת ההתמדה</div>
         <div class="mini-desc">שני בקבוקים · חודשיים</div>
         <div class="mini-price">₪396</div>
         <a href="order.html?plan=starter" onclick="buyNow('starter')" class="btn btn-ghost">קנה עכשיו</a>
@@ -1379,7 +1483,7 @@
       <!-- 1 bottle -->
       <div class="price-card reveal">
         <div class="price-img"><img src="assets/redesign/bottle-1-crop.png?v=3" alt="בקבוק אחד"></div>
-        <div class="tier">חבילת הביישן</div>
+        <div class="tier">חבילת היכרות</div>
         <div class="tier-desc">בקבוק אחד · 90 קפסולות · חודש</div>
         <div class="price"><span class="amt">₪198</span></div>
         <div class="install">או ₪16.5 × 12 תשלומים ללא ריבית</div>
@@ -1395,7 +1499,7 @@
       <!-- 2 bottles -->
       <div class="price-card reveal">
         <div class="price-img"><img src="assets/redesign/bottle-2-crop.png?v=3" alt="שני בקבוקים"></div>
-        <div class="tier">יאללה, בוא ננסה</div>
+        <div class="tier">חבילת ההתמדה</div>
         <div class="tier-desc">שני בקבוקים · 180 קפסולות · חודשיים</div>
         <div class="price"><span class="amt">₪396</span></div>
         <div class="install">או ₪33 × 12 תשלומים ללא ריבית</div>
@@ -1556,8 +1660,8 @@
        Prices here are display-only — api/create-payment.js re-prices the order
        server-side and is the authority on what anyone is actually charged. */
     var PLANS = {
-      single:       { name: 'חבילת הביישן',         price: 198, currency: 'ILS', quantity: 1 },
-      starter:      { name: 'חבילת יאללה, בוא ננסה', price: 396, currency: 'ILS', quantity: 2 },
+      single:       { name: 'חבילת היכרות',         price: 198, currency: 'ILS', quantity: 1 },
+      starter:      { name: 'חבילת ההתמדה', price: 396, currency: 'ILS', quantity: 2 },
       results:      { name: 'חבילת אול-אין',         price: 496, currency: 'ILS', quantity: 3 }
     };
 

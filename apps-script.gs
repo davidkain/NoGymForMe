@@ -108,8 +108,8 @@ const RECOVERY_CART_URL =
 // which package the lead was looking at, without opening the email.
 const SOURCE_LABELS = {
   'popup':                 '🪄 10% popup',
-  'waitlist_single':       '🍶 חבילת הביישן (1 בקבוק)',
-  'waitlist_starter':      '🍶🍶 חבילת יאללה (2 בקבוקים)',
+  'waitlist_single':       '🍶 חבילת היכרות (1 בקבוק)',
+  'waitlist_starter':      '🍶🍶 חבילת ההתמדה (2 בקבוקים)',
   'waitlist_results':      '🍶🍶🍶 חבילת אול-אין (3 בקבוקים)',
   'waitlist_subscription': '♻️ מנוי חודשי'
 };
@@ -118,7 +118,7 @@ function labelForSource(source) {
 }
 // Label for the tracking `plan` field, which is either a single package KEY
 // (single/starter/results) → its emoji label, or a readable multi-item cart
-// summary (e.g. "חבילת אול-אין ×2, חבילת הביישן") → used as-is.
+// summary (e.g. "חבילת אול-אין ×2, חבילת היכרות") → used as-is.
 function planLabelFor_(plan) {
   if (!plan) return '(no plan)';
   var byKey = SOURCE_LABELS['waitlist_' + plan];
@@ -128,8 +128,8 @@ function planLabelFor_(plan) {
 // Clean plan names (no emoji prefixes) for the customer-facing confirmation
 // email. KEEP IN SYNC with PLAN_LABELS in thank-you.html.
 const PLAN_NAMES = {
-  single:       'חבילת הביישן',
-  starter:      'חבילת יאללה, בוא ננסה',
+  single:       'חבילת היכרות',
+  starter:      'חבילת ההתמדה',
   results:      'חבילת אול-אין',
   subscription: 'מנוי חודשי'
 };

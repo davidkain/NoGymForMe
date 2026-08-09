@@ -113,8 +113,8 @@ function discountMessage(reason) {
 
 // SOURCE OF TRUTH for what each plan costs. Prices are VAT-inclusive (ILS).
 const PLANS = {
-  single:       { name: 'חבילת הביישן',                      price: 198, recurring: false },
-  starter:      { name: 'חבילת יאללה, בוא ננסה',             price: 396, recurring: false },
+  single:       { name: 'חבילת היכרות',                      price: 198, recurring: false },
+  starter:      { name: 'חבילת ההתמדה',                      price: 396, recurring: false },
   results:      { name: 'חבילת אול-אין (כי הקיץ כבר פה...)', price: 496, recurring: false },
 };
 
