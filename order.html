@@ -927,8 +927,8 @@
   /* ── Plan data (drives the summary column; the server re-prices
         authoritatively in api/create-payment.js — this is display only) ── */
   var PLANS = {
-    single:  { name: 'חבילת הביישן',                      variant: 'בקבוק אחד - 90 קפסולות',      price: 198, qty: 1 },
-    starter: { name: 'חבילת יאללה, בוא ננסה',             variant: 'שני בקבוקים - 180 קפסולות',   price: 396, qty: 2 },
+    single:  { name: 'חבילת היכרות',                      variant: 'בקבוק אחד - 90 קפסולות',      price: 198, qty: 1 },
+    starter: { name: 'חבילת ההתמדה',                      variant: 'שני בקבוקים - 180 קפסולות',   price: 396, qty: 2 },
     results: { name: 'חבילת אול-אין (כי הקיץ כבר פה...)', variant: 'שלושה בקבוקים - 270 קפסולות', price: 496, qty: 3 }
   };
 
@@ -995,7 +995,7 @@
   function formatPrice(n) { return '₪' + Math.round(n).toLocaleString('he-IL'); }
   /* Compact key for tracking (Sheet / abandoned-cart email): "single x1, results x2" */
   function orderSummary() { return orderItems.map(function (o) { return o.key + 'x' + o.qty; }).join(', '); }
-  /* Human label for pixels / confirmation: "חבילת הביישן, חבילת אול-אין ×2" */
+  /* Human label for pixels / confirmation: "חבילת היכרות, חבילת אול-אין ×2" */
   function orderName()    { return orderItems.map(function (o) { return PLANS[o.key].name + (o.qty > 1 ? ' ×' + o.qty : ''); }).join(', '); }
   /* Value for the tracking `plan` field: a single package's KEY (so the Google
      Apps Script's per-plan labels, analytics + buyer confirmation behave EXACTLY
