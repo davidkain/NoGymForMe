@@ -478,6 +478,48 @@
     .signoff .avatar{width:50px;height:50px}
   }
 
+  /* ── Refer a friend on WhatsApp ─────────────────
+     Static site, so there is no component state: the two fields hold their own
+     values and the submit handler reads them. */
+  .share{border-top:1px solid var(--line);background:var(--bg-2)}
+  .share-card{
+    max-width:600px;margin-inline:auto;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--r);padding:clamp(24px,4vw,40px);
+    box-shadow:0 26px 60px -38px rgba(0,0,0,.45);
+  }
+  .share-card h2{
+    font-family:'Rubik',sans-serif;font-weight:800;
+    font-size:clamp(21px,2.5vw,29px);line-height:1.35;margin:10px 0;
+  }
+  .share-sub{color:var(--muted);font-size:15px;line-height:1.75;margin:0 0 22px}
+  .share-form{display:grid;gap:14px}
+  .share-input,.share-textarea{
+    width:100%;font:inherit;color:var(--ink);
+    /* 16px is deliberate: anything smaller makes iOS Safari zoom on focus. */
+    font-size:16px;
+    background:var(--bg);border:1px solid var(--line-2);
+    border-radius:12px;padding:14px 16px;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .share-textarea{min-height:96px;resize:vertical;line-height:1.6}
+  .share-input:focus,.share-textarea:focus{
+    outline:none;border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(242,203,27,.28);
+  }
+  .share-input::placeholder,.share-textarea::placeholder{color:var(--muted-2)}
+  .share-btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;border:0;cursor:pointer;
+    font-family:'Rubik',sans-serif;font-weight:800;font-size:17px;color:#fff;
+    background:#25D366;border-radius:100px;padding:16px 26px;margin-top:4px;
+    box-shadow:0 14px 30px -14px rgba(37,211,102,.75);
+    transition:background .2s,transform .15s,box-shadow .2s;
+  }
+  .share-btn:hover{background:#1da851;transform:translateY(-2px);box-shadow:0 18px 34px -14px rgba(37,211,102,.85)}
+  .share-btn:active{transform:none}
+  .share-btn svg{width:22px;height:22px;flex:0 0 auto;fill:currentColor}
+
   /* ── Section scaffolding ───────────────────────── */
   section{position:relative}
   .pad{padding:90px 0}
@@ -1594,6 +1636,29 @@
   </div>
 </section>
 
+<!-- ════════ REFER A FRIEND (WhatsApp) ════════ -->
+<!-- Sits before the final CTA so the page still closes on the order prompt. -->
+<section class="share pad" id="share">
+  <div class="wrap">
+    <div class="share-card reveal">
+      <p class="eyebrow">ממליצים לחבר</p>
+      <h2>מכיר מישהו שזה יכול להתאים לו? שלח לו הודעה!</h2>
+      <p class="share-sub">כותבים מספר, מוסיפים מילה אישית — ואנחנו פותחים את הצ׳אט בוואטסאפ עם ההודעה מוכנה לשליחה.</p>
+
+      <form class="share-form" onsubmit="return shareOnWhatsApp(event)">
+        <input class="share-input" id="sharePhone" type="tel" inputmode="tel" autocomplete="tel"
+               placeholder="מספר הטלפון של החבר" aria-label="מספר הטלפון של החבר">
+        <textarea class="share-textarea" id="shareMsg" rows="3"
+                  placeholder="הוסף הודעה אישית (אופציונלי)..." aria-label="הודעה אישית, לא חובה"></textarea>
+        <button class="share-btn" type="submit">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.79.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.86.84-.86 2.05s.89 2.38 1.01 2.54c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg>
+          שלח לחבר בוואטסאפ
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
 <!-- FINAL CTA -->
 <section class="final pad">
   <div class="wrap">
@@ -2155,6 +2220,42 @@
      An abandoned checkout means exactly one thing: the shopper reached
      order.html, entered an email or phone, and left without paying. That is
      captured by NGFMTrack.watchAbandon() in order.html. */
+
+  /* ── Refer a friend on WhatsApp ────────────────────────────────────────
+     Builds the share link from the two fields and opens the chat. window.open
+     runs inside the submit handler, i.e. inside the user's click, so popup
+     blockers allow it. */
+  function shareOnWhatsApp(e) {
+    e.preventDefault();
+
+    var BASE = 'מצאתי את התוסף הזה וחשבתי שזה ממש יכול להתאים לך';
+    var LINK = 'https://www.nogymforme.com';
+
+    var raw    = document.getElementById('sharePhone').value || '';
+    var custom = (document.getElementById('shareMsg').value || '').trim();
+
+    /* Strip anything that is not a digit — spaces, dashes, brackets, a leading +.
+       Then fix the country code: api.whatsapp.com resolves international format
+       ONLY, so a local "05…" number has to become "9725…". Without this every
+       Israeli number a visitor types would open an empty chat. */
+    var digits = raw.replace(/\D/g, '');
+    if (digits.slice(0, 2) === '00') digits = digits.slice(2);          // 00972…
+    if (digits.charAt(0) === '0') digits = '972' + digits.slice(1);     // 05…  → 9725…
+    else if (digits && digits.slice(0, 3) !== '972' && digits.length <= 9) {
+      digits = '972' + digits;                                          // 5…   → 9725…
+    }
+
+    var text = (custom ? BASE + '\n' + custom : BASE) + '\n\n' + LINK;
+
+    /* No number typed → omit phone= entirely and let WhatsApp show its own
+       contact picker, which is friendlier than refusing to submit. */
+    var url = 'https://api.whatsapp.com/send?'
+            + (digits ? 'phone=' + digits + '&' : '')
+            + 'text=' + encodeURIComponent(text);
+
+    window.open(url, '_blank', 'noopener');
+    return false;
+  }
   </script>
 
 <!-- Vercel Web Analytics -->
