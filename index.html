@@ -1143,6 +1143,14 @@
         "mainEntity": [
           {
             "@type": "Question",
+            "name": "האם זה באמת מתאים רק לגברים?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "לא. התוסף אומנם נבנה על ידי ד״ר דייויד קין, אך הוא מותאם גם לנשים וגם לגברים. המרכיבים שבתוכו והמינון מתאימים לנשים וגברים כאחד."
+            }
+          },
+          {
+            "@type": "Question",
             "name": "מתי תגיע ההזמנה שלי?",
             "acceptedAnswer": {
               "@type": "Answer",
@@ -1206,7 +1214,6 @@
     <a href="#top" class="logo">NO<b>GYM</b>FORME</a>
     <nav class="nav-links" onclick="this.classList.remove('open');document.querySelector('.nav-toggle').setAttribute('aria-expanded','false')">
       <a href="#ingredients">הרכיבים</a>
-      <a href="#science">המדע</a>
       <a href="#reviews">ביקורות</a>
       <a href="#faq">שאלות נפוצות</a>
       <a href="/app" style="color:var(--gold-ink);font-weight:700">אזור חברים</a>
@@ -1336,6 +1343,37 @@
 
       <div class="story-cta">
         <a href="#pricing" class="btn btn-gold">להצטרפות לקהילה ולהורדת החולצה <span class="arrow">←</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ REVIEWS ════════ -->
+<section class="rev pad" id="reviews">
+  <div class="wrap center">
+    <h2 class="h2 display reveal">גברים אמיתיים.<br>תוצאות אמיתיות.</h2>
+    <div class="rating reveal">
+      <div class="score">4.9</div>
+      <div style="text-align:start"><div class="stars">★★★★★</div><div class="count">מתוך 127 לקוחות מרוצים</div></div>
+    </div>
+    <div class="tcards">
+      <div class="tcard reveal">
+        <div class="stars">★★★★★</div>
+        <p>"ניסיתי כל מיני דברים לאורך השנים ורובם פשוט לא עבדו. עם NOGYMFORME פשוט הפסקתי לנשנש את החטיפים של הילדים בלילה. אני מרגיש הרבה יותר שבע ורגוע, ועל הדרך גם יש לי הרבה יותר אנרגיה בעבודה במקום העייפות הרגילה של הצהריים."</p>
+        <div class="who">רוני מ., 33</div>
+        <div class="meta">תל אביב · לקוח 3 חודשים</div>
+      </div>
+      <div class="tcard reveal">
+        <div class="stars">★★★★★</div>
+        <p>"סוף סוף מוצר שמיועד לגברים, בלי בולשיט ובלי הבטחות קסם. הרוב המוחלט של הדיאטות מתישות אותי, אבל פה פשוט לוקחים וזה סוגר את הפינה ועוזר לשמור על איזון. שווה כל שקל."</p>
+        <div class="who">מיכאל ק., 47</div>
+        <div class="meta">חיפה · לקוח 5 חודשים</div>
+      </div>
+      <div class="tcard reveal">
+        <div class="stars">★★★★★</div>
+        <p>"הכרס תמיד הייתה הבעיה הגדולה שלי ופשוט סירבה לרדת. אחרי חודשיים עם NOGYMFORME החגורה סוף סוף נסגרת חור אחד פנימה, ואני ממש מרגיש את ההבדל בבגדים. ממליץ בחום לכל גבר שאין לו זמן לשרוף במכון כושר."</p>
+        <div class="who">אבי ש., 58</div>
+        <div class="meta">ירושלים · לקוח 2 חודשים</div>
       </div>
     </div>
   </div>
@@ -1480,23 +1518,6 @@
   </div>
 </section>
 
-<!-- ════════ SCIENCE / SCIENTIST ════════ -->
-<section class="sci pad" id="science">
-  <div class="wrap">
-    <div class="sci-grid reveal">
-      <div class="sci-img">
-        <img src="assets/redesign/scientist-lab.jpg" alt="ד״ר דייויד קין, מפתח NOGYMFORME" loading="lazy">
-      </div>
-      <div class="sci-copy">
-        <p class="eyebrow">מי עומד מאחורי המוצר</p>
-        <h2 class="display">הפורמולה שפיתח <em>ד״ר דייויד קין</em></h2>
-        <p class="lead">בלי קסמים ובלי הבטחות ריקות. פורמולה אחת, רכיבים טבעיים — שעובדים על שלושה דברים שמפילים כל דיאטה: <strong style="color:var(--ink)">רעב, חשק למתוק, ונפילות אנרגיה.</strong></p>
-        <div><a href="https://www.nogymforme.com/about.html" class="btn btn-ghost">קראו עוד על הסיפור שלנו <span class="arrow">←</span></a></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 
 <!-- ════════ OUTCOMES ════════ -->
 <section class="out pad">
@@ -1519,37 +1540,6 @@
       <div class="out-card reveal">
         <div class="out-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
         <h4>מנטרל חשק למתוק</h4><p>נפרדים מהנפילות של ארבע אחר הצהריים.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ════════ REVIEWS ════════ -->
-<section class="rev pad" id="reviews">
-  <div class="wrap center">
-    <h2 class="h2 display reveal">גברים אמיתיים.<br>תוצאות אמיתיות.</h2>
-    <div class="rating reveal">
-      <div class="score">4.9</div>
-      <div style="text-align:start"><div class="stars">★★★★★</div><div class="count">מתוך 127 לקוחות מרוצים</div></div>
-    </div>
-    <div class="tcards">
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <p>"ניסיתי כל מיני דברים לאורך השנים ורובם פשוט לא עבדו. עם NOGYMFORME פשוט הפסקתי לנשנש את החטיפים של הילדים בלילה. אני מרגיש הרבה יותר שבע ורגוע, ועל הדרך גם יש לי הרבה יותר אנרגיה בעבודה במקום העייפות הרגילה של הצהריים."</p>
-        <div class="who">רוני מ., 33</div>
-        <div class="meta">תל אביב · לקוח 3 חודשים</div>
-      </div>
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <p>"סוף סוף מוצר שמיועד לגברים, בלי בולשיט ובלי הבטחות קסם. הרוב המוחלט של הדיאטות מתישות אותי, אבל פה פשוט לוקחים וזה סוגר את הפינה ועוזר לשמור על איזון. שווה כל שקל."</p>
-        <div class="who">מיכאל ק., 47</div>
-        <div class="meta">חיפה · לקוח 5 חודשים</div>
-      </div>
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <p>"הכרס תמיד הייתה הבעיה הגדולה שלי ופשוט סירבה לרדת. אחרי חודשיים עם NOGYMFORME החגורה סוף סוף נסגרת חור אחד פנימה, ואני ממש מרגיש את ההבדל בבגדים. ממליץ בחום לכל גבר שאין לו זמן לשרוף במכון כושר."</p>
-        <div class="who">אבי ש., 58</div>
-        <div class="meta">ירושלים · לקוח 2 חודשים</div>
       </div>
     </div>
   </div>
@@ -1641,6 +1631,10 @@
   </div>
   <div class="wrap">
     <div class="faq-list reveal">
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)"><span>האם זה באמת מתאים רק לגברים?</span><span class="faq-toggle">+</span></button>
+        <div class="faq-answer">לא. התוסף אומנם נבנה על ידי ד״ר דייויד קין, אך הוא מותאם גם לנשים וגם לגברים. המרכיבים שבתוכו והמינון מתאימים לנשים וגברים כאחד.</div>
+      </div>
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this)"><span>מתי תגיע ההזמנה שלי?</span><span class="faq-toggle">+</span></button>
         <div class="faq-answer">ההזמנות נשלחות תוך 1-2 ימי עסקים ומגיעות לכל רחבי הארץ תוך 7 ימי עסקים. המשלוח חינם ללא תנאים.</div>
