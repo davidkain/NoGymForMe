@@ -152,8 +152,15 @@
     border-bottom:1px solid var(--line-2);
   }
   .nav{display:flex;align-items:center;justify-content:space-between;height:72px}
-  .logo{font-family:'Rubik',sans-serif;font-weight:900;font-size:22px;letter-spacing:-0.01em;color:var(--ink)}
+  .logo{font-family:'Rubik',sans-serif;font-weight:900;font-size:22px;letter-spacing:-0.01em;color:var(--ink);display:block}
   .logo b{color:var(--gold-ink)}
+  /* Tagline under the wordmark. line-height:1 on the block keeps the two lines
+     tight enough to stay inside the 72px header. */
+  .brand{line-height:1}
+  .brand-tagline{
+    margin-top:4px;font-size:12px;font-weight:600;color:var(--muted);
+    letter-spacing:.01em;white-space:nowrap;
+  }
   .nav-links{display:flex;gap:34px;align-items:center}
   .nav-links a{font-size:15px;color:var(--muted);font-weight:600;transition:color .2s}
   .nav-links a:hover{color:var(--ink)}
@@ -392,26 +399,22 @@
        overflow:hidden keeps them inside the rounded corners. */
     position:relative;overflow:hidden;
   }
-  /* The photo's plaster background is light, so the overlays are dark ink with
-     a white halo rather than the usual white-on-scrim treatment. */
-  .story-photo-title,.story-photo-caption{
-    position:absolute;right:4%;left:4%;text-align:right;
+  /* Headline + credit line stack together in the top-right corner, over the
+     light plaster background — so they are dark ink with a white halo rather
+     than the usual white-on-scrim treatment. */
+  .story-photo-overlay{
+    position:absolute;top:3.5%;right:4%;left:4%;text-align:right;
     color:#141414;text-shadow:0 1px 6px rgba(255,255,255,.75);
     pointer-events:none;
   }
   .story-photo-title{
-    top:3.5%;
     font-family:var(--font-display);font-weight:900;
     font-size:clamp(20px,2.6vw,30px);line-height:1.15;
   }
-  /* The credit line sits over the (dark) bottle, so it gets its own light
-     scrim — the white halo alone is not enough contrast down there. */
-  .story-photo::after{
-    content:"";position:absolute;left:0;right:0;bottom:0;height:16%;
-    background:linear-gradient(to top,rgba(240,238,232,.92),rgba(240,238,232,0));
-  }
+  /* The display font packs the three dots tight enough to read as one glyph. */
+  .story-photo-title .dots{letter-spacing:.14em}
   .story-photo-caption{
-    bottom:3.5%;z-index:1;
+    margin-top:6px;
     font-weight:700;font-size:clamp(12px,1.25vw,15px);line-height:1.3;
   }
   .story-head h1{margin-bottom:0}
@@ -1334,7 +1337,10 @@
 <!-- ════════ HEADER ════════ -->
 <header>
   <div class="wrap nav">
-    <a href="#top" class="logo">NO<b>GYM</b>FORME</a>
+    <div class="brand">
+      <a href="#top" class="logo">NO<b>GYM</b>FORME</a>
+      <div class="brand-tagline">כל מה שאתה צריך לניהול המשקל</div>
+    </div>
     <nav class="nav-links" onclick="this.classList.remove('open');document.querySelector('.nav-toggle').setAttribute('aria-expanded','false')">
       <a href="#ingredients">הרכיבים</a>
       <a href="#reviews">ביקורות</a>
@@ -1418,8 +1424,10 @@
         </div>
       </div>
       <div class="story-photo" role="img" aria-label="ד״ר דייויד קין מחזיק את מיכל NOGYMFORME">
-        <div class="story-photo-title">"אין לי זמן להתאמן..."</div>
-        <div class="story-photo-caption">ד״ר דייויד קין - ממציא הפורמולה לניהול משקל</div>
+        <div class="story-photo-overlay">
+          <div class="story-photo-title">"אין לי זמן להתאמן<span class="dots">...</span>"</div>
+          <div class="story-photo-caption">ד״ר דייויד קין - ממציא הפורמולה לניהול משקל</div>
+        </div>
       </div>
     </div>
   </div>
