@@ -152,8 +152,15 @@
     border-bottom:1px solid var(--line-2);
   }
   .nav{display:flex;align-items:center;justify-content:space-between;height:72px}
-  .logo{font-family:'Rubik',sans-serif;font-weight:900;font-size:22px;letter-spacing:-0.01em;color:var(--ink)}
+  .logo{font-family:'Rubik',sans-serif;font-weight:900;font-size:22px;letter-spacing:-0.01em;color:var(--ink);display:block}
   .logo b{color:var(--gold-ink)}
+  /* Tagline under the wordmark. line-height:1 on the block keeps the two lines
+     tight enough to stay inside the 72px header. */
+  .brand{line-height:1}
+  .brand-tagline{
+    margin-top:4px;font-size:12px;font-weight:600;color:var(--muted);
+    letter-spacing:.01em;white-space:nowrap;
+  }
   .nav-links{display:flex;gap:34px;align-items:center}
   .nav-links a{font-size:15px;color:var(--muted);font-weight:600;transition:color .2s}
   .nav-links a:hover{color:var(--ink)}
@@ -1330,7 +1337,10 @@
 <!-- ════════ HEADER ════════ -->
 <header>
   <div class="wrap nav">
-    <a href="#top" class="logo">NO<b>GYM</b>FORME</a>
+    <div class="brand">
+      <a href="#top" class="logo">NO<b>GYM</b>FORME</a>
+      <div class="brand-tagline">כל מה שאתה צריך לניהול המשקל</div>
+    </div>
     <nav class="nav-links" onclick="this.classList.remove('open');document.querySelector('.nav-toggle').setAttribute('aria-expanded','false')">
       <a href="#ingredients">הרכיבים</a>
       <a href="#reviews">ביקורות</a>
