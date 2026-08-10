@@ -87,6 +87,9 @@
     --gold-soft:#fde585;
     --gold-deep:#b8860b;
     --gold-ink:#a9760a;          /* deeper gold for text on light surfaces */
+    /* --gold-ink is 3.52:1 on --bg: fine for short accents, below the 4.5:1 AA
+       floor for running body text. This one clears it at 4.75:1. */
+    --gold-ink-strong:#8f6207;
     --line:rgba(0,0,0,0.10);
     --line-2:rgba(0,0,0,0.06);
     --on-photo:#f6f4ef;          /* text over the dark founder photo */
@@ -422,7 +425,13 @@
   .story-body .opening{font-size:clamp(17px,1.3vw,20px);color:var(--ink)}
   /* Carries .story-body so it outranks `.story-body p`, which would otherwise
      force this back to muted body colour. */
-  .story-body p.pitch{color:var(--gold-ink);font-weight:700}
+  /* Bold glyphs are wider, so justify had ~17% of the column to absorb here
+     against ~9% in the plain paragraphs — visibly gappy. This one paragraph
+     opts out; the rest of the story stays justified. */
+  .story-body p.pitch{
+    color:var(--gold-ink-strong);font-weight:700;
+    text-align:start;text-align-last:start;
+  }
   .story-body strong{color:var(--ink);font-weight:700}
 
   /* All-In package + community — lifted onto a card so it reads as the offer,
