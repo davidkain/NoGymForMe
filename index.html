@@ -414,7 +414,7 @@
   .story-photo-title{
     /* Narrow + small enough that the whole block sits in the plaster above his
        head — any wider and the middle lines run into his hair. */
-    margin:0;max-width:56%;margin-inline-start:auto;
+    margin:0;max-width:56%;margin-left:auto;margin-right:0;
     font-family:var(--font-display);font-weight:900;
     font-size:clamp(15px,1.65vw,22px);line-height:1.2;
   }
@@ -446,9 +446,9 @@
     .story-head-copy{max-width:none}
     /* Photo first on mobile, and squarer so it does not eat the whole screen. */
     .story-photo{order:-1;aspect-ratio:1/1}
-    /* No plaster strip to hang the headline on at this width, so it goes full
-       width across the top and leans on the scrim for contrast. */
-    .story-photo-title{max-width:none;font-size:clamp(16px,4.4vw,22px)}
+    /* Stays on the right half here too — full width read as "headline on the
+       left". Smaller type so the extra lines still clear his hair. */
+    .story-photo-title{max-width:74%;font-size:clamp(14px,3.6vw,18px)}
   }
   .story-col{max-width:66ch;margin-inline:auto}
   .story-rule{
