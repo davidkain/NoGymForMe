@@ -795,10 +795,18 @@
      height, and aspect-ratio is ignored unless one axis is auto - without it
      these render at full intrinsic height instead of the square crop. */
   .ba-pair img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}
+  /* The pair labels step back so the person caption below reads as primary. */
   .ba-pair figcaption{
-    direction:rtl;padding:10px 8px;text-align:center;
-    font-family:'Rubik',sans-serif;font-weight:800;font-size:14px;color:var(--ink);
+    direction:rtl;padding:9px 8px 7px;text-align:center;
+    font-family:'Rubik',sans-serif;font-weight:700;font-size:12.5px;
+    letter-spacing:.03em;color:var(--muted);
   }
+  .ba-cap{
+    margin:0;padding:11px 14px 14px;text-align:center;
+    border-top:1px solid var(--line-2);
+    font-size:14.5px;line-height:1.5;color:var(--ink);
+  }
+  .ba-cap b{font-family:'Rubik',sans-serif;font-weight:800}
   .ba-note{margin-top:18px;text-align:center;font-size:13px;color:var(--muted-2)}
   @media(max-width:860px){
     /* One pair per row: two half-width photos still compare fine at 375px. */
@@ -1545,30 +1553,35 @@
       <div class="score">4.9</div>
       <div style="text-align:start"><div class="stars">★★★★★</div><div class="count">מתוך 127 לקוחות מרוצים</div></div>
     </div>
+    <!-- TODO: replace each .ba-cap with the real name + duration. -->
     <div class="ba-grid reveal">
       <div class="ba-card">
         <div class="ba-pair">
           <figure><img src="images/result-1-before.jpg" alt="לפני התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>לפני</figcaption></figure>
           <figure><img src="images/result-1-after.jpg" alt="אחרי התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>אחרי</figcaption></figure>
         </div>
+        <p class="ba-cap"><b>שם</b> · אחרי X חודשים</p>
       </div>
       <div class="ba-card">
         <div class="ba-pair">
           <figure><img src="images/result-2-before.jpg" alt="לפני התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>לפני</figcaption></figure>
           <figure><img src="images/result-2-after.jpg" alt="אחרי התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>אחרי</figcaption></figure>
         </div>
+        <p class="ba-cap"><b>שם</b> · אחרי X חודשים</p>
       </div>
       <div class="ba-card">
         <div class="ba-pair">
           <figure><img src="images/result-3-before.jpg" alt="לפני התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>לפני</figcaption></figure>
           <figure><img src="images/result-3-after.jpg" alt="אחרי התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>אחרי</figcaption></figure>
         </div>
+        <p class="ba-cap"><b>שם</b> · אחרי X חודשים</p>
       </div>
       <div class="ba-card">
         <div class="ba-pair">
           <figure><img src="images/result-4-before.jpg" alt="לפני התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>לפני</figcaption></figure>
           <figure><img src="images/result-4-after.jpg" alt="אחרי התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>אחרי</figcaption></figure>
         </div>
+        <p class="ba-cap"><b>שם</b> · אחרי X חודשים</p>
       </div>
     </div>
     <p class="ba-note reveal">תוצאות משתנות מאדם לאדם.</p>
