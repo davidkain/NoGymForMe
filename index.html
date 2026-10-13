@@ -776,6 +776,46 @@
   .rating .score{font-family:'Rubik',sans-serif;font-weight:900;font-size:54px;color:var(--gold-ink);line-height:1}
   .rating .stars{color:var(--gold-ink);font-size:22px;letter-spacing:2px}
   .rating .count{color:var(--muted);font-size:14px}
+
+  /* ── Before / after proof grid ──────────────────
+     Four pairs, two per row, so each photo gets real size. Each half carries
+     its own לפני / אחרי label as text rather than baked into the image. */
+  .ba-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:40px}
+  .ba-card{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;
+    transition:border-color .3s,transform .3s;
+  }
+  .ba-card:hover{border-color:rgba(242,203,27,.4);transform:translateY(-4px)}
+  /* direction:ltr only for the pair: the page is RTL, which would otherwise put
+     the BEFORE shot on the right. The captions below are reset to rtl. */
+  .ba-pair{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);direction:ltr}
+  .ba-pair figure{margin:0;background:var(--panel)}
+  /* height:auto is load-bearing: the width/height attributes map to a CSS
+     height, and aspect-ratio is ignored unless one axis is auto - without it
+     these render at full intrinsic height instead of the square crop. */
+  .ba-pair img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}
+  /* The pair labels step back so the person caption below reads as primary. */
+  .ba-pair figcaption{
+    direction:rtl;padding:9px 8px 7px;text-align:center;
+    font-family:'Rubik',sans-serif;font-weight:700;font-size:12.5px;
+    letter-spacing:.03em;color:var(--muted);
+  }
+  .ba-cap{
+    margin:0;padding:11px 14px 5px;text-align:center;
+    border-top:1px solid var(--line-2);
+    font-size:14.5px;line-height:1.5;color:var(--ink);
+  }
+  .ba-quote{
+    margin:0;padding:0 16px 16px;text-align:center;
+    font-size:14px;line-height:1.75;color:var(--muted);
+  }
+  .ba-cap b{font-family:'Rubik',sans-serif;font-weight:800}
+  .ba-note{margin-top:18px;text-align:center;font-size:13px;color:var(--muted-2)}
+  @media(max-width:860px){
+    /* One pair per row: two half-width photos still compare fine at 375px. */
+    .ba-grid{grid-template-columns:1fr;max-width:460px;margin-inline:auto}
+  }
   .rev-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:40px}
   .rev-tile{
     position:relative;aspect-ratio:9/13;border-radius:12px;overflow:hidden;cursor:pointer;
@@ -1177,13 +1217,6 @@
 
 
     /* ── Testimonials cards (new design) ── */
-    .tcards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:46px;text-align:start}
-    .tcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px 26px;display:flex;flex-direction:column;transition:border-color .3s,transform .3s}
-    .tcard:hover{border-color:rgba(242,203,27,.4);transform:translateY(-4px)}
-    .tcard .stars{color:var(--gold-ink);font-size:18px;letter-spacing:2px;margin-bottom:14px}
-    .tcard p{color:var(--ink);font-size:16px;line-height:1.85;margin-bottom:20px;flex:1}
-    .tcard .who{font-family:'Rubik',sans-serif;font-weight:800;font-size:16px}
-    .tcard .meta{color:var(--muted);font-size:13px;margin-top:3px}
 
 
     /* ── Final CTA (new design) ── */
@@ -1193,7 +1226,6 @@
     .final .fp{color:var(--muted);font-size:18px;max-width:48ch;margin:0 auto 30px}
 
 
-    @media(max-width:860px){ .tcards{grid-template-columns:1fr;max-width:460px;margin-inline:auto} }
 
   </style>
 
@@ -1517,25 +1549,42 @@
       <div class="score">4.9</div>
       <div style="text-align:start"><div class="stars">★★★★★</div><div class="count">מתוך 127 לקוחות מרוצים</div></div>
     </div>
-    <div class="tcards">
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <p>"ניסיתי כל מיני דברים לאורך השנים ורובם פשוט לא עבדו. עם NOGYMFORME פשוט הפסקתי לנשנש את החטיפים של הילדים בלילה. אני מרגיש הרבה יותר שבע ורגוע, ועל הדרך גם יש לי הרבה יותר אנרגיה בעבודה במקום העייפות הרגילה של הצהריים."</p>
-        <div class="who">רוני מ., 33</div>
-        <div class="meta">תל אביב · לקוח 3 חודשים</div>
+    <div class="ba-grid reveal">
+      <div class="ba-card">
+        <div class="ba-pair">
+          <figure><img src="images/result-1-before.jpg" alt="לפני התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>לפני</figcaption></figure>
+          <figure><img src="images/result-1-after.jpg" alt="אחרי התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>אחרי</figcaption></figure>
+        </div>
+        <p class="ba-cap"><b>עידו ב.</b> · אחרי 3 חודשים</p>
+        <p class="ba-quote">״הנשנושים בלילה היו החולשה שלי. עם NOGYMFORME הרגשתי יותר שבע, ופחות חיפשתי משהו לאכול.״</p>
       </div>
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <p>"סוף סוף מוצר שמיועד לגברים, בלי בולשיט ובלי הבטחות קסם. הרוב המוחלט של הדיאטות מתישות אותי, אבל פה פשוט לוקחים וזה סוגר את הפינה ועוזר לשמור על איזון. שווה כל שקל."</p>
-        <div class="who">מיכאל ק., 47</div>
-        <div class="meta">חיפה · לקוח 5 חודשים</div>
+      <div class="ba-card">
+        <div class="ba-pair">
+          <figure><img src="images/result-2-before.jpg" alt="לפני התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>לפני</figcaption></figure>
+          <figure><img src="images/result-2-after.jpg" alt="אחרי התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>אחרי</figcaption></figure>
+        </div>
+        <p class="ba-cap"><b>אלון ל.</b> · אחרי 4 חודשים</p>
+        <p class="ba-quote">״הכי כיף היה ללבוש שוב מכנסיים שכבר היו צמודים מדי. אחרי כמה חודשים עם NOGYMFORME הרגשתי את ההבדל.״</p>
       </div>
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <p>"הכרס תמיד הייתה הבעיה הגדולה שלי ופשוט סירבה לרדת. אחרי חודשיים עם NOGYMFORME החגורה סוף סוף נסגרת חור אחד פנימה, ואני ממש מרגיש את ההבדל בבגדים. ממליץ בחום לכל גבר שאין לו זמן לשרוף במכון כושר."</p>
-        <div class="who">אבי ש., 58</div>
-        <div class="meta">ירושלים · לקוח 2 חודשים</div>
+      <div class="ba-card">
+        <div class="ba-pair">
+          <figure><img src="images/result-3-before.jpg" alt="לפני התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>לפני</figcaption></figure>
+          <figure><img src="images/result-3-after.jpg" alt="אחרי התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>אחרי</figcaption></figure>
+        </div>
+        <p class="ba-cap"><b>אלכס י.</b> · אחרי 3 חודשים</p>
+        <p class="ba-quote">״ניסיתי לא מעט דברים ותמיד התקשיתי להתמיד. NOGYMFORME השתלב לי בשגרה, והפעם גם ראיתי ירידה במשקל.״</p>
       </div>
+      <div class="ba-card">
+        <div class="ba-pair">
+          <figure><img src="images/result-4-before.jpg" alt="לפני התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>לפני</figcaption></figure>
+          <figure><img src="images/result-4-after.jpg" alt="אחרי התהליך" width="490" height="518" loading="lazy" decoding="async"><figcaption>אחרי</figcaption></figure>
+        </div>
+        <p class="ba-cap"><b>רועי ח.</b> · אחרי 3 חודשים</p>
+        <p class="ba-quote">״הגעתי די סקפטי. אחרי כמה חודשים עם NOGYMFORME, לראות את השינוי במשקל ובתמונות היה ממש מספק.״</p>
+      </div>
+    </div>
+    <p class="ba-note reveal">תוצאות משתנות מאדם לאדם.</p>
+
     </div>
   </div>
 </section>
