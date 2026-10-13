@@ -776,6 +776,33 @@
   .rating .score{font-family:'Rubik',sans-serif;font-weight:900;font-size:54px;color:var(--gold-ink);line-height:1}
   .rating .stars{color:var(--gold-ink);font-size:22px;letter-spacing:2px}
   .rating .count{color:var(--muted);font-size:14px}
+
+  /* ── Before / after proof grid ──────────────────
+     Each card is a before|after pair with a caption, sitting above the three
+     written testimonials so the visual proof lands first. */
+  .ba-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+  .ba-card{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;
+    transition:border-color .3s,transform .3s;
+  }
+  .ba-card:hover{border-color:rgba(242,203,27,.4);transform:translateY(-4px)}
+  /* Hairline seam between the halves, so the pair reads as one comparison. */
+  /* direction:ltr only for the pair: the page is RTL, which would otherwise put
+     the BEFORE shot on the right. Keeps before-left / after-right as in the
+     reference layout. The caption below stays RTL. */
+  .ba-pair{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);direction:ltr}
+  /* height:auto is load-bearing: the width/height attributes map to a CSS
+     height, and aspect-ratio is ignored unless one axis is auto - without it
+     these render 165x800 instead of 165x220. */
+  .ba-pair img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover}
+  .ba-cap{padding:14px 16px;text-align:center;font-size:14px;color:var(--muted);line-height:1.5}
+  .ba-cap b{color:var(--ink);font-weight:800}
+  .ba-note{margin-top:18px;text-align:center;font-size:13px;color:var(--muted-2)}
+  @media(max-width:860px){
+    /* One pair per row: two half-width photos still compare fine at 375px. */
+    .ba-grid{grid-template-columns:1fr;max-width:420px;margin-inline:auto}
+  }
   .rev-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:40px}
   .rev-tile{
     position:relative;aspect-ratio:9/13;border-radius:12px;overflow:hidden;cursor:pointer;
@@ -1517,6 +1544,34 @@
       <div class="score">4.9</div>
       <div style="text-align:start"><div class="stars">★★★★★</div><div class="count">מתוך 127 לקוחות מרוצים</div></div>
     </div>
+    <!-- PLACEHOLDER IMAGES - swap images/ba-*-placeholder.jpg for the real
+         customer photos (one before + one after per man) and write the real
+         captions. Do not ship the placeholders. -->
+    <div class="ba-grid reveal">
+      <div class="ba-card">
+        <div class="ba-pair">
+          <img src="images/ba-before-placeholder.jpg" alt="לפני השימוש" width="600" height="800" loading="lazy" decoding="async">
+          <img src="images/ba-after-placeholder.jpg" alt="אחרי השימוש" width="600" height="800" loading="lazy" decoding="async">
+        </div>
+        <div class="ba-cap"><b>שם הלקוח</b> · אחרי X חודשים</div>
+      </div>
+      <div class="ba-card">
+        <div class="ba-pair">
+          <img src="images/ba-before-placeholder.jpg" alt="לפני השימוש" width="600" height="800" loading="lazy" decoding="async">
+          <img src="images/ba-after-placeholder.jpg" alt="אחרי השימוש" width="600" height="800" loading="lazy" decoding="async">
+        </div>
+        <div class="ba-cap"><b>שם הלקוח</b> · אחרי X חודשים</div>
+      </div>
+      <div class="ba-card">
+        <div class="ba-pair">
+          <img src="images/ba-before-placeholder.jpg" alt="לפני השימוש" width="600" height="800" loading="lazy" decoding="async">
+          <img src="images/ba-after-placeholder.jpg" alt="אחרי השימוש" width="600" height="800" loading="lazy" decoding="async">
+        </div>
+        <div class="ba-cap"><b>שם הלקוח</b> · אחרי X חודשים</div>
+      </div>
+    </div>
+    <p class="ba-note reveal">תוצאות משתנות מאדם לאדם.</p>
+
     <div class="tcards">
       <div class="tcard reveal">
         <div class="stars">★★★★★</div>
